@@ -2,7 +2,6 @@ require_relative 'lib/eventhub/processor2'
 
 module Eventhub
   class Demo < Eventhub::Processor2
-
     def handle_message(message, args)
       # your code here.....
     end
@@ -10,7 +9,6 @@ module Eventhub
     def version
       '10.1.1'
     end
-
   end
 end
 

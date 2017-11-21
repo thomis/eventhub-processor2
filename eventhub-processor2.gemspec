@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ['Steiner, Thomas']
   spec.email         = ['thomas.steiner@ikey.ch']
 
-  spec.summary       = %q(Next generation gem to build ruby based eventhub processor)
-  spec.description   = %q(Next generation gem to build ruby based eventhub processor)
+  spec.summary       = 'Next generation gem to build ruby based eventhub processor'
+  spec.description   = 'Next generation gem to build ruby based eventhub processor'
   spec.homepage      = 'https://github.com/thomis/eventhub-processor2'
   spec.license       = 'MIT'
 

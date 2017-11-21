@@ -1,9 +1,10 @@
 require_relative 'version'
 require_relative 'helper'
 
+# Eventhub module
 module Eventhub
+  # Processor2 class
   class Processor2
-
     attr_reader :name, :environment, :detached, :configuration_file
 
     def initialize(args={})
@@ -79,6 +80,7 @@ module Eventhub
     end
 
     def handle_message(message, args={})
+      # to do...
     end
 
     def setup_signal_handler
@@ -106,6 +108,5 @@ module Eventhub
 
     def after_stop
     end
-
   end
 end

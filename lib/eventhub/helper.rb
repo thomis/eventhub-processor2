@@ -2,6 +2,7 @@ require 'optparse'
 
 # Eventhub module
 module Eventhub
+  # Helper module
   module Helper
     # Extracts processor name from given class instance.
     # Removes 'Eventhub' module from name.
@@ -20,7 +21,7 @@ module Eventhub
 
     # Parses command line options into a hash
     def self.parse_options(argv=ARGV)
-      options = { environment: 'development', detached: false}
+      options = {environment: 'development', detached: false}
 
       OptionParser.new do |opts|
         opts.on('-e', '--environment ENVIRONMENT', 'Define environment') do |environment|
@@ -38,7 +39,7 @@ module Eventhub
 
       options
     rescue OptionParser::MissingArgument => e
-      puts "Argument Parsing: #{e.to_s}"
+      puts "Argument Parsing: #{e}"
       options
     end
   end
