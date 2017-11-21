@@ -1,8 +1,8 @@
 require 'optparse'
 
+# Eventhub module
 module Eventhub
   module Helper
-
     # Extracts processor name from given class instance.
     # Removes 'Eventhub' module from name.
 
@@ -12,10 +12,10 @@ module Eventhub
     # Eventhub::NameSpace::DemoProcessor => name_space.demo_processor
     # NameSpace::Demo => name_space.demo
     def self.get_name_from_class(instance)
-      instance.class.to_s.split('::').map { |element|
+      instance.class.to_s.split('::').map do |element|
         next if element == 'Eventhub'
         element.split(/(?=[A-Z])/).join('_').downcase
-      }.compact.join('.')
+      end.compact.join('.')
     end
 
     # Parses command line options into a hash
@@ -34,7 +34,6 @@ module Eventhub
         opts.on('-c', '--config CONFIG', 'Define configuration file') do |config|
           options[:config] = config
         end
-
       end.parse!(argv)
 
       options
@@ -42,6 +41,5 @@ module Eventhub
       puts "Argument Parsing: #{e.to_s}"
       options
     end
-
   end
 end
