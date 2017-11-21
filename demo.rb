@@ -1,7 +1,7 @@
-require_relative 'lib/eventhub/processor'
+require_relative 'lib/eventhub/processor2'
 
 module Eventhub
-  class Demo < Eventhub::Processor
+  class Demo < Eventhub::Processor2
 
     def handle_message(message, args)
       # your code here.....
@@ -13,6 +13,9 @@ module Eventhub
 
   end
 end
+
+require 'json'
+puts ARGV.to_json
 
 processor = Eventhub::Demo.new
 puts processor.name

@@ -19,7 +19,7 @@ module Eventhub
     end
 
     # Parses command line options into a hash
-    def self.parse_options
+    def self.parse_options(argv=ARGV)
       options = { environment: 'development', detached: false}
 
       OptionParser.new do |opts|
@@ -35,7 +35,7 @@ module Eventhub
           options[:config] = c
         end
 
-      end.parse!
+      end.parse!(argv)
 
       options
     rescue OptionParser::MissingArgument => e

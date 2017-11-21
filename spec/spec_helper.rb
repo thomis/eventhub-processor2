@@ -1,3 +1,7 @@
+# to collect test coverage
+require 'simplecov'
+SimpleCov.start
+
 require 'bundler/setup'
 require 'eventhub/processor2'
 
