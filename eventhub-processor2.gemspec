@@ -11,6 +11,7 @@ Gem::Specification.new do |spec|
   spec.summary       = %q{Next generation gem to build ruby based eventhub processor}
   spec.description   = %q{Next generation gem to build ruby based eventhub processor}
   spec.homepage      = 'https://github.com/thomis/eventhub-processor2'
+  spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0").reject do |f|
     f.match(%r{^(test|spec|features)/})
