@@ -18,7 +18,7 @@ module Eventhub
 
       @configuration_file = args[:configuration_file] \
         || options[:config] \
-        || File.join( Dir.getwd , 'config', "#{@name}.json")
+        || File.join(Dir.getwd, 'config', "#{@name}.json")
 
       @thread_group = ThreadGroup.new
     end
