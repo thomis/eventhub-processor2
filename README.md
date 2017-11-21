@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/thomis/eventhub-processor2.svg?branch=master)](https://travis-ci.org/thomis/eventhub-processor2)
+
 # Eventhub::Processor2
 
 Next generation gem to build ruby based eventhub processor.
