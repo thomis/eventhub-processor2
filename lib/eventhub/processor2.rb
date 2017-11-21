@@ -49,33 +49,33 @@ module Eventhub
     private
 
     def start_listen
-      t = Thread.new do
+      listen_thread = Thread.new do
         loop do
           puts 'listen...'
           sleep 1
         end
       end
-      @thread_group.add(t)
+      @thread_group.add(listen_thread)
     end
 
     def start_watchdog
-      t = Thread.new do
+      watchdog_thread = Thread.new do
         loop do
           puts 'watchdog...'
           sleep 1
         end
       end
-      @thread_group.add(t)
+      @thread_group.add(watchdog_thread)
     end
 
     def start_heartbeat
-      t = Thread.new do
+      heatbeat_threat = Thread.new do
         loop do
           puts 'heartbeat...'
           sleep 1
         end
       end
-      @thread_group.add(t)
+      @thread_group.add(heatbeat_threat)
     end
 
     def handle_message(message, args={})
@@ -97,9 +97,7 @@ module Eventhub
 
     def stop_thread_group
       puts 'Stopping threads...'
-      @thread_group.list.each do |t|
-        t.exit
-      end
+      @thread_group.list.each(&:exit)
       puts 'Threads stopped'
     end
 
