@@ -20,8 +20,8 @@ module Eventhub
     end
 
     # Parses command line options into a hash
-    def self.parse_options(argv=ARGV)
-      options = {environment: 'development', detached: false}
+    def self.parse_options(argv = ARGV)
+      options = { environment: 'development', detached: false }
 
       OptionParser.new do |opts|
         opts.on('-e', '--environment ENVIRONMENT', 'Define environment') do |environment|

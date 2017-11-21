@@ -104,9 +104,11 @@ module Eventhub
     end
 
     def before_start
+      # can be implemented in derived class
     end
 
     def after_stop
+      # can be implemented in derived class
     end
   end
 end
