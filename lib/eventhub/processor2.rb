@@ -7,7 +7,7 @@ module Eventhub
   class Processor2
     attr_reader :name, :environment, :detached, :configuration_file
 
-    def initialize(args={})
+    def initialize(args = {})
       options = Eventhub::Helper.parse_options
 
       @name = args[:name] || Eventhub::Helper.get_name_from_class(self)
@@ -18,7 +18,7 @@ module Eventhub
 
       @configuration_file = args[:configuration_file] \
         || options[:config] \
-        || File.join( Dir.getwd ,'config', "#{@name}.json")
+        || File.join( Dir.getwd , 'config', "#{@name}.json")
 
       @thread_group = ThreadGroup.new
     end
@@ -79,12 +79,12 @@ module Eventhub
       @thread_group.add(heatbeat_threat)
     end
 
-    def handle_message(message, args={})
+    def handle_message(message, args = {})
       # to do...
     end
 
     def setup_signal_handler
-      Signal.trap("INT") do
+      Signal.trap('INT') do
         stop_thread_group
       end
 
