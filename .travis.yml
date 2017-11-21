@@ -1,0 +1,12 @@
+language: ruby
+os:
+  - linux
+  - osx
+osx_image: xcode9.1
+rvm:
+  - 2.4.2
+  - 2.4.1
+  - 2.3.1
+  - 2.1.5
+before_install:
+  - gem install bundler --version '~> 1.16.0'

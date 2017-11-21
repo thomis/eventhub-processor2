@@ -1,0 +1,23 @@
+require_relative 'lib/eventhub/processor'
+
+module Eventhub
+  class Demo < Eventhub::Processor
+
+    def handle_message(message, args)
+      # your code here.....
+    end
+
+    def version
+      '10.1.1'
+    end
+
+  end
+end
+
+processor = Eventhub::Demo.new
+puts processor.name
+puts processor.version
+puts processor.environment
+puts processor.detached
+puts processor.configuration_file
+processor.start
