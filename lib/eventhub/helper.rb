@@ -24,7 +24,8 @@ module Eventhub
       options = { environment: 'development', detached: false }
 
       OptionParser.new do |opts|
-        opts.on('-e', '--environment ENVIRONMENT', 'Define environment') do |environment|
+        note = 'Define environment'
+        opts.on('-e', '--environment ENVIRONMENT', note) do |environment|
           options[:environment] = environment
         end
 
@@ -32,7 +33,8 @@ module Eventhub
           options[:detached] = true
         end
 
-        opts.on('-c', '--config CONFIG', 'Define configuration file') do |config|
+        note = 'Define configuration file'
+        opts.on('-c', '--config CONFIG', note) do |config|
           options[:config] = config
         end
       end.parse!(argv)
