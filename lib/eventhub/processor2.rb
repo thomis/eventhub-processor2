@@ -38,6 +38,10 @@ module Eventhub
       after_stop
     end
 
+    def stop
+      stop_thread_group
+    end
+
     def version
       Eventhub::VERSION
     end
