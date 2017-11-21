@@ -1,3 +1,4 @@
+[![Dependency Status](https://gemnasium.com/badges/github.com/thomis/eventhub-processor2.svg)](https://gemnasium.com/github.com/thomis/eventhub-processor2)
 [![Build Status](https://travis-ci.org/thomis/eventhub-processor2.svg?branch=master)](https://travis-ci.org/thomis/eventhub-processor2)
 
 # Eventhub::Processor2
