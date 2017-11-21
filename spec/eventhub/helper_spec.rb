@@ -78,5 +78,10 @@ RSpec.describe Eventhub::Helper do
       expect(options[:detached]).to eq(false)
     end
 
+    it 'parses invalid option -k' do
+      options = Eventhub::Helper.parse_options(['-k'])
+      expect(options[:environment]).to eq('development')
+      expect(options[:detached]).to eq(false)
+    end
   end
 end

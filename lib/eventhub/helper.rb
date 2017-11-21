@@ -40,6 +40,9 @@ module Eventhub
       end.parse!(argv)
 
       options
+    rescue OptionParser::InvalidOption => e
+      puts "Argument Parsing: #{e}"
+      options
     rescue OptionParser::MissingArgument => e
       puts "Argument Parsing: #{e}"
       options
