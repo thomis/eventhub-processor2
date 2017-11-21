@@ -23,16 +23,16 @@ module Eventhub
       options = { environment: 'development', detached: false}
 
       OptionParser.new do |opts|
-        opts.on('-e', '--environment ENVIRONMENT', 'Define environment') do |e|
-          options[:environment] = e
+        opts.on('-e', '--environment ENVIRONMENT', 'Define environment') do |environment|
+          options[:environment] = environment
         end
 
         opts.on('-d', '--detached', 'Run processor detached as a daemon') do
           options[:detached] = true
         end
 
-        opts.on('-c', '--config CONFIG', 'Define configuration file') do |c|
-          options[:config] = c
+        opts.on('-c', '--config CONFIG', 'Define configuration file') do |config|
+          options[:config] = config
         end
 
       end.parse!(argv)
