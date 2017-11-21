@@ -1,6 +1,6 @@
 # Eventhub::Processor2
 
-Gem to build Event Hub Processors. It gives you some core infrastructure pieces to easily implement a customized Event Hub Processor.
+Next generation gem to build ruby based eventhub processor.
 
 ## Installation
 
