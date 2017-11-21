@@ -2,14 +2,16 @@ lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'eventhub/version'
 
+note = 'Next generation gem to build ruby based eventhub processor'
+
 Gem::Specification.new do |spec|
   spec.name          = 'eventhub-processor2'
   spec.version       = Eventhub::VERSION
   spec.authors       = ['Steiner, Thomas']
   spec.email         = ['thomas.steiner@ikey.ch']
 
-  spec.summary       = 'Next generation gem to build ruby based eventhub processor'
-  spec.description   = 'Next generation gem to build ruby based eventhub processor'
+  spec.summary       = note
+  spec.description   = note
   spec.homepage      = 'https://github.com/thomis/eventhub-processor2'
   spec.license       = 'MIT'
 
