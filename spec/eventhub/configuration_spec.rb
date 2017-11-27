@@ -9,8 +9,9 @@ RSpec.describe Eventhub::Configuration do
     expect(Eventhub::Configuration.server[:vhost]).to eq('eventhub')
     expect(Eventhub::Configuration.server[:port]).to eq(5672)
     expect(Eventhub::Configuration.server[:ssl]).to eq(false)
-    expect(Eventhub::Configuration.heartbeat_cycle_in_s).to eq(300)
-    expect(Eventhub::Configuration.watchdog_cycle_in_s).to eq(15)
+    expect(Eventhub::Configuration.processor[:heartbeat_cycle_in_s]).to eq(300)
+    expect(Eventhub::Configuration.processor[:watchdog_cycle_in_s]).to eq(15)
+    expect(Eventhub::Configuration.processor[:listener_queues]).to eq(['undefined'])
   end
 
   it 'loads default environment configuration from file' do
@@ -21,8 +22,9 @@ RSpec.describe Eventhub::Configuration do
     expect(Eventhub::Configuration.server[:vhost]).to eq('eventhub_development')
     expect(Eventhub::Configuration.server[:port]).to eq(5673)
     expect(Eventhub::Configuration.server[:ssl]).to eq(true)
-    expect(Eventhub::Configuration.heartbeat_cycle_in_s).to eq(400)
-    expect(Eventhub::Configuration.watchdog_cycle_in_s).to eq(60)
+    expect(Eventhub::Configuration.processor[:heartbeat_cycle_in_s]).to eq(400)
+    expect(Eventhub::Configuration.processor[:watchdog_cycle_in_s]).to eq(60)
+    expect(Eventhub::Configuration.processor[:listener_queues]).to eq(['demo'])
   end
 
   it 'loads test environment configuration from file' do
@@ -33,8 +35,9 @@ RSpec.describe Eventhub::Configuration do
     expect(Eventhub::Configuration.server[:vhost]).to eq('eventhub_test')
     expect(Eventhub::Configuration.server[:port]).to eq(5674)
     expect(Eventhub::Configuration.server[:ssl]).to eq(true)
-    expect(Eventhub::Configuration.heartbeat_cycle_in_s).to eq(401)
-    expect(Eventhub::Configuration.watchdog_cycle_in_s).to eq(61)
+    expect(Eventhub::Configuration.processor[:heartbeat_cycle_in_s]).to eq(401)
+    expect(Eventhub::Configuration.processor[:watchdog_cycle_in_s]).to eq(61)
+    expect(Eventhub::Configuration.processor[:listener_queues]).to eq(['demo'])
   end
 
   it 'read additional values' do

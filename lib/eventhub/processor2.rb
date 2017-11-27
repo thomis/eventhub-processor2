@@ -13,18 +13,13 @@ module Eventhub
       options = Eventhub::Helper.parse_options
 
       @name = args[:name] || Eventhub::Helper.get_name_from_class(self)
-
       @environment = args[:environment] || options[:environment]
-
       @detached = args[:detached] || options[:detached]
-
       @configuration_file = args[:configuration_file] \
         || options[:config] \
         || File.join(Dir.getwd, 'config', "#{@name}.json")
-
       Eventhub::Configuration.load!(@configuration_file,
                                     environment: @environment)
-
       @thread_group = ThreadGroup.new
     end
 
@@ -66,7 +61,7 @@ module Eventhub
       watchdog_thread = Thread.new do
         loop do
           puts 'watchdog...'
-          sleep Configuration.watchdog_cycle_in_s
+          sleep Configuration.processor[:watchdog_cycle_in_s]
         end
       end
       @thread_group.add(watchdog_thread)
@@ -76,7 +71,7 @@ module Eventhub
       heatbeat_threat = Thread.new do
         loop do
           puts 'heartbeat...'
-          sleep Configuration.heartbeat_cycle_in_s
+          sleep Configuration.processor[:heartbeat_cycle_in_s]
         end
       end
       @thread_group.add(heatbeat_threat)

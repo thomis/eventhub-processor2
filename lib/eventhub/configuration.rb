@@ -48,8 +48,11 @@ module Eventhub
           port: 5672,
           ssl: false
         },
-        heartbeat_cycle_in_s: 300,
-        watchdog_cycle_in_s: 15
+        processor: {
+          heartbeat_cycle_in_s: 300,
+          watchdog_cycle_in_s: 15,
+          listener_queues: ['undefined']
+        }
       }
     end
   end
