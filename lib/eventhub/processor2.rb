@@ -1,6 +1,12 @@
+require 'eventhub/components'
+require 'logstash-logger'
+
 require_relative 'version'
+require_relative 'logger'
 require_relative 'helper'
 require_relative 'configuration'
+require_relative 'watchdog'
+require_relative 'heartbeat'
 require_relative 'listener'
 
 # Eventhub module
@@ -14,10 +20,14 @@ module Eventhub
 
       @name = args[:name] || Eventhub::Helper.get_name_from_class(self)
       @environment = args[:environment] || options[:environment]
+
+      Eventhub.set_logger(@name, @environment)
+
       @detached = args[:detached] || options[:detached]
       @configuration_file = args[:configuration_file] \
         || options[:config] \
         || File.join(Dir.getwd, 'config', "#{@name}.json")
+
       Eventhub::Configuration.load!(@configuration_file,
                                     environment: @environment)
       @thread_group = ThreadGroup.new
@@ -28,13 +38,18 @@ module Eventhub
 
       setup_signal_handler
 
-      start_watchdog
-      start_heartbeat
-      start_listen
+      Eventhub.logger.info("#{@name}: has been started")
 
-      puts "#{@name}: has been started"
+      # start sub components
+      [Watchdog, Heartbeat, Listener].each do |item|
+        thread = Thread.new do
+          item.new.start
+        end
+        @thread_group.add(thread)
+      end
+
       @thread_group.list.each(&:join)
-      puts "#{@name}: has been stopped"
+      Eventhub.logger.info("#{@name}: has been stopped")
     ensure
       after_stop
     end
@@ -48,34 +63,6 @@ module Eventhub
     end
 
     private
-
-    def start_listen
-      listen_thread = Thread.new do
-        listener = Eventhub::Listener.new(configuration: @configuration)
-        listener.start
-      end
-      @thread_group.add(listen_thread)
-    end
-
-    def start_watchdog
-      watchdog_thread = Thread.new do
-        loop do
-          puts 'watchdog...'
-          sleep Configuration.processor[:watchdog_cycle_in_s]
-        end
-      end
-      @thread_group.add(watchdog_thread)
-    end
-
-    def start_heartbeat
-      heatbeat_threat = Thread.new do
-        loop do
-          puts 'heartbeat...'
-          sleep Configuration.processor[:heartbeat_cycle_in_s]
-        end
-      end
-      @thread_group.add(heatbeat_threat)
-    end
 
     def handle_message(message, args = {})
       # to do...
@@ -96,9 +83,7 @@ module Eventhub
     end
 
     def stop_thread_group
-      puts 'Stopping threads...'
       @thread_group.list.each(&:exit)
-      puts 'Threads stopped'
     end
 
     def before_start

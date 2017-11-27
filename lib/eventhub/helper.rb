@@ -41,10 +41,10 @@ module Eventhub
 
       options
     rescue OptionParser::InvalidOption => e
-      puts "Argument Parsing: #{e}"
+      Eventhub.logger.warn("Argument Parsing: #{e}")
       options
     rescue OptionParser::MissingArgument => e
-      puts "Argument Parsing: #{e}"
+      Eventhub.logger.warn("Argument Parsing: #{e}")
       options
     end
   end

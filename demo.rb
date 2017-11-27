@@ -13,13 +13,4 @@ module Eventhub
   end
 end
 
-require 'json'
-puts ARGV.to_json
-
-processor = Eventhub::Demo.new
-puts processor.name
-puts processor.version
-puts processor.environment
-puts processor.detached
-puts processor.configuration_file
-processor.start
+Eventhub::Demo.new.start

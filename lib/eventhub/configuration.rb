@@ -15,7 +15,8 @@ module Eventhub
       begin
         new_data = JSON.parse(File.read(filename), symbolize_names: true)
       rescue => e
-        puts "Exception while loading configuration file: #{e}"
+        Eventhub.logger.warn("Exception while loading configuration file: #{e}")
+        Eventhub.logger.info("Using default configuration values")
       end
 
       deep_merge!(@data, default_configuration)

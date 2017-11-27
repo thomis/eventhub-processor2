@@ -8,7 +8,7 @@ module Eventhub
 
     def start
       loop do
-        puts 'is listening...'
+        Eventhub.logger.info('is listening...')
         sleep 5
       end
     end
