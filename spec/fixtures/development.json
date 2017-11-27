@@ -1,0 +1,14 @@
+{
+  "development": {
+    "server": {
+      "user": "guest_development",
+      "password": "guest_development",
+      "host": "localhost_development",
+      "vhost": "eventhub_development",
+      "port": 5673,
+      "ssl": true
+    },
+    "heartbeat_cycle_in_s": 400,
+    "watchdog_cycle_in_s": 60
+  }
+}

@@ -1,5 +1,7 @@
 require_relative 'version'
 require_relative 'helper'
+require_relative 'configuration'
+require_relative 'listener'
 
 # Eventhub module
 module Eventhub
@@ -19,6 +21,8 @@ module Eventhub
       @configuration_file = args[:configuration_file] \
         || options[:config] \
         || File.join(Dir.getwd, 'config', "#{@name}.json")
+
+      Eventhub::Configuration.load!(@configuration_file, environment: @environment)
 
       @thread_group = ThreadGroup.new
     end
@@ -51,10 +55,8 @@ module Eventhub
 
     def start_listen
       listen_thread = Thread.new do
-        loop do
-          puts 'listen...'
-          sleep 1
-        end
+        listener = Eventhub::Listener.new(configuration: @configuration)
+        listener.start
       end
       @thread_group.add(listen_thread)
     end
@@ -63,7 +65,7 @@ module Eventhub
       watchdog_thread = Thread.new do
         loop do
           puts 'watchdog...'
-          sleep 1
+          sleep Configuration.watchdog_cycle_in_s
         end
       end
       @thread_group.add(watchdog_thread)
@@ -73,7 +75,7 @@ module Eventhub
       heatbeat_threat = Thread.new do
         loop do
           puts 'heartbeat...'
-          sleep 1
+          sleep Configuration.heartbeat_cycle_in_s
         end
       end
       @thread_group.add(heatbeat_threat)

@@ -1,0 +1,18 @@
+{
+  "test": {
+    "server": {
+      "user": "guest_test",
+      "password": "guest_test",
+      "host": "localhost_test",
+      "vhost": "eventhub_test",
+      "port": 5674,
+      "ssl": true
+    },
+    "heartbeat_cycle_in_s": 401,
+    "watchdog_cycle_in_s": 61,
+    "value_name1": "value1",
+    "value_name2": {
+      "value_name3": "value3"
+    }
+  }
+}
