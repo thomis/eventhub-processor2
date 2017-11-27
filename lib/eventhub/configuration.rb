@@ -1,11 +1,9 @@
 # Eventhub module
 module Eventhub
-
   # Configuraiton module
   module Configuration
     # it's a singleton (don't allow to instantiate this class)
     extend self
-
     @data = {}
     attr_reader :data
 
@@ -27,14 +25,13 @@ module Eventhub
     # deep_merge by Stefan Rusterholz, see http://www.ruby-forum.com/topic/142809
     def deep_merge!(target, data)
       return if data.nil?
-      merger = proc{|key, v1, v2|
-        Hash === v1 && Hash === v2 ? v1.merge(v2, &merger) : v2 }
+      merger = proc{|key, v1, v2| Hash === v1 && Hash === v2 ? v1.merge(v2, &merger) : v2}
       target.merge! data, &merger
     end
 
     def method_missing(name, *args, &block)
       @data[name.to_sym] ||
-      fail(NoMethodError, "unknown configuration [#{name}]", caller)
+        raise NoMethodError, "unknown configuration [#{name}]"
     end
 
     def default_configuration

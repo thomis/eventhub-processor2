@@ -1,6 +1,5 @@
 # Eventhub module
 module Eventhub
-
   # Listner Class
   class Listener
 
@@ -14,6 +13,5 @@ module Eventhub
         sleep 5
       end
     end
-
   end
 end
