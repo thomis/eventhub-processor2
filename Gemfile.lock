@@ -3,7 +3,7 @@ PATH
   specs:
     eventhub-processor2 (1.0.0)
       bunny (~> 2.7)
-      eventhub-components (~> 0.1)
+      eventhub-components (~> 0.2)
 
 GEM
   remote: https://rubygems.org/
@@ -13,8 +13,8 @@ GEM
       amq-protocol (>= 2.2.0)
     diff-lcs (1.3)
     docile (1.1.5)
-    eventhub-components (0.1.8)
-      logstash-logger
+    eventhub-components (0.2.0)
+      logstash-logger (~> 0.25)
     json (2.1.0)
     logstash-event (1.2.02)
     logstash-logger (0.25.1)
