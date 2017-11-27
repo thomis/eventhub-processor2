@@ -2,7 +2,6 @@
 module Eventhub
   # Listner Class
   class Listener
-
     def initialize(args = {})
       @configuration = args[:configuration]
     end

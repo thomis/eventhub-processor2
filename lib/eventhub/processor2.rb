@@ -23,7 +23,7 @@ module Eventhub
         || File.join(Dir.getwd, 'config', "#{@name}.json")
 
       Eventhub::Configuration.load!(@configuration_file,
-        environment: @environment)
+                                    environment: @environment)
 
       @thread_group = ThreadGroup.new
     end

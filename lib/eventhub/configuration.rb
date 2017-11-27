@@ -27,11 +27,13 @@ module Eventhub
     # deep_merge by Stefan Rusterholz, see http://www.ruby-forum.com/topic/142809
     def deep_merge!(target, data)
       return if data.nil?
-      merger = proc{|_, v1, v2| Hash === v1 && Hash === v2 ? v1.merge(v2, &merger) : v2}
+      merger = Proc.new do |_, v1, v2|
+        Hash === v1 && Hash === v2 ? v1.merge(v2, &merger) : v2
+      end
       target.merge! data, &merger
     end
 
-    def method_missing(name, *args, &block)
+    def method_missing(name, *_args, &_block)
       @data[name.to_sym] ||
         fail(NoMethodError, "unknown configuration [#{name}]", caller)
     end
