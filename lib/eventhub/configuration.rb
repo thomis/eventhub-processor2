@@ -11,13 +11,15 @@ module Eventhub
     def load!(filename = nil, options = {})
       new_data = {}
       environment = options[:environment] || 'development'
+
       begin
         new_data = JSON.parse(File.read(filename), symbolize_names: true)
       rescue => e
         puts "Exception while loading configuration file: #{e}"
       end
-      new_data = new_data[environment.to_sym] if environment
+
       deep_merge!(@data, default_configuration)
+      new_data = new_data[environment.to_sym]
       deep_merge!(@data, new_data)
     end
 
@@ -25,13 +27,13 @@ module Eventhub
     # deep_merge by Stefan Rusterholz, see http://www.ruby-forum.com/topic/142809
     def deep_merge!(target, data)
       return if data.nil?
-      merger = proc{|key, v1, v2| Hash === v1 && Hash === v2 ? v1.merge(v2, &merger) : v2}
+      merger = proc{|_, v1, v2| Hash === v1 && Hash === v2 ? v1.merge(v2, &merger) : v2}
       target.merge! data, &merger
     end
 
     def method_missing(name, *args, &block)
       @data[name.to_sym] ||
-        raise NoMethodError, "unknown configuration [#{name}]"
+        fail(NoMethodError, "unknown configuration [#{name}]", caller)
     end
 
     def default_configuration

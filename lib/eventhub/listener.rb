@@ -9,7 +9,7 @@ module Eventhub
 
     def start
       loop do
-         puts 'is listening...'
+        puts 'is listening...'
         sleep 5
       end
     end
