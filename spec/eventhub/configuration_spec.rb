@@ -1,6 +1,19 @@
 require 'spec_helper'
 
 RSpec.describe Eventhub::Configuration do
+
+  it 'gets default evironment' do
+    expect(Eventhub::Configuration.environment).to eq('development')
+  end
+
+  it 'gets default detached info' do
+    expect(Eventhub::Configuration.detached).to eq(false)
+  end
+
+  it 'get default configuration file' do
+    expect(Eventhub::Configuration.config_file).to match(/undefined.json$/)
+  end
+
   it 'loads defaults' do
     Eventhub::Configuration.load!
     expect(Eventhub::Configuration.server[:user]).to eq('guest')
@@ -15,7 +28,7 @@ RSpec.describe Eventhub::Configuration do
   end
 
   it 'loads default environment configuration from file' do
-    Eventhub::Configuration.load!('spec/fixtures/development.json')
+    Eventhub::Configuration.load!(config_file: 'spec/fixtures/development.json')
     expect(Eventhub::Configuration.server[:user]).to eq('guest_development')
     expect(Eventhub::Configuration.server[:password]).to eq('guest_development')
     expect(Eventhub::Configuration.server[:host]).to eq('localhost_development')
@@ -28,7 +41,7 @@ RSpec.describe Eventhub::Configuration do
   end
 
   it 'loads test environment configuration from file' do
-    Eventhub::Configuration.load!('spec/fixtures/test.json', environment: 'test')
+    Eventhub::Configuration.load!(config_file: 'spec/fixtures/test.json', environment: 'test')
     expect(Eventhub::Configuration.server[:user]).to eq('guest_test')
     expect(Eventhub::Configuration.server[:password]).to eq('guest_test')
     expect(Eventhub::Configuration.server[:host]).to eq('localhost_test')
@@ -41,7 +54,7 @@ RSpec.describe Eventhub::Configuration do
   end
 
   it 'read additional values' do
-    Eventhub::Configuration.load!('spec/fixtures/test.json', environment: 'test')
+    Eventhub::Configuration.load!(config_file: 'spec/fixtures/test.json', environment: 'test')
     expect(Eventhub::Configuration.value_name1).to eq('value1')
     expect(Eventhub::Configuration.value_name2[:value_name3]).to eq('value3')
   end
@@ -54,9 +67,9 @@ RSpec.describe Eventhub::Configuration do
   end
 
   it 'allows to read from configuration file multiple times' do
-    Eventhub::Configuration.load!
+    Eventhub::Configuration.load!(environment: 'development')
     expect(Eventhub::Configuration.server[:user]).to eq('guest')
-    Eventhub::Configuration.load!('spec/fixtures/development.json')
+    Eventhub::Configuration.load!(config_file: 'spec/fixtures/development.json')
     expect(Eventhub::Configuration.server[:user]).to eq('guest_development')
   end
 end

@@ -16,20 +16,16 @@ module Eventhub
     attr_reader :name, :environment, :detached, :configuration_file
 
     def initialize(args = {})
-      options = Eventhub::Helper.parse_options
+      # Set processor name
+      Eventhub::Configuration.name = args[:name] ||
+        Eventhub::Helper.get_name_from_class(self)
 
-      @name = args[:name] || Eventhub::Helper.get_name_from_class(self)
-      @environment = args[:environment] || options[:environment]
+      # Parse comand line options
+      Eventhub::Configuration.parse_options
 
-      Eventhub.set_logger(@name, @environment)
+      # Load configuration file
+      Eventhub::Configuration.load!(args)
 
-      @detached = args[:detached] || options[:detached]
-      @configuration_file = args[:configuration_file] \
-        || options[:config] \
-        || File.join(Dir.getwd, 'config', "#{@name}.json")
-
-      Eventhub::Configuration.load!(@configuration_file,
-                                    environment: @environment)
       @thread_group = ThreadGroup.new
     end
 
@@ -38,7 +34,7 @@ module Eventhub
 
       setup_signal_handler
 
-      Eventhub.logger.info("#{@name}: has been started")
+      Eventhub.logger.info("#{Configuration.name}: has been started")
 
       # start sub components
       [Watchdog, Heartbeat, Listener].each do |item|
@@ -49,7 +45,7 @@ module Eventhub
       end
 
       @thread_group.list.each(&:join)
-      Eventhub.logger.info("#{@name}: has been stopped")
+      Eventhub.logger.info("#{Configuration.name}: has been stopped")
     ensure
       after_stop
     end
@@ -62,11 +58,11 @@ module Eventhub
       Eventhub::VERSION
     end
 
-    private
-
     def handle_message(message, args = {})
       # to do...
     end
+
+    private
 
     def setup_signal_handler
       Signal.trap('INT') do

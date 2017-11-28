@@ -4,24 +4,71 @@ module Eventhub
   module Configuration
     # it's a singleton (don't allow to instantiate this class)
     extend self
-    @data = {}
-    attr_reader :data
 
-    # Main entry point to load configuration file data
-    def load!(filename = nil, options = {})
+    attr_reader :name           # name of processor
+    attr_reader :environment    # environment the processor is running
+    attr_reader :detached       # run processor run as a daemon
+    attr_reader :config_file    # name of configuration file
+    attr_reader :config_data    # data from configuration file
+
+
+    @name = 'undefined'
+    @environment = 'development'
+    @detached = false
+    @config_file = File.join(Dir.getwd, 'config', "#{@name}.json")
+    @config_data = {}
+
+    # set name of processor
+    def name=(value)
+      @name = value
+    end
+
+    # parse options from argument list
+    def parse_options(argv = ARGV)
+
+      @config_file = File.join(Dir.getwd, 'config', "#{@name}.json")
+
+      OptionParser.new do |opts|
+        note = 'Define environment'
+        opts.on('-e', '--environment ENVIRONMENT', note) do |environment|
+          @environment = environment
+        end
+
+        opts.on('-d', '--detached', 'Run processor detached as a daemon') do
+          @detached = true
+        end
+
+        note = 'Define configuration file'
+        opts.on('-c', '--config CONFIG', note) do |filename|
+          @config_file = filename
+        end
+      end.parse!(argv)
+
+    rescue OptionParser::InvalidOption => e
+      Eventhub.logger.warn("Argument Parsing: #{e}")
+    rescue OptionParser::MissingArgument => e
+      Eventhub.logger.warn("Argument Parsing: #{e}")
+    end
+
+    # load configuration from file
+    def load!(args = {})
+
+      # for better rspec testing
+      @config_file = args[:config_file] if args[:config_file]
+      @environment = args[:environment] if args[:environment]
+
       new_data = {}
-      environment = options[:environment] || 'development'
 
       begin
-        new_data = JSON.parse(File.read(filename), symbolize_names: true)
+        new_data = JSON.parse(File.read(@config_file), symbolize_names: true)
       rescue => e
         Eventhub.logger.warn("Exception while loading configuration file: #{e}")
         Eventhub.logger.info("Using default configuration values")
       end
 
-      deep_merge!(@data, default_configuration)
-      new_data = new_data[environment.to_sym]
-      deep_merge!(@data, new_data)
+      deep_merge!(@config_data, default_configuration)
+      new_data = new_data[@environment.to_sym]
+      deep_merge!(@config_data, new_data)
     end
 
     # Deep merging of hashes
@@ -35,7 +82,7 @@ module Eventhub
     end
 
     def method_missing(name, *_args, &_block)
-      @data[name.to_sym] ||
+      @config_data[name.to_sym] ||
         fail(NoMethodError, "unknown configuration [#{name}]", caller)
     end
 
@@ -52,7 +99,7 @@ module Eventhub
         processor: {
           heartbeat_cycle_in_s: 300,
           watchdog_cycle_in_s: 15,
-          listener_queues: ['undefined']
+          listener_queues: [@name]
         }
       }
     end
