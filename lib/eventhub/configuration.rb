@@ -22,6 +22,14 @@ module Eventhub
       @name = value
     end
 
+    def reset
+      @name = 'undefined'
+      @environment = 'development'
+      @detached = false
+      @config_file = File.join(Dir.getwd, 'config', "#{@name}.json")
+      @config_data = {}
+    end
+
     # parse options from argument list
     def parse_options(argv = ARGV)
 
@@ -38,15 +46,18 @@ module Eventhub
         end
 
         note = 'Define configuration file'
-        opts.on('-c', '--config CONFIG', note) do |filename|
-          @config_file = filename
+        opts.on('-c', '--config CONFIG', note) do |config|
+          @config_file = config
         end
       end.parse!(argv)
 
+      true
     rescue OptionParser::InvalidOption => e
       Eventhub.logger.warn("Argument Parsing: #{e}")
+      false
     rescue OptionParser::MissingArgument => e
       Eventhub.logger.warn("Argument Parsing: #{e}")
+      false
     end
 
     # load configuration from file

@@ -18,7 +18,7 @@ module Eventhub
     def initialize(args = {})
       # Set processor name
       Eventhub::Configuration.name = args[:name] ||
-        Eventhub::Helper.get_name_from_class(self)
+                                     Eventhub::Helper.get_name_from_class(self)
 
       # Parse comand line options
       Eventhub::Configuration.parse_options
