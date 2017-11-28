@@ -32,7 +32,6 @@ module Eventhub
 
     # parse options from argument list
     def parse_options(argv = ARGV)
-
       @config_file = File.join(Dir.getwd, 'config', "#{@name}.json")
 
       OptionParser.new do |opts|
