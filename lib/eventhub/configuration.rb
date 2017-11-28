@@ -11,7 +11,6 @@ module Eventhub
     attr_reader :config_file    # name of configuration file
     attr_reader :config_data    # data from configuration file
 
-
     @name = 'undefined'
     @environment = 'development'
     @detached = false
@@ -52,18 +51,16 @@ module Eventhub
 
     # load configuration from file
     def load!(args = {})
-
       # for better rspec testing
       @config_file = args[:config_file] if args[:config_file]
       @environment = args[:environment] if args[:environment]
 
       new_data = {}
-
       begin
         new_data = JSON.parse(File.read(@config_file), symbolize_names: true)
       rescue => e
         Eventhub.logger.warn("Exception while loading configuration file: #{e}")
-        Eventhub.logger.info("Using default configuration values")
+        Eventhub.logger.info('Using default configuration values')
       end
 
       deep_merge!(@config_data, default_configuration)
