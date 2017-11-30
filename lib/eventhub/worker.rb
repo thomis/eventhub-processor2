@@ -26,18 +26,16 @@ module Eventhub
       start
     end
 
-    private
-
     def self.wait_for_stop
       workers = WORKER.keys
       start = Time.now
 
       # as long as we have running workers and below time limit
       while !workers.empty? && below_time_limit?(start)
-        unless @@queue_terminated.empty?
-          workers.delete(@@queue_terminated.pop)
-        else
+        if @@queue_terminated.empty?
           sleep 0.2
+        else
+          workers.delete(@@queue_terminated.pop)
         end
       end
       msg = "Worker(s) [#{workers.join(', ')}]: "
@@ -48,5 +46,8 @@ module Eventhub
     def self.below_time_limit?(start)
       (Time.now - start) < MAX_STOP_TIME_IN_S
     end
+
+    private_class_method :wait_for_stop
+    private_class_method :below_time_limit?
   end
 end
