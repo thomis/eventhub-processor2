@@ -19,33 +19,27 @@ module Eventhub
       end.compact.join('.')
     end
 
-    # Parses command line options into a hash
-    def self.parse_options(argv = ARGV)
-      options = { environment: 'development', detached: false }
+    def self.bunny_connection_properties
+      server = Eventhub::Configuration.server
 
-      OptionParser.new do |opts|
-        note = 'Define environment'
-        opts.on('-e', '--environment ENVIRONMENT', note) do |environment|
-          options[:environment] = environment
-        end
-
-        opts.on('-d', '--detached', 'Run processor detached as a daemon') do
-          options[:detached] = true
-        end
-
-        note = 'Define configuration file'
-        opts.on('-c', '--config CONFIG', note) do |config|
-          options[:config] = config
-        end
-      end.parse!(argv)
-
-      options
-    rescue OptionParser::InvalidOption => e
-      Eventhub.logger.warn("Argument Parsing: #{e}")
-      options
-    rescue OptionParser::MissingArgument => e
-      Eventhub.logger.warn("Argument Parsing: #{e}")
-      options
+      if Configuration.server[:tls]
+        {
+          user: server[:user],
+          password: server[:password],
+          host: server[:host],
+          vhost: server[:vhost],
+          port: server[:port],
+          tls: server[:tls]
+        }
+      else
+        {
+          user: server[:user],
+          password: server[:password],
+          host: server[:host],
+          vhost: server[:vhost],
+          port: server[:port]
+        }
+      end
     end
   end
 end

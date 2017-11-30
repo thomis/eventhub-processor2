@@ -1,0 +1,20 @@
+{
+  "development": {
+    "server": {
+      "user": "guest",
+      "password": "guest",
+      "host": "localhost",
+      "vhost": "/",
+      "port": 5672,
+      "tls": false
+    },
+    "processor": {
+      "heartbeat_cycle_in_s": 300,
+      "watchdog_cycle_in_s": 15,
+      "listener_queues": [
+        "example",
+        "example2"
+      ]
+    }
+  }
+}

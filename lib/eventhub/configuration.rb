@@ -99,9 +99,9 @@ module Eventhub
           user: 'guest',
           password: 'guest',
           host: 'localhost',
-          vhost: 'eventhub',
+          vhost: 'event_hub',
           port: 5672,
-          ssl: false
+          tls: false
         },
         processor: {
           heartbeat_cycle_in_s: 300,

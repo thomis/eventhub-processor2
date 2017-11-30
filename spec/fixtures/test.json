@@ -6,7 +6,7 @@
       "host": "localhost_test",
       "vhost": "eventhub_test",
       "port": 5674,
-      "ssl": true
+      "tls": true
     },
     "processor": {
       "heartbeat_cycle_in_s": 401,

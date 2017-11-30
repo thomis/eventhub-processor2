@@ -16,42 +16,11 @@ RSpec.describe Eventhub::Processor2 do
 
   end
 
-  it 'starts and stops' do
-    processor = Eventhub::Processor2.new
-    thr = Thread.new { processor.start }
-    sleep 0.5
-    processor.stop
-    thr.join
-    expect(true).to eq(true)
-  end
-
-  # it 'starts and stops with INT signal' do
-  #   old_signal_handler = Signal.trap 'TERM', 'SYSTEM_DEFAULT'
-
+  # it 'starts and stops' do
   #   processor = Eventhub::Processor2.new
   #   thr = Thread.new { processor.start }
   #   sleep 0.5
-  #   Process.kill 'INT', 0
-  #   thr.join
-  #   expect(true).to eq(true)
-
-  #    Signal.trap 'TERM', old_signal_handler
-  # end
-
-  # it 'starts and stops with HUP signal' do
-  #   processor = Eventhub::Processor2.new
-  #   thr = Thread.new { processor.start }
-  #   sleep 0.5
-  #   Process.kill 'HUP', 0
-  #   thr.join
-  #   expect(true).to eq(true)
-  # end
-
-  # it 'starts and stops with TERM signal' do
-  #   processor = Eventhub::Processor2.new
-  #   thr = Thread.new { processor.start }
-  #   sleep 0.5
-  #   Process.kill 'TERM', 0
+  #   processor.stop
   #   thr.join
   #   expect(true).to eq(true)
   # end

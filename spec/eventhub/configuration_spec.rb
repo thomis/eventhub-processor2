@@ -7,6 +7,12 @@ RSpec.describe Eventhub::Configuration do
   end
 
   context 'argument options' do
+    it 'parses no options' do
+      Eventhub::Configuration.parse_options()
+      expect(Eventhub::Configuration.environment).to eq('development')
+      expect(Eventhub::Configuration.detached).to eq(false)
+    end
+
     it 'parses environment' do
       Eventhub::Configuration.parse_options(['-e', 'integration'])
       expect(Eventhub::Configuration.environment).to eq('integration')
@@ -14,6 +20,12 @@ RSpec.describe Eventhub::Configuration do
 
     it 'parses detached' do
       Eventhub::Configuration.parse_options(['-d'])
+      expect(Eventhub::Configuration.detached).to eq(true)
+    end
+
+    it 'parses environment and detached' do
+      Eventhub::Configuration.parse_options(['-d', '-e', 'integration'])
+      expect(Eventhub::Configuration.environment).to eq('integration')
       expect(Eventhub::Configuration.detached).to eq(true)
     end
 
@@ -52,9 +64,9 @@ RSpec.describe Eventhub::Configuration do
       expect(Eventhub::Configuration.server[:user]).to eq('guest')
       expect(Eventhub::Configuration.server[:password]).to eq('guest')
       expect(Eventhub::Configuration.server[:host]).to eq('localhost')
-      expect(Eventhub::Configuration.server[:vhost]).to eq('eventhub')
+      expect(Eventhub::Configuration.server[:vhost]).to eq('event_hub')
       expect(Eventhub::Configuration.server[:port]).to eq(5672)
-      expect(Eventhub::Configuration.server[:ssl]).to eq(false)
+      expect(Eventhub::Configuration.server[:tls]).to eq(false)
       expect(Eventhub::Configuration.processor[:heartbeat_cycle_in_s]).to eq(300)
       expect(Eventhub::Configuration.processor[:watchdog_cycle_in_s]).to eq(15)
       expect(Eventhub::Configuration.processor[:listener_queues]).to eq(['undefined'])
@@ -67,7 +79,7 @@ RSpec.describe Eventhub::Configuration do
       expect(Eventhub::Configuration.server[:host]).to eq('localhost_development')
       expect(Eventhub::Configuration.server[:vhost]).to eq('eventhub_development')
       expect(Eventhub::Configuration.server[:port]).to eq(5673)
-      expect(Eventhub::Configuration.server[:ssl]).to eq(true)
+      expect(Eventhub::Configuration.server[:tls]).to eq(true)
       expect(Eventhub::Configuration.processor[:heartbeat_cycle_in_s]).to eq(400)
       expect(Eventhub::Configuration.processor[:watchdog_cycle_in_s]).to eq(60)
       expect(Eventhub::Configuration.processor[:listener_queues]).to eq(['demo'])
@@ -80,7 +92,7 @@ RSpec.describe Eventhub::Configuration do
       expect(Eventhub::Configuration.server[:host]).to eq('localhost_test')
       expect(Eventhub::Configuration.server[:vhost]).to eq('eventhub_test')
       expect(Eventhub::Configuration.server[:port]).to eq(5674)
-      expect(Eventhub::Configuration.server[:ssl]).to eq(true)
+      expect(Eventhub::Configuration.server[:tls]).to eq(true)
       expect(Eventhub::Configuration.processor[:heartbeat_cycle_in_s]).to eq(401)
       expect(Eventhub::Configuration.processor[:watchdog_cycle_in_s]).to eq(61)
       expect(Eventhub::Configuration.processor[:listener_queues]).to eq(['demo'])
