@@ -1,4 +1,6 @@
+# Eventhub module
 module Eventhub
+  # Base worker class
   class Worker
     WORKER = {}
     MAX_STOP_TIME_IN_S = 3
@@ -7,19 +9,15 @@ module Eventhub
     @@queue_terminated = Queue.new
 
     def self.register(name)
-      WORKER[name] = self.new
+      WORKER[name] = new
     end
 
     def self.start
-      WORKER.values.each do |worker|
-        worker.start
-      end
+      WORKER.values.each(&:start)
     end
 
     def self.stop
-      WORKER.values.each do |worker|
-        worker.stop
-      end
+      WORKER.values.each(&:stop)
       wait_for_stop
     end
 
@@ -36,7 +34,7 @@ module Eventhub
 
       # as long as we have running workers and below time limit
       while !workers.empty? && below_time_limit?(start)
-        if @@queue_terminated.size > 0
+        unless @@queue_terminated.empty?
           workers.delete(@@queue_terminated.pop)
         else
           sleep 0.2
@@ -50,6 +48,5 @@ module Eventhub
     def self.below_time_limit?(start)
       (Time.now - start) < MAX_STOP_TIME_IN_S
     end
-
   end
 end
