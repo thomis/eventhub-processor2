@@ -1,0 +1,87 @@
+{
+  "rabbit_version": "3.6.14",
+  "users": [
+    {
+      "name": "guest",
+      "password_hash": "Xvy2EUToV+QoQDNOypgOwwnnjrN2PYSR2s29TAy0BrSsP1i+",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": "administrator"
+    }
+  ],
+  "vhosts": [
+    {
+      "name": "event_hub"
+    }
+  ],
+  "permissions": [
+    {
+      "user": "guest",
+      "vhost": "event_hub",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    }
+  ],
+  "parameters": [],
+  "global_parameters": [
+    {
+      "name": "cluster_name",
+      "value": "rabbit@54d839ff16c7"
+    }
+  ],
+  "policies": [],
+  "queues": [
+    {
+      "name": "event_hub.inbound",
+      "vhost": "event_hub",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "example",
+      "vhost": "event_hub",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    }
+  ],
+  "exchanges": [
+    {
+      "name": "event_hub.inbound",
+      "vhost": "event_hub",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "example",
+      "vhost": "event_hub",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+  "bindings": [
+    {
+      "source": "event_hub.inbound",
+      "vhost": "event_hub",
+      "destination": "event_hub.inbound",
+      "destination_type": "queue",
+      "routing_key": "",
+      "arguments": {}
+    },
+    {
+      "source": "example",
+      "vhost": "event_hub",
+      "destination": "example",
+      "destination_type": "queue",
+      "routing_key": "",
+      "arguments": {}
+    }
+  ]
+}

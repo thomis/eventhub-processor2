@@ -13,16 +13,15 @@ RSpec.describe Eventhub::Processor2 do
   it 'get configuration file' do
     processor = Eventhub::Processor2.new
     expect(Eventhub::Configuration.config_file).to match(/config\/processor2.json$/)
-
   end
 
-  # it 'starts and stops' do
-  #   processor = Eventhub::Processor2.new
-  #   thr = Thread.new { processor.start }
-  #   sleep 0.5
-  #   processor.stop
-  #   thr.join
-  #   expect(true).to eq(true)
-  # end
+  it 'starts and stops' do
+    processor = Eventhub::Processor2.new
+    thr = Thread.new { processor.start }
+    sleep 0.5
+    processor.stop
+    thr.join
+    expect(true).to eq(true)
+  end
 
 end

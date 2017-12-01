@@ -46,6 +46,11 @@ module Eventhub
       Eventhub.logger.info("#{Configuration.name}: has been stopped")
     end
 
+    def stop
+      # used by rspec
+      @queue_command << :TERM
+    end
+
     def version
       Eventhub::VERSION
     end
