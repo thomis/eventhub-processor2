@@ -7,7 +7,7 @@ module Eventhub
     def start
       @thread = Thread.new do
         loop do
-          Eventhub.logger.info('watchdog')
+          Eventhub.logger.info('Watchdog')
           watch
           sleep Configuration.processor[:watchdog_cycle_in_s]
         end
@@ -27,7 +27,10 @@ module Eventhub
 
       Eventhub::Configuration.processor[:listener_queues].each do |queue_name|
         unless connection.queue_exists?(queue_name)
-          Eventhub.logger.warn("Unable to find queue [#{queue_name}]")
+          Eventhub.logger.warn("Watchdog: Unable to find queue [#{queue_name}]")
+          puts 'before...'
+          Process.kill('USR1')
+          puts 'after...'
         end
       end
 

@@ -16,9 +16,10 @@ require_relative 'worker_listener'
 module Eventhub
   # Processor2 class
   class Processor2
-    SIGNALS_FOR_TERMINATION = [:INT, :TERM, :QUIT]
-    SIGNALS_FOR_RELOAD_CONFIG = [:HUP]
-    ALL_SIGNALS = SIGNALS_FOR_TERMINATION + SIGNALS_FOR_RELOAD_CONFIG
+    SIGNALS_FOR_TERMINATION = ['INT', 'TERM', 'QUIT']
+    SIGNAL_FOR_RELOAD_CONFIG = 'HUP'
+    SIGNAL_FOR_RESTART = 'USR1'
+    ALL_SIGNALS = ['INT', 'TERM', 'QUIT', 'HUP', 'USR1']
 
     def initialize(args = {})
       # Set processor name
@@ -35,7 +36,7 @@ module Eventhub
     end
 
     def start
-      Eventhub.logger.info("#{Configuration.name}: has been started")
+      Eventhub.logger.info("#{Configuration.name} #{version} has been started")
 
       before_start
       Worker.start
@@ -43,7 +44,7 @@ module Eventhub
       Worker.stop
       after_stop
 
-      Eventhub.logger.info("#{Configuration.name}: has been stopped")
+      Eventhub.logger.info("#{Configuration.name} #{version} has been stopped")
     end
 
     def stop
@@ -56,7 +57,7 @@ module Eventhub
     end
 
     def handle_message(message, args = {})
-      raise 'need to be implmented in derived class'
+      raise 'need to be implemented in derived class'
     end
 
     def before_start
@@ -82,10 +83,14 @@ module Eventhub
       loop do
         command = @queue_command.pop
         case
+          when SIGNAL_FOR_RESTART == command
+            Eventhub.logger.info("Command [#{command}] received. Restarting in 15s...")
+            sleep 15
+            Worker.restart
           when SIGNALS_FOR_TERMINATION.include?(command)
             Eventhub.logger.info("Command [#{command}] received")
             break
-          when SIGNALS_FOR_RELOAD_CONFIG.include?(command)
+          when SIGNAL_FOR_RELOAD_CONFIG == command
             Eventhub::Configuration.load!
             Eventhub.logger.info('Configuration file reloaded')
             Worker.restart

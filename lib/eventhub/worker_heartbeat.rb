@@ -7,7 +7,7 @@ module Eventhub
     def start
       @thread = Thread.new do
         loop do
-          Eventhub.logger.info('hearbeat')
+          Eventhub.logger.info('Hearbeat')
           sleep Configuration.processor[:heartbeat_cycle_in_s]
         end
       end
