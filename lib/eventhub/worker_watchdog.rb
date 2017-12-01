@@ -22,7 +22,6 @@ module Eventhub
     private
 
     def watch
-      server = Eventhub::Configuration.server
       connection = Bunny.new(Eventhub::Helper.bunny_connection_properties)
       connection.start
 
@@ -32,6 +31,8 @@ module Eventhub
         end
       end
 
+    rescue Bunny::Exception => ex
+      Eventhub.logger.error("Unexpected exception in watchdog [#{ex.class}]: #{ex}")
     ensure
       connection.close if connection
     end

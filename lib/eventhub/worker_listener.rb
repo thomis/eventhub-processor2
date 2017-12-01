@@ -17,8 +17,12 @@ module Eventhub
     end
 
     def listen
-      @connection = Bunny.new(Eventhub::Helper.bunny_connection_properties)
-      @connection.start
+      begin
+        @connection = Bunny.new(Eventhub::Helper.bunny_connection_properties)
+        @connection.start
+      rescue Bunny::Exception => ex
+        Eventhub.logger.error("Unexpected exception in listener [#{ex.class}]: #{ex}")
+      end
 
       threads = []
       Eventhub::Configuration.processor[:listener_queues].each_with_index do |queue_name, index|
@@ -41,13 +45,13 @@ module Eventhub
                 channel.acknowledge(delivery_info.delivery_tag, false)
                 Eventhub.logger.info("#{queue_name}: [#{delivery_info.delivery_tag}] acknowledged")
               rescue Bunny::Exception => ex
-                Eventhub.logger.error("Unexpected exception [#{ex.class}]: #{ex}")
+                Eventhub.logger.error("Unexpected exception in listener [#{ex.class}]: #{ex}")
               end
             end
 
             queue.subscribe_with(consumer, block: true)
           rescue Bunny::Exception => ex
-            Eventhub.logger.error("Unexpected exception [#{ex.class}]: #{ex}")
+            Eventhub.logger.error("Unexpected exception in listener [#{ex.class}]: #{ex}")
           end
         end
       end

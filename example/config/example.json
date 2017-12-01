@@ -4,7 +4,7 @@
       "user": "guest",
       "password": "guest",
       "host": "localhost",
-      "vhost": "/",
+      "vhost": "event_hub",
       "port": 5672,
       "tls": false
     },
@@ -12,8 +12,8 @@
       "heartbeat_cycle_in_s": 300,
       "watchdog_cycle_in_s": 15,
       "listener_queues": [
-        "example",
-        "example2"
+        "event_hub.inbound",
+        "example"
       ]
     }
   }
