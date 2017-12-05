@@ -3,7 +3,7 @@ require 'simplecov'
 SimpleCov.start
 
 require 'bundler/setup'
-require 'eventhub/processor2'
+require 'eventhub'
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

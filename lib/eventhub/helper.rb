@@ -49,7 +49,7 @@ module EventHub
     # Formats stamp into UTC format
     def now_stamp(now=nil)
       now ||= Time.now
-      now.utc.strftime("%Y-%m-%dT%H:%M:%S.#{now.usec}Z")
+      now.utc.strftime("%Y-%m-%dT%H:%M:%S.%6NZ")
     end
   end
 end
