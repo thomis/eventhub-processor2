@@ -28,6 +28,7 @@ class Publisher
 
       file = File.open("data/#{id}.json", 'w')
       file.write(data)
+      file.close
 
       exchange.publish(data, persistent: true)
 
@@ -37,7 +38,7 @@ class Publisher
         raise 'Published message not confirmed'
       end
 
-      file.close
+
 
       sleep 0.001
       print '.'
