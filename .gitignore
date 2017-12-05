@@ -2,3 +2,4 @@
 coverage
 .rspec_status
 logs
+example/data

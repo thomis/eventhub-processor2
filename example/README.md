@@ -11,9 +11,9 @@
 * Start 1 or more publisher processes ( I did 1)
 * Start one crasher.rb
 
-## What is the goal
+### What is the goal
 * See how the components work under various conditions. Feel free to manually interact (Exp. kill -9 PID)
 * There should be no files left in the data folder when all example messages are consumed
 
-## Note
-* It can happen that a file gets deleted before message is acknowledged. This message will be processed again and will just log a warning about missing file. Due to the nature of 2 independent processes it can not garanteed that both process transaction are all done or not done at all, but with message acknowledgement and and publisher confirms we can mitigate issues in this area.
+### Note
+It can happen that a file gets deleted before message is acknowledged. This message will be processed again and will just log a warning about missing file. Due to the nature of 2 independent processes it can not garanteed that both process transaction are all done or not done at all, but with message acknowledgement and and publisher confirms we can mitigate risk of lost messages.
