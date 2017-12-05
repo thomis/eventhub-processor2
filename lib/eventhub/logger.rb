@@ -1,5 +1,5 @@
-# Eventhub module
-module Eventhub
+# EventHub module
+module EventHub
   def self.logger
     unless @logger
       @logger = ::EventHub::Components::MultiLogger.new

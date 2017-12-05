@@ -1,58 +1,52 @@
-require 'eventhub/components'
-require 'logstash-logger'
-require 'bunny'
-
-require_relative 'version'
-require_relative 'logger'
-require_relative 'helper'
-require_relative 'configuration'
-require_relative 'consumer'
-require_relative 'worker'
-require_relative 'worker_heartbeat'
-require_relative 'worker_watchdog'
-require_relative 'worker_listener'
-
-# Eventhub module
-module Eventhub
+# EventHub module
+module EventHub
   # Processor2 class
   class Processor2
+    include Helper
+
     SIGNALS_FOR_TERMINATION = [:INT, :TERM, :QUIT]
     SIGNALS_FOR_RELOAD_CONFIG = [:HUP]
     ALL_SIGNALS = SIGNALS_FOR_TERMINATION + SIGNALS_FOR_RELOAD_CONFIG
 
+    attr_reader :started_at, :statistics
+
     def initialize(args = {})
       # Set processor name
-      Eventhub::Configuration.name = args[:name] ||
-                                     Eventhub::Helper.get_name_from_class(self)
+      EventHub::Configuration.name = args[:name] ||
+                                     get_name_from_class(self)
 
       # Parse comand line options
-      Eventhub::Configuration.parse_options
+      EventHub::Configuration.parse_options
 
       # Load configuration file
-      Eventhub::Configuration.load!(args)
+      EventHub::Configuration.load!(args)
 
-      @queue_command = []
+      @command_queue = []
+
+      @started_at = Time.now
+      @statistics = EventHub::Statistics.new
     end
 
     def start
-      Eventhub.logger.info("#{Configuration.name}: has been started")
+      EventHub.logger.info("#{Configuration.name} (#{version}): has been started")
 
       before_start
-      Worker.start
       main_event_loop
-      Worker.stop
       after_stop
 
-      Eventhub.logger.info("#{Configuration.name}: has been stopped")
+      EventHub.logger.info("#{Configuration.name} (#{version}): has been stopped")
+
+    rescue => ex
+      EventHub.logger.error("Unexpected error in Processor2.start: #{ex}")
     end
 
     def stop
       # used by rspec
-      @queue_command << :TERM
+      @command_queue << :TERM
     end
 
     def version
-      Eventhub::VERSION
+      EventHub::VERSION
     end
 
     def handle_message(message, args = {})
@@ -73,26 +67,44 @@ module Eventhub
       # have a re-entrant signal handler by just using a simple array
       # https://www.sitepoint.com/the-self-pipe-trick-explained/
       ALL_SIGNALS.each do |signal|
-        Signal.trap(signal) { @queue_command << signal }
+        Signal.trap(signal) { @command_queue << signal }
       end
+    end
+
+    def start_supervisor
+      @config = Celluloid::Supervision::Configuration.define([
+        {type: ActorHeartbeat, as: :actor_heartbeat, args: [ self ]},
+        {type: ActorListener, as: :actor_listener, args: [ self ]}
+      ])
+
+      @config.injection!(:before_restart, proc do
+        EventHub.logger.info('Restarting in 10 seconds...')
+        sleep 10
+      end )
+
+      @config.deploy
     end
 
     def main_event_loop
       setup_signal_handler
+      start_supervisor
+
       loop do
-        command = @queue_command.pop
+        command = @command_queue.pop
         case
           when SIGNALS_FOR_TERMINATION.include?(command)
-            Eventhub.logger.info("Command [#{command}] received")
+            EventHub.logger.info("Command [#{command}] received")
             break
           when SIGNALS_FOR_RELOAD_CONFIG.include?(command)
-            Eventhub::Configuration.load!
-            Eventhub.logger.info('Configuration file reloaded')
-            Worker.restart
+            EventHub::Configuration.load!
+            EventHub.logger.info('Configuration file reloaded')
+            Celluloid::Actor[:actor_listener].async.restart
           else
             sleep 0.5
         end
       end
+
+      Celluloid.shutdown
     end
   end
 end

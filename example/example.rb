@@ -1,10 +1,20 @@
-require_relative '../lib/eventhub/processor2'
+require_relative '../lib/eventhub'
 
-module Eventhub
+module EventHub
   # Demo class
-  class Example < Eventhub::Processor2
+  class Example < Processor2
     def handle_message(message, args)
-      # your code here.....
+
+      id = message.body['id']
+      name = "data/#{id}.json"
+
+      begin
+        File.delete(name)
+      rescue => ex
+        EventHub.logger.warn("File [#{name}]: #{ex}")
+      end
+
+      return { body: { id: id, message: 'has been done' }}
     end
 
     def version
@@ -13,11 +23,4 @@ module Eventhub
   end
 end
 
-Eventhub::Example.new.start
-
-
-# connection =Bunny.new(port: 32777)
-# connection.start
-# channel = connection.create_channel
-# channel.queue("example", :durable => true, :auto_delete => false)
-# connection.close
+EventHub::Example.new.start

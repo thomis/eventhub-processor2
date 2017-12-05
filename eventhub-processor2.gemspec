@@ -6,7 +6,7 @@ note = 'Next generation gem to build ruby based eventhub processor'
 
 Gem::Specification.new do |spec|
   spec.name          = 'eventhub-processor2'
-  spec.version       = Eventhub::VERSION
+  spec.version       = EventHub::VERSION
   spec.authors       = ['Steiner, Thomas']
   spec.email         = ['thomas.steiner@ikey.ch']
 
@@ -22,8 +22,10 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ['lib']
 
+  spec.add_dependency 'celluloid', '~> 0.17'
   spec.add_dependency 'bunny', '~> 2.7'
   spec.add_dependency 'eventhub-components', '~> 0.2'
+  spec.add_dependency 'uuidtools', '~> 2.1'
 
   spec.add_development_dependency 'bundler', '~> 1.16'
   spec.add_development_dependency 'rake', '~> 12.2'

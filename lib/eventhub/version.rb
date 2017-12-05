@@ -1,3 +1,3 @@
-module Eventhub
+module EventHub
   VERSION = '1.0.0'.freeze
 end

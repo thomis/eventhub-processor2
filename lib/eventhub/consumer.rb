@@ -1,10 +1,10 @@
-# Eventhub module
-module Eventhub
+# EventHub module
+module EventHub
   # Heartbeat class
   class Consumer < Bunny::Consumer
 
     def handle_cancellation(_)
-      Eventhub.logger.error("Consumer reports cancellation")
+      EventHub.logger.error("Consumer reports cancellation")
     end
 
   end

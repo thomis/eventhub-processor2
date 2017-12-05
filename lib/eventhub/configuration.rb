@@ -1,5 +1,5 @@
-# Eventhub module
-module Eventhub
+# EventHub module
+module EventHub
   # Configuraiton module
   module Configuration
     # it's a singleton (don't allow to instantiate this class)
@@ -52,10 +52,10 @@ module Eventhub
 
       true
     rescue OptionParser::InvalidOption => e
-      Eventhub.logger.warn("Argument Parsing: #{e}")
+      EventHub.logger.warn("Argument Parsing: #{e}")
       false
     rescue OptionParser::MissingArgument => e
-      Eventhub.logger.warn("Argument Parsing: #{e}")
+      EventHub.logger.warn("Argument Parsing: #{e}")
       false
     end
 
@@ -69,8 +69,8 @@ module Eventhub
       begin
         new_data = JSON.parse(File.read(@config_file), symbolize_names: true)
       rescue => e
-        Eventhub.logger.warn("Exception while loading configuration file: #{e}")
-        Eventhub.logger.info('Using default configuration values')
+        EventHub.logger.warn("Exception while loading configuration file: #{e}")
+        EventHub.logger.info('Using default configuration values')
       end
 
       deep_merge!(@config_data, default_configuration)
