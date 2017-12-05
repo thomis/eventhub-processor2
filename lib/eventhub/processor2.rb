@@ -35,7 +35,6 @@ module EventHub
       after_stop
 
       EventHub.logger.info("#{Configuration.name} (#{version}): has been stopped")
-
     rescue => ex
       EventHub.logger.error("Unexpected error in Processor2.start: #{ex}")
     end
@@ -92,10 +91,6 @@ module EventHub
       loop do
         command = @command_queue.pop
         case
-          when SIGNAL_FOR_RESTART == command
-            Eventhub.logger.info("Command [#{command}] received. Restarting in 15s...")
-            sleep 15
-            Worker.restart
           when SIGNALS_FOR_TERMINATION.include?(command)
             EventHub.logger.info("Command [#{command}] received")
             break
