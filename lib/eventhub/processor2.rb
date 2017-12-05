@@ -50,7 +50,7 @@ module EventHub
     end
 
     def handle_message(message, args = {})
-      raise 'need to be implmented in derived class'
+      raise 'need to be implemented in derived class'
     end
 
     def before_start
@@ -92,6 +92,10 @@ module EventHub
       loop do
         command = @command_queue.pop
         case
+          when SIGNAL_FOR_RESTART == command
+            Eventhub.logger.info("Command [#{command}] received. Restarting in 15s...")
+            sleep 15
+            Worker.restart
           when SIGNALS_FOR_TERMINATION.include?(command)
             EventHub.logger.info("Command [#{command}] received")
             break
