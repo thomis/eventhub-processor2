@@ -1,8 +1,8 @@
 ## Example Application
 
 ### Components
-* example.rb is listening to the example queue, reads id from message and deletes file with id in data folder
-* publisher.rb - creates a file with name id (guid) and publishes a messages to example exchange
+* example.rb - is listening to the example queue, reads id from message and deletes file with id in data folder
+* publisher.rb - creates a file with name id.json (id=guid) and publishes a json messages with id as content to the example exchange
 * crasher.rb - randomly restarts example processes or docker container (processor-rabbitmq)
 
 ### How to use
@@ -12,7 +12,7 @@
 * Start one crasher.rb
 
 ## What is the goal
-* See how the components work under various conditions
+* See how the components work under various conditions. Feel free to manually interact (Exp. kill -9 PID)
 * There should be no files left in the data folder when all example messages are consumed
 
 ## Note
