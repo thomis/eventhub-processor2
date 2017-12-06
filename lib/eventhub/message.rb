@@ -1,5 +1,6 @@
+# EventHub module
 module EventHub
-
+  # Message class
   class Message
     include Helper
 
@@ -135,19 +136,7 @@ module EventHub
     end
 
     def self.translate_status_code(code)
-      case code
-        when EventHub::STATUS_INITIAL            then return 'STATUS_INITIAL'
-        when EventHub::STATUS_SUCCESS            then return 'STATUS_SUCCESS'
-        when EventHub::STATUS_RETRY              then return 'STATUS_RETRY'
-        when EventHub::STATUS_RETRY_PENDING      then return 'STATUS_RETRY_PENDING'
-        when EventHub::STATUS_INVALID            then return 'STATUS_INVALID'
-        when EventHub::STATUS_DEADLETTER         then return 'STATUS_DEADLETTER'
-        when EventHub::STATUS_SCHEDULE           then return 'STATUS_SCHEDULE'
-        when EventHub::STATUS_SCHEDULE_RETRY     then return 'STATUS_SCHEDULE_RETRY'
-        when EventHub::STATUS_SCHEDULE_PENDING   then return 'STATUS_SCHEDULE_PENDING'
-      end
+      STATUS_CODE_TRANSLATION[code]
     end
-
   end
-
 end

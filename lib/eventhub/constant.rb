@@ -20,4 +20,16 @@ module EventHub
   STATUS_SCHEDULE          = 600       # To be set to trigger scheduler based on schedule block, proceses next process step
   STATUS_SCHEDULE_RETRY    = 601       # To be set to trigger scheduler based on schedule block, retry actual process step
   STATUS_SCHEDULE_PENDING  = 602       # Set and used by the dispatcher only. Set before putting the scheduled message to the schedule queue.
+
+  STATUS_CODE_TRANSLATION = {
+    STATUS_INITIAL => 'STATUS_INITIAL',
+    STATUS_SUCCESS => 'STATUS_SUCCESS',
+    STATUS_RETRY => 'STATUS_RETRY',
+    STATUS_RETRY_PENDING => 'STATUS_RETRY_PENDING',
+    STATUS_INVALID => 'STATUS_INVALID',
+    STATUS_DEADLETTER => 'STATUS_DEADLETTER',
+    STATUS_SCHEDULE => 'STATUS_SCHEDULE',
+    STATUS_SCHEDULE_RETRY => 'STATUS_SCHEDULE_RETRY',
+    STATUS_SCHEDULE_PENDING =>'STATUS_SCHEDULE_PENDING',
+  }
 end
