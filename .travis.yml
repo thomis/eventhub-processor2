@@ -1,12 +1,23 @@
+sudo: required
+
 language: ruby
+
+services:
+  - docker
+
 os:
   - linux
   - osx
+
 osx_image: xcode9.1
+
 rvm:
   - 2.4.2
   - 2.4.1
   - 2.3.1
   - 2.1.5
+
 before_install:
+  - cd docker && docker build -t processor-rabbitmq .
+  - docker run -d -p 5672:5672 -p 15672:15672 --name processor-rabbitmq processor-rabbitmq
   - gem install bundler --version '~> 1.16.0'
