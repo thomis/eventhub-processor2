@@ -3,8 +3,7 @@ require_relative '../lib/eventhub'
 module EventHub
   # Demo class
   class Example < Processor2
-    def handle_message(message, args)
-
+    def handle_message(message, _args)
       id = message.body['id']
       name = "data/#{id}.json"
 
@@ -14,7 +13,7 @@ module EventHub
         EventHub.logger.warn("File [#{name}]: #{ex}")
       end
 
-      return { body: { id: id, message: 'has been done' }}
+      { body: { id: id, message: 'has been done' }}
     end
 
     def version
