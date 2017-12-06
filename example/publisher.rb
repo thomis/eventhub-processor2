@@ -15,13 +15,9 @@ class Publisher
   end
 
   def start
-    connection = Bunny.new(vhost: 'event_hub',
-                           automatic_recovery: false,
-                           logger: Logger.new('/dev/null'))
-    connection.start
+    connection = connect
     channel = connection.create_channel
     channel.confirm_select
-
     exchange = channel.direct('example', durable: true)
 
     count = 1
@@ -33,12 +29,19 @@ class Publisher
       puts '' if (count % 80).zero?
       count += 1
     end
-
   ensure
     connection.close if connection
   end
 
   private
+
+  def connect
+    connection = Bunny.new(vhost: 'event_hub',
+                           automatic_recovery: false,
+                           logger: Logger.new('/dev/null'))
+    connection.start
+    connection
+  end
 
   def do_the_work(exchange, channel)
     id = SecureRandom.uuid
