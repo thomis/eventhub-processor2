@@ -1,5 +1,6 @@
 require 'uuidtools'
 require 'json'
+require 'base64'
 
 require 'eventhub/components'
 require 'logstash-logger'

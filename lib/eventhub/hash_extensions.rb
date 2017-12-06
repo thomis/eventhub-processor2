@@ -9,8 +9,6 @@ module HashExtensions
     def get(arg)
       path = arg.is_a?(String) ? arg.split('.') : arg
       path.inject(self,:[])
-    rescue NoMethodError
-      return nil
     end
 
     # set value from provided key path, e.h. hash.set('a.b.c','new value')
