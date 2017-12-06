@@ -13,7 +13,7 @@ module EventHub
         EventHub.logger.warn("File [#{name}]: #{ex}")
       end
 
-      { body: { id: id, message: 'has been done' }}
+      { body: { id: id, message: 'has been done'}}
     end
 
     def version

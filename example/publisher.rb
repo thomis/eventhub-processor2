@@ -6,6 +6,7 @@ require 'securerandom'
 Celluloid.logger = nil
 Celluloid.exception_handler { |ex| puts "Exception occured: #{ex}" }
 
+# Publisher
 class Publisher
   include Celluloid
 
@@ -14,7 +15,9 @@ class Publisher
   end
 
   def start
-    connection = Bunny.new(vhost: 'event_hub', :automatic_recovery => false, logger: Logger.new('/dev/null'))
+    connection = Bunny.new(vhost: 'event_hub',
+                           automatic_recovery: false,
+                           logger: Logger.new('/dev/null'))
     connection.start
     channel = connection.create_channel
     channel.confirm_select
@@ -34,11 +37,7 @@ class Publisher
 
       success = channel.wait_for_confirms
 
-      if !success
-        raise 'Published message not confirmed'
-      end
-
-
+      raise 'Published message not confirmed' unless success
 
       sleep 0.001
       print '.'
@@ -49,12 +48,10 @@ class Publisher
   ensure
     connection.close if connection
   end
-
 end
 
-
+# Application
 class Application
-
   def initialize
     @run = true
     @config = Celluloid::Supervision::Configuration.define([
@@ -65,7 +62,6 @@ class Application
       puts 'Restarting in 5 seconds...'
       sleep 5
     end )
-
   end
 
   def start
@@ -88,7 +84,6 @@ class Application
   def cleanup
     Celluloid.shutdown
   end
-
 end
 
 Application.new.start
