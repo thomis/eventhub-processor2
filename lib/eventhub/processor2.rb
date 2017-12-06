@@ -48,7 +48,7 @@ module EventHub
       EventHub::VERSION
     end
 
-    def handle_message(message, args = {})
+    def handle_message(_message, _args = {})
       raise 'need to be implemented in derived class'
     end
 
