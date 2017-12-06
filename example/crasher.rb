@@ -43,7 +43,7 @@ run = true
 Signal.trap('INT') { run = false }
 
 while run do
-  to_sleep = rand(120)
+  to_sleep = rand(3600)
   puts "Waiting [#{to_sleep}]..."
   sleep to_sleep
   items.sample.restart

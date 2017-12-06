@@ -104,6 +104,10 @@ module EventHub
       end
 
       Celluloid.shutdown
+      # make sure all actors are gone
+      while Celluloid.running?
+        sleep 0.1
+      end
     end
   end
 end

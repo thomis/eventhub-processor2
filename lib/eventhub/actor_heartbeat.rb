@@ -13,6 +13,9 @@ module EventHub
 
     def start
       EventHub.logger.info('Heartbeat is starting...')
+
+      every(60) { EventHub.logger.info("Running actors: #{Celluloid::Actor.all.size}: #{Celluloid::Actor.all.map{ |a| a.class }.join(', ')}") }
+
       publish(heartbeat(action: 'started'))
       loop do
         sleep Configuration.processor[:heartbeat_cycle_in_s]
