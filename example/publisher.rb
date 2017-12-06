@@ -41,7 +41,7 @@ class Publisher
 
       sleep 0.001
       print '.'
-      puts '' if (count % 80) == 0
+      puts '' if (count % 80).zero?
       count += 1
     end
 
@@ -54,14 +54,16 @@ end
 class Application
   def initialize
     @run = true
-    @config = Celluloid::Supervision::Configuration.define([
-      {type: Publisher, as: :publisher}
-    ])
+    @config = Celluloid::Supervision::Configuration.define(
+      [
+        { type: Publisher, as: :publisher }
+      ]
+    )
 
     @config.injection!(:before_restart, proc do
       puts 'Restarting in 5 seconds...'
       sleep 5
-    end )
+    end)
   end
 
   def start
@@ -76,9 +78,7 @@ class Application
 
   def main_event_loop
     Signal.trap(:INT) { @run = false }
-    while @run
-      sleep 0.5
-    end
+    sleep 0.5 while @run
   end
 
   def cleanup
