@@ -75,35 +75,35 @@ module EventHub
     end
 
     def success?
-      self.status_code == STATUS_SUCCESS
+      status_code == STATUS_SUCCESS
     end
 
     def retry?
-      self.status_code == STATUS_RETRY
+      status_code == STATUS_RETRY
     end
 
     def initial?
-      self.status_code == STATUS_INITIAL
+      status_code == STATUS_INITIAL
     end
 
     def retry_pending?
-      self.status_code == STATUS_RETRY_PENDING
+      status_code == STATUS_RETRY_PENDING
     end
 
     def invalid?
-      self.status_code == STATUS_INVALID
+      status_code == STATUS_INVALID
     end
 
     def schedule?
-      self.status_code == STATUS_SCHEDULE
+      status_code == STATUS_SCHEDULE
     end
 
     def schedule_retry?
-      self.status_code == STATUS_SCHEDULE_RETRY
+      status_code == STATUS_SCHEDULE_RETRY
     end
 
     def schedule_pending?
-      self.status_code == STATUS_SCHEDULE_PENDING
+      status_code == STATUS_SCHEDULE_PENDING
     end
 
     def to_json
@@ -111,7 +111,7 @@ module EventHub
     end
 
     def to_s
-      "Msg: process [#{self.process_name},#{self.process_step_position},#{self.process_execution_id}], status [#{self.status_code},#{self.status_message},#{self.status_retried_count}]"
+      "Msg: process [#{process_name},#{process_step_position},#{process_execution_id}], status [#{status_code},#{status_message},#{status_retried_count}]"
     end
 
     # copies the message and set's provided status code (default: success), actual stamp, and a new message id
@@ -121,9 +121,9 @@ module EventHub
       copied_header = Marshal.load( Marshal.dump(header))
       copied_body   = Marshal.load( Marshal.dump(body))
 
-      copied_header.set("message_id",UUIDTools::UUID.timestamp_create.to_s)
-      copied_header.set("created_at",now_stamp)
-      copied_header.set("status.code",status_code)
+      copied_header.set('message_id', UUIDTools::UUID.timestamp_create.to_s)
+      copied_header.set('created_at', now_stamp)
+      copied_header.set('status.code', status_code)
 
       Message.new(copied_header, copied_body)
     end
