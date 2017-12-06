@@ -26,18 +26,7 @@ class Publisher
 
     count = 1
     loop do
-      id = SecureRandom.uuid
-      data = { body: { id: id } }.to_json
-
-      file = File.open("data/#{id}.json", 'w')
-      file.write(data)
-      file.close
-
-      exchange.publish(data, persistent: true)
-
-      success = channel.wait_for_confirms
-
-      raise 'Published message not confirmed' unless success
+      do_the_work(exchange, channel)
 
       sleep 0.001
       print '.'
@@ -47,6 +36,22 @@ class Publisher
 
   ensure
     connection.close if connection
+  end
+
+  private
+
+  def do_the_work(exchange, channel)
+    id = SecureRandom.uuid
+    data = { body: { id: id } }.to_json
+
+    file = File.open("data/#{id}.json", 'w')
+    file.write(data)
+    file.close
+
+    exchange.publish(data, persistent: true)
+    success = channel.wait_for_confirms
+
+    raise 'Published message not confirmed' unless success
   end
 end
 
