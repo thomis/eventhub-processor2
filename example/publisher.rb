@@ -15,14 +15,10 @@ class Publisher
   end
 
   def start
-    connection = connect
-    channel = connection.create_channel
-    channel.confirm_select
-    exchange = channel.direct('example', durable: true)
-
+    connect
     count = 1
     loop do
-      do_the_work(exchange, channel)
+      do_the_work
 
       sleep 0.001
       print '.'
@@ -30,20 +26,22 @@ class Publisher
       count += 1
     end
   ensure
-    connection.close if connection
+    @connection.close if @connection
   end
 
   private
 
   def connect
-    connection = Bunny.new(vhost: 'event_hub',
-                           automatic_recovery: false,
-                           logger: Logger.new('/dev/null'))
-    connection.start
-    connection
+    @connection = Bunny.new(vhost: 'event_hub',
+                            automatic_recovery: false,
+                            logger: Logger.new('/dev/null'))
+    @connection.start
+    @channel = @connection.create_channel
+    @channel.confirm_select
+    @exchange = @channel.direct('example', durable: true)
   end
 
-  def do_the_work(exchange, channel)
+  def do_the_work
     id = SecureRandom.uuid
     data = { body: { id: id } }.to_json
 
@@ -51,8 +49,8 @@ class Publisher
     file.write(data)
     file.close
 
-    exchange.publish(data, persistent: true)
-    success = channel.wait_for_confirms
+    @exchange.publish(data, persistent: true)
+    success = @channel.wait_for_confirms
 
     raise 'Published message not confirmed' unless success
   end
