@@ -3,19 +3,34 @@ sudo: required
 language: ruby
 
 services:
-  - docker
+- docker
 
 os:
-  - linux
+- linux
 
 rvm:
-  - 2.4.2
-  - 2.4.1
-  - 2.3.1
-  - 2.1.5
+- 2.4.2
+- 2.4.1
+- 2.3.1
+- 2.1.5
+
+env:
+  - secure: R0rBtWClmnJKO+zyAncF6+1qDpZ6JQR+Z6VXzUmWw8MuxUXv732XTNYulY/tTeDW876GofAsOF9QfX/jhF+2ubV8SzM6rKTZS09feATuOWRPtECEaBOPcb0JGYouBNg/Lv4onuXb8KS/9U093sRqiJMfib82iY7QK9bnDPsYoQXtMnI7KBeQNrTV0H4nby3lvbjcpMDhmyg+anOmCP5yepZeS53Qq+C5GHguYivisvhSPmCfONrT303XxFLDo/aOkMDlceeZBDhtcpm5Px3GIwybSI9xRtAnpT73oL1Piazda6mRN7VHoT7YAHKqcJNZDB48HYuTj3Pt3oVVw0v78Cf25caBqXttXflXfB8U3qfVt+94uF0icH34NAnpW9l1B8GXHi6CTr27Hg2ZatWkQCN1rCpcCaW0eM/NoAG6snwTIwr1VvjLWpSW5wwhQgHPyMl+MRlTmCn/UM+eQSwPVhflKpMS1+ah6cbhDrQQF1jDt3dRaLqSnVE4APrafdT90SA3SCG2MGOE+pp+DX528gEsRB34UdX2V67dlwXeRu1eU5vZBR7jZrqwuwTAgSvxEF0eJWC0kgvEfouzuVHhVmmSAcNNHlg2kd0/oyQELyXTsklJghwAupcy4X/GEAyfLW9GAxItjATyV7XyfjmaBmdzHl/5JWeXicoyZ/4+8iE=
 
 before_install:
-  - cd docker && docker build -t processor-rabbitmq .
-  - docker run -d -p 5672:5672 -p 15672:15672 --name processor-rabbitmq processor-rabbitmq
-  - cd ..
-  - gem install bundler --version '~> 1.16.0'
+- cd docker && docker build -t processor-rabbitmq .
+- docker run -d -p 5672:5672 -p 15672:15672 --name processor-rabbitmq processor-rabbitmq
+- cd ..
+- curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64
+  > ./cc-test-reporter
+- chmod +x ./cc-test-reporter
+- gem install bundler --version '~> 1.16.0'
+
+before_script:
+- "./cc-test-reporter before-build"
+
+script:
+- bundle exec rspec
+
+after_script:
+- "./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT"
