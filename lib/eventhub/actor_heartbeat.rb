@@ -14,7 +14,7 @@ module EventHub
     def start
       EventHub.logger.info('Heartbeat is starting...')
 
-      every(60) { EventHub.logger.info("Running actors: #{Celluloid::Actor.all.size}: #{Celluloid::Actor.all.map{ |a| a.class }.join(', ')}") }
+      every(60) { EventHub.logger.info("Running actors: #{ Celluloid::Actor.all.size }: #{Celluloid::Actor.all.map{ |a| a.class }.join(', ') }") }
 
       publish(heartbeat(action: 'started'))
       loop do
@@ -40,13 +40,15 @@ module EventHub
       exchange.publish(message, persistent: true)
       success = channel.wait_for_confirms
 
-      raise 'Published heartbeat message '\
-        'has not been confirmed by the server' unless success
+      unless success
+        raise 'Published heartbeat message has '\
+          'not been confirmed by the server'
+      end
     ensure
       connection.close if connection
     end
 
-    def heartbeat(args = {action: 'running'})
+    def heartbeat(args = { action: 'running' })
       message = EventHub::Message.new
       message.origin_module_id  = EventHub::Configuration.name
       message.origin_type       = 'processor'
@@ -65,7 +67,7 @@ module EventHub
         heartbeat: {
           started: now_stamp(started_at),
           stamp_last_beat: now_stamp(now),
-          uptime_in_ms: (now - started_at)*1000,
+          uptime_in_ms: (now - started_at) * 1000,
           heartbeat_cycle_in_ms: Configuration.processor[:heartbeat_cycle_in_s] * 1000,
           queues_consuming_from: EventHub::Configuration.processor[:listener_queues],
           queues_publishing_to: [EventHub::EH_X_INBOUND], # needs more dynamic in the future
@@ -76,8 +78,8 @@ module EventHub
             successful: statistics.messages_successful,
             unsuccessful: statistics.messages_unsuccessful,
             average_size: statistics.messages_average_size,
-            average_process_time_in_ms: statistics.messages_average_process_time*1000,
-            total_process_time_in_ms: statistics.messages_total_process_time*1000
+            average_process_time_in_ms: statistics.messages_average_process_time * 1000,
+            total_process_time_in_ms: statistics.messages_total_process_time * 1000
           }
         }
       }
