@@ -26,7 +26,7 @@ module EventHub
 
     # Build accessors for all required headers
     REQUIRED_HEADERS.each do |header|
-      name = header.gsub(/\./,"_")
+      name = header.tr('.','_')
 
       define_method(name) do
         self.header.get(header)
@@ -41,11 +41,22 @@ module EventHub
       data = JSON.parse(raw)
       Message.new(data.get('header'), data.get('body'),raw)
     rescue => e
-      Message.new({ "status" =>  { "code" => STATUS_INVALID, "message" => "JSON parse error: #{e}" }} ,{ "original_message_base64_encoded" => Base64.encode64(raw)},raw)
+      Message.new(
+        {
+          'status' =>
+          {
+            'code' => STATUS_INVALID,
+            'message' => "JSON parse error: #{e}"
+          }
+        },
+        {
+          'original_message_base64_encoded' => Base64.encode64(raw)
+        },
+        raw
+      )
     end
 
     def initialize(header = nil, body = nil, raw = nil)
-
       @header = header || {}
       @body   = body || {}
       @raw    = raw
@@ -66,12 +77,14 @@ module EventHub
       @header.set('status.retried_count', 0, false)
       @header.set('status.code', STATUS_INITIAL, false)
       @header.set('status.message', '', false)
-
     end
 
     def valid?
       # check for existence and defined value
-      REQUIRED_HEADERS.all? { |key| @header.all_keys_with_path.include?(key) && !!self.send(key.gsub(/\./,"_").to_sym)}
+      REQUIRED_HEADERS.all? do |key|
+        @header.all_keys_with_path.include?(key) &&
+        !self.send(key.tr('.','_').to_sym).nil?
+      end
     end
 
     def success?
@@ -111,12 +124,13 @@ module EventHub
     end
 
     def to_s
-      "Msg: process [#{process_name},#{process_step_position},#{process_execution_id}], status [#{status_code},#{status_message},#{status_retried_count}]"
+      "Msg: process "\
+        "[#{process_name}, #{process_step_position}, #{process_execution_id}]"\
+        ", status [#{status_code},#{status_message},#{status_retried_count}]"
     end
 
     # copies the message and set's provided status code (default: success), actual stamp, and a new message id
     def copy(status_code = STATUS_SUCCESS)
-
       # use Marshal dump and load to make a deep object copy
       copied_header = Marshal.load( Marshal.dump(header))
       copied_body   = Marshal.load( Marshal.dump(body))
@@ -129,10 +143,10 @@ module EventHub
     end
 
     def append_to_execution_history(processor_name)
-      unless header.get('execution_history')
-        header.set('execution_history', [])
-      end
-      header.get('execution_history') << {'processor' => processor_name, 'timestamp' => now_stamp}
+      header.set('execution_history', []) unless \
+        header.get('execution_history')
+      header.get('execution_history') << \
+        {'processor' => processor_name, 'timestamp' => now_stamp}
     end
 
     def self.translate_status_code(code)
