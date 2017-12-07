@@ -42,11 +42,32 @@ module EventHub
 
       EventHub.logger.info("Listening to queue [#{queue_name}]")
       consumer.on_delivery do |delivery_info, metadata, payload|
+        response_messages = []
         EventHub.logger.info("#{queue_name}: [#{delivery_info.delivery_tag}] delivery")
 
         @processor_instance.statistics.measure(payload.size) do
+
+          # convert to EventHub message
           message = EventHub::Message.from_json(payload)
-          response_messages = @processor_instance.send(:handle_message, message, {})
+
+          # append to execution history
+          message.append_to_execution_history(EventHub::Configuration.name)
+
+          # just return invalid messages
+          if message.invalid?
+            response_messages << message
+            EventHub.logger.info("-> #{message.to_s} => Put to queue [#{EventHub::EH_X_INBOUND}].")
+          else
+            begin
+              response_messages = @processor_instance.send(:handle_message, message, { queue_name: queue_name })
+            rescue => exception
+              # this catches unexpected exceptions in handle message method
+              # deadletter the message via dispatcher
+              message.status_code = EventHub::STATUS_DEADLETTER
+              message.status_message = exception
+              response_messages << message
+            end
+          end
 
           Array(response_messages).each do |message|
             publish(connection, message.to_json)
@@ -76,7 +97,7 @@ module EventHub
 
     def cleanup
       EventHub.logger.info('Listener is cleanig up...')
-
+      # close all open connections
       @connections.values.each do |connection|
         connection.close if connection
       end
