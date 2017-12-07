@@ -39,9 +39,9 @@ module EventHub
       exchange = channel.direct(EventHub::EH_X_INBOUND, durable: true)
       exchange.publish(message, persistent: true)
       success = channel.wait_for_confirms
-      if !success
-        raise 'Published heartbeat message has not been confirmed by the server'
-      end
+
+      raise 'Published heartbeat message '\
+        'has not been confirmed by the server' unless success
     ensure
       connection.close if connection
     end
@@ -62,23 +62,22 @@ module EventHub
         action:  args[:action],
         pid:     Process.pid,
         process_name: 'event_hub.heartbeat',
-
         heartbeat: {
-          started:                      now_stamp(started_at),
-          stamp_last_beat:              now_stamp(now),
-          uptime_in_ms:                 (now - started_at)*1000,
-          heartbeat_cycle_in_ms:        Configuration.processor[:heartbeat_cycle_in_s] * 1000,
-          queues_consuming_from:        EventHub::Configuration.processor[:listener_queues],
-          queues_publishing_to:         [EventHub::EH_X_INBOUND], # needs more dynamic in the future
-          host:                         Socket.gethostname,
-          addresses:                    addresses,
+          started: now_stamp(started_at),
+          stamp_last_beat: now_stamp(now),
+          uptime_in_ms: (now - started_at)*1000,
+          heartbeat_cycle_in_ms: Configuration.processor[:heartbeat_cycle_in_s] * 1000,
+          queues_consuming_from: EventHub::Configuration.processor[:listener_queues],
+          queues_publishing_to: [EventHub::EH_X_INBOUND], # needs more dynamic in the future
+          host: Socket.gethostname,
+          addresses: addresses,
           messages: {
-            total:                      statistics.messages_total,
-            successful:                 statistics.messages_successful,
-            unsuccessful:               statistics.messages_unsuccessful,
-            average_size:               statistics.messages_average_size,
+            total: statistics.messages_total,
+            successful: statistics.messages_successful,
+            unsuccessful: statistics.messages_unsuccessful,
+            average_size: statistics.messages_average_size,
             average_process_time_in_ms: statistics.messages_average_process_time*1000,
-            total_process_time_in_ms:   statistics.messages_total_process_time*1000
+            total_process_time_in_ms: statistics.messages_total_process_time*1000
           }
         }
       }
@@ -101,9 +100,9 @@ module EventHub
       interfaces.map do |interface|
         begin
           {
-            :interface => interface.name,
-            :host_name => Socket.gethostname,
-            :ip_address => interface.addr.ip_address
+            interface: interface.name,
+            host_name: Socket.gethostname,
+            ip_address: interface.addr.ip_address
           }
         rescue
           nil # will be ignored
