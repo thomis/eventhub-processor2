@@ -73,14 +73,7 @@ module EventHub
           queues_publishing_to: [EventHub::EH_X_INBOUND], # needs more dynamic in the future
           host: Socket.gethostname,
           addresses: addresses,
-          messages: {
-            total: statistics.messages_total,
-            successful: statistics.messages_successful,
-            unsuccessful: statistics.messages_unsuccessful,
-            average_size: statistics.messages_average_size,
-            average_process_time_in_ms: statistics.messages_average_process_time * 1000,
-            total_process_time_in_ms: statistics.messages_total_process_time * 1000
-          }
+          messages: messages_statistics
         }
       }
       message.to_json
@@ -110,6 +103,19 @@ module EventHub
           nil # will be ignored
         end
       end.compact
+    end
+
+    def messages_statistics
+      {
+        total: statistics.messages_total,
+        successful: statistics.messages_successful,
+        unsuccessful: statistics.messages_unsuccessful,
+        average_size: statistics.messages_average_size,
+        average_process_time_in_ms:
+          statistics.messages_average_process_time * 1000,
+        total_process_time_in_ms:
+          statistics.messages_total_process_time * 1000
+      }
     end
   end
 end
