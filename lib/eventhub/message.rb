@@ -71,7 +71,8 @@ module EventHub
       @header.set('origin.site_id', 'undefined', false)
 
       @header.set('process.name', 'undefined', false)
-      @header.set('process.execution_id', UUIDTools::UUID.timestamp_create.to_s, false)
+      @header.set('process.execution_id',
+                  UUIDTools::UUID.timestamp_create.to_s, false)
       @header.set('process.step_position', 0, false)
 
       @header.set('status.retried_count', 0, false)
@@ -129,7 +130,8 @@ module EventHub
         ", status [#{status_code},#{status_message},#{status_retried_count}]"
     end
 
-    # copies the message and set's provided status code (default: success), actual stamp, and a new message id
+    # copies the message and set's provided status code (default: success),
+    # actual stamp, and a new message id
     def copy(status_code = STATUS_SUCCESS)
       # use Marshal dump and load to make a deep object copy
       copied_header = Marshal.load(Marshal.dump(header))
