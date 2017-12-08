@@ -1,4 +1,5 @@
 class MyProcess
+  attr_reader :id
   def initialize(id)
     @id = id
   end
@@ -6,6 +7,7 @@ class MyProcess
   def restart
     puts "Sending Signal HUP to process [#{@id}]"
     Process.kill('HUP', @id)
+  rescue Errno::ESRCH
   end
 
   def self.all
@@ -14,6 +16,8 @@ class MyProcess
     data.lines[0..-2].each do |line|
       processes << MyProcess.new(line.split(' ')[0].to_i)
     end
+
+    puts "Found ids: #{processes.map{ |pr| pr.id}.join(', ')}"
     processes
   end
 end
