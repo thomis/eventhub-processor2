@@ -7,8 +7,7 @@ RSpec.describe EventHub::ActorListener do
   end
 
   it 'gives a valid actor' do
-    @listener = EventHub::ActorListener.new(EventHub::Processor2.new)
-    expect(@listener.class).to eq(EventHub::ActorListener)
+    expect(@listener).not_to eq(nil)
   end
 
   it 'handles with_publish' do
