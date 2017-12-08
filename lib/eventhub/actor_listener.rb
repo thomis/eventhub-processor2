@@ -21,62 +21,137 @@ module EventHub
     end
 
     def restart
-      raise 'Listener is restarting..'
+      raise 'Listener is restarting...'
     end
 
     def listen(args = {})
-      queue_name = args[:queue_name]
+      with_listen(args) do |connection, channel, consumer, queue, queue_name|
+        EventHub.logger.info("Listening to queue [#{queue_name}]")
+        consumer.on_delivery do |delivery_info, metadata, payload|
+          EventHub.logger.info("#{queue_name}: [#{delivery_info.delivery_tag}]"\
+                                 ' delivery')
 
+          # EventHub::logger.debug("delivery_info: #{delivery_info.inspect}")
+          # EventHub::logger.debug("metadata: #{metadata.inspect}")
+
+          @processor_instance.statistics.measure(payload.size) do
+            handle_payload(payload: payload,
+                           connection: connection,
+                           queue_name: queue_name,
+                           content_type: metadata[:content_type],
+                           priority: metadata[:priority],
+                           delivery_tag: delivery_info.delivery_tag
+                           )
+            channel.acknowledge(delivery_info.delivery_tag, false)
+          end
+
+          EventHub.logger.info("#{queue_name}: [#{delivery_info.delivery_tag}]"\
+                               ' acknowledged')
+        end
+        queue.subscribe_with(consumer, block: false)
+      end
+    end
+
+    def with_listen(args = {}, &block)
       connection = Bunny.new(bunny_connection_properties)
-      @connections[queue_name] = connection
       connection.start
-
+      queue_name = args[:queue_name]
+      @connections[queue_name] = connection
       channel = connection.create_channel
       channel.prefetch(1)
       queue = channel.queue(queue_name, durable: true)
-
       consumer = EventHub::Consumer.new(channel,
                                         queue,
-                                        EventHub::Configuration.name + '-' + args[:index].to_s,
+                                        EventHub::Configuration.name +
+                                          '-' +
+                                          args[:index].to_s,
                                         false)
+      yield connection, channel, consumer, queue, queue_name
+    end
 
-      EventHub.logger.info("Listening to queue [#{queue_name}]")
-      consumer.on_delivery do |delivery_info, metadata, payload|
-        EventHub.logger.info("#{queue_name}: [#{delivery_info.delivery_tag}] delivery")
+    def handle_payload(args = {})
+      response_messages = []
+      connection = args[:connection]
 
-        @processor_instance.statistics.measure(payload.size) do
-          message = EventHub::Message.from_json(payload)
-          response_messages = @processor_instance.send(:handle_message, message, {})
+      # convert to EventHub message
+      message = EventHub::Message.from_json(args[:payload])
 
-          Array(response_messages).each do |message|
-            publish(connection, message.to_json)
-          end
+      # append to execution history
+      message.append_to_execution_history(EventHub::Configuration.name)
 
-          channel.acknowledge(delivery_info.delivery_tag, false)
+      # return invalid messages to dispatcher
+      if message.invalid?
+        response_messages << message
+        EventHub.logger.info("-> #{message.to_s} => return invalid to dispatcher")
+      else
+        begin
+          response_messages = @processor_instance.send(:handle_message,
+                                                       message,
+                                                       pass_arguments(args))
+        rescue => exception
+          # this catches unexpected exceptions in handle message method
+          # deadletter the message via dispatcher
+          message.status_code = EventHub::STATUS_DEADLETTER
+          message.status_message = exception
+          EventHub.logger.info("-> #{message.to_s} => return exception to diaptcher")
+          response_messages << message
         end
-
-        EventHub.logger.info("#{queue_name}: [#{delivery_info.delivery_tag}] acknowledged")
       end
 
-      queue.subscribe_with(consumer, block: false)
+      Array(response_messages).each do |message|
+        publish(message: message.to_json, connection: connection)
+      end
     end
 
-    def publish(connection, message)
-      channel = connection.create_channel
-      channel.confirm_select
-      exchange = channel.direct(EventHub::EH_X_INBOUND, durable: true)
-      exchange.publish(message, persistent: true)
-      success = channel.wait_for_confirms
-      if !success
-        raise 'Published message from Listener actor has not been confirmed by the server'
+    def pass_arguments(args = {})
+      keys_to_pass = [:queue_name, :content_type, :priority, :delivery_tag]
+      args.select{ |key| keys_to_pass.include?(key) }
+    end
+
+    def publish(args = {})
+      with_publish(args) do |connection, exchange_name, message|
+        begin
+          channel = connection.create_channel
+          channel.confirm_select
+          exchange = channel.direct(exchange_name, durable: true)
+          exchange.publish(message, persistent: true)
+
+          success = channel.wait_for_confirms
+
+          unless success
+            raise 'Published message from Listener actor '\
+              'has not been confirmed by the server'
+          end
+        ensure
+          channel.close if channel
+        end
       end
+    end
+
+
+    def with_publish(args = {}, &block)
+      message = args[:message]
+      return if message.nil?
+
+      need_to_close = false
+      connection = args[:connection]
+      if connection.nil?
+        connection = Bunny.new(bunny_connection_properties)
+        connection.start
+        need_to_close = true
+      end
+
+      exchange_name = args[:exchange_name] || EH_X_INBOUND
+
+      yield connection, exchange_name, message
     ensure
-      channel.close
+      connection.close if connection && need_to_close
     end
+
 
     def cleanup
       EventHub.logger.info('Listener is cleanig up...')
-
+      # close all open connections
       @connections.values.each do |connection|
         connection.close if connection
       end

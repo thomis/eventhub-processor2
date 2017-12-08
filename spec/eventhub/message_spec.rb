@@ -12,7 +12,8 @@ RSpec.describe EventHub::Message do
     end
 
     it 'shoudld have a default output' do
-      expect(@m.to_s).to match(/Msg: process \[undefined,0,[0-9a-f-]+\], status \[0,,0\]/)
+      expect(@m.to_s).to \
+        match(/Msg: process \[undefined, 0, [0-9a-f-]+\], status \[0,,0\]/)
     end
 
   end

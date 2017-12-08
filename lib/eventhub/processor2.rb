@@ -48,8 +48,16 @@ module EventHub
       EventHub::VERSION
     end
 
+    # get message as EventHub::Message class instance
+    # args contain :queue_name, :content_type, :priority, :delivery_tag
     def handle_message(_message, _args = {})
       raise 'need to be implemented in derived class'
+    end
+
+    # pass message: '{ "header": ... , "body": { .. }}'
+    # and optionally exchange_name: 'your exchange name'
+    def publish(args = {})
+      Celluloid::Actor[:actor_listener].publish(args)
     end
 
     def before_start

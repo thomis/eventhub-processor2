@@ -1,3 +1,4 @@
+# MyProcess
 class MyProcess
   attr_reader :id
   def initialize(id)
@@ -22,9 +23,9 @@ class MyProcess
   end
 end
 
-
+# Docker
 class Docker
-  def initialize(name, time=10)
+  def initialize(name, time = 10)
     @name = name
     @time = time
   end
@@ -46,7 +47,7 @@ end
 run = true
 Signal.trap('INT') { run = false }
 
-while run do
+while run
   to_sleep = rand(3600)
   puts "Waiting [#{to_sleep}]..."
   sleep to_sleep
