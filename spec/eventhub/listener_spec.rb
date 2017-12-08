@@ -1,9 +1,9 @@
 require 'spec_helper'
 
 RSpec.describe EventHub::ActorListener do
-
-  before(:each) do
+  before(:all) do
     @listener = EventHub::ActorListener.new(EventHub::Processor2.new)
+    sleep 0.5
   end
 
   it 'gives a valid actor' do
