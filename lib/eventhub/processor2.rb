@@ -4,7 +4,7 @@ require_relative 'base'
 module EventHub
   # Processor2 class
   class Processor2
-    include EventHub::Helper
+    include Helper
 
     SIGNALS_FOR_TERMINATION = [:INT, :TERM, :QUIT]
     SIGNALS_FOR_RELOAD_CONFIG = [:HUP]
