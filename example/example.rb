@@ -3,7 +3,7 @@ require_relative '../lib/eventhub'
 module EventHub
   # Demo class
   class Example < Processor2
-    def handle_message(message, _args)
+    def handle_message(message, args = {})
       id = message.body['id']
       name = "data/#{id}.json"
 
