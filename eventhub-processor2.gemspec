@@ -22,6 +22,8 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ['lib']
 
+  spec.required_ruby_version = '~> 2.2' # required by bunny -> amq-protocol
+
   spec.add_dependency 'celluloid', '~> 0.17'
   spec.add_dependency 'bunny', '~> 2.9'
   spec.add_dependency 'eventhub-components', '~> 0.2'
