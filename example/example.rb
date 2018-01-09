@@ -1,4 +1,4 @@
-require_relative '../lib/eventhub'
+require_relative '../lib/eventhub/base'
 
 module EventHub
   # Demo class

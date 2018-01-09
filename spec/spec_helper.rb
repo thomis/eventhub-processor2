@@ -2,6 +2,11 @@
 require 'simplecov'
 SimpleCov.start
 
+# the following line leaves the startup and shutdown
+# of Celluloid to the the developer/tester
+ENV['RSPEC_PROCESSOR2'] = '1' # to trigger various require in base.rb
+require 'celluloid/test'
+
 require 'bundler/setup'
 require 'eventhub/base'
 

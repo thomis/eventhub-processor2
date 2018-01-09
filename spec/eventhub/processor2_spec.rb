@@ -16,6 +16,7 @@ RSpec.describe EventHub::Processor2 do
   end
 
   it 'starts and stops' do
+    Celluloid.boot
     processor = EventHub::Processor2.new
     thr = Thread.new { processor.start }
     sleep 0.5
@@ -23,5 +24,4 @@ RSpec.describe EventHub::Processor2 do
     thr.join
     expect(true).to eq(true)
   end
-
 end

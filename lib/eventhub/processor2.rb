@@ -56,7 +56,7 @@ module EventHub
       raise 'need to be implemented in derived class'
     end
 
-    # pass message: '{ "header": ... , "body": { .. }}'
+    # pass message as string like: '{ "header": ... , "body": { .. }}'
     # and optionally exchange_name: 'your exchange name'
     def publish(args = {})
       Celluloid::Actor[:actor_listener].publish(args)

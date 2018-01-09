@@ -1,12 +1,16 @@
 require 'spec_helper'
 
 RSpec.describe EventHub::ActorListener do
-  before(:each) do
+
+  around(:each) do |example|
+    Celluloid.boot
     @listener = EventHub::ActorListener.new(EventHub::Processor2.new)
+    example.run
+    Celluloid.shutdown
   end
 
   it 'gives a valid actor' do
-    expect(@listener).not_to eq(nil)
+    expect(@listener.class).to eq(EventHub::ActorListener)
   end
 
   it 'handles with_publish' do

@@ -5,7 +5,14 @@ require 'base64'
 require 'eventhub/components'
 require 'logstash-logger'
 require 'bunny'
-require 'celluloid/current'
+
+# Maybe needs refactoring in future versions ?!
+if ENV['RSPEC_PROCESSOR2']
+  require 'celluloid'
+else
+  # celluloid is booting automatically
+  require 'celluloid/current'
+end
 
 require_relative 'version'
 require_relative 'constant'
