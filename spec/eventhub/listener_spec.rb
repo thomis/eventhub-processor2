@@ -9,6 +9,7 @@ RSpec.describe EventHub::ActorListener do
   end
 
   it 'gives a valid actor' do
+    # due to rspec caching better to create instance within the test
     @listener = EventHub::ActorListener.new(EventHub::Processor2.new)
     expect(@listener.class).to eq(EventHub::ActorListener)
   end
@@ -44,7 +45,7 @@ RSpec.describe EventHub::ActorListener do
   it 'handles payload' do
     @listener = EventHub::ActorListener.new(EventHub::Processor2.new)
     payload = EventHub::Message.new.to_json
-    #expect{ @listener.handle_payload(payload: payload)}.not_to raise_error
+    expect{ @listener.handle_payload(payload: payload)}.not_to raise_error
   end
 
   it 'handles invalid payload' do
