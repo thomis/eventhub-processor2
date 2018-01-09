@@ -11,6 +11,7 @@ RSpec.describe EventHub::ActorListener do
   it 'gives a valid actor' do
     # due to rspec caching better to create instance within the test
     @listener = EventHub::ActorListener.new(EventHub::Processor2.new)
+    sleep 0.2 # give a bit time here
     expect(@listener.class).to eq(EventHub::ActorListener)
   end
 
