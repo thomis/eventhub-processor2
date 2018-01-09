@@ -1,6 +1,12 @@
 require 'spec_helper'
 
 RSpec.describe EventHub::Processor2 do
+  around(:each) do |example|
+    Celluloid.boot
+    example.run
+    Celluloid.shutdown
+  end
+
   it 'has a version number' do
     expect(EventHub::VERSION).not_to be nil
   end
@@ -16,7 +22,6 @@ RSpec.describe EventHub::Processor2 do
   end
 
   it 'starts and stops' do
-    Celluloid.boot
     processor = EventHub::Processor2.new
     thr = Thread.new { processor.start }
     sleep 0.5
