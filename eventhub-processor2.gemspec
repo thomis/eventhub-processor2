@@ -23,7 +23,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
 
   # required by celluloid and bunny (-> amq-protocol)
-  spec.required_ruby_version = '~> 2.2.6'
+  # spec.required_ruby_version = '~> 2.2.6'
 
   spec.add_dependency 'celluloid', '~> 0.17'
   spec.add_dependency 'bunny', '~> 2.9'
