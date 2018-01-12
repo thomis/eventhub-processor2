@@ -11,8 +11,8 @@ GEM
   remote: https://rubygems.org/
   specs:
     amq-protocol (2.3.0)
-    bunny (2.9.0)
-      amq-protocol (>= 2.2.0)
+    bunny (2.9.1)
+      amq-protocol (~> 2.3.0)
     celluloid (0.17.3)
       celluloid-essentials
       celluloid-extras

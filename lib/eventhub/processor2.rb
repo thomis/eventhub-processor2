@@ -87,8 +87,9 @@ module EventHub
       ])
 
       @config.injection!(:before_restart, proc do
-        EventHub.logger.info('Restarting in 10 seconds...')
-        sleep 10
+        restart_in_s = Configuration.processor[:restart_in_s]
+        EventHub.logger.info("Restarting in #{restart_in_s} seconds...")
+        sleep restart_in_s
       end )
 
       @config.deploy

@@ -39,6 +39,7 @@ RSpec.describe EventHub::Processor2 do
     sleep 0.5
 
     # write new configuration file
+    FileUtils.mkdir_p('./config')
     IO.write('./config/processor2.json', config_file_content)
 
     # send signal to reload configuration file
@@ -54,7 +55,8 @@ RSpec.describe EventHub::Processor2 do
     expect(true).to eq(true)
 
     # remove config folder with files
-    FileUtils.rm('config/processor2.json')
+    FileUtils.rm('./config/processor2.json')
+    FileUtils.rmdir('./config')
   end
 
 

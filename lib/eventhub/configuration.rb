@@ -106,6 +106,7 @@ module EventHub
         processor: {
           heartbeat_cycle_in_s: 300,
           watchdog_cycle_in_s: 15,
+          restart_in_s: 5,
           listener_queues: [@name]
         }
       }
