@@ -36,21 +36,18 @@ RSpec.describe EventHub::Processor2 do
 
     processor = EventHub::Processor2.new
     thr = Thread.new { processor.start }
-    sleep 1
 
     # write new configuration file
     FileUtils.mkdir_p('./config')
     IO.write('./config/processor2.json', config_file_content)
-    sleep 1
 
     # send signal to reload configuration file
     Process.kill 'HUP', 0
-    sleep 1
+    sleep 0.5 # give a bit time to load
 
-    # check value again
+    # check value
     expect(EventHub::Configuration.processor[:restart_in_s]).to eq(0)
 
-    sleep 1
     processor.stop
     thr.join
     expect(true).to eq(true)

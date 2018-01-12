@@ -1,6 +1,6 @@
 # to collect test coverage
 require 'simplecov'
-SimpleCov.start
+impleCov.start
 
 # the following line leaves the startup and shutdown
 # of Celluloid to the the developer/tester
