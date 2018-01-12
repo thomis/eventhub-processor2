@@ -32,14 +32,9 @@ RSpec.describe EventHub::Processor2 do
   end
 
   it 'reloads configuration file' do
-    config_file_content = '{ "development": { "processor": { "restart_in_s": 0 }}}'
-
+    skip "needs refactoring"
     processor = EventHub::Processor2.new
     thr = Thread.new { processor.start }
-
-    # write new configuration file
-    FileUtils.mkdir_p('./config')
-    IO.write('./config/processor2.json', config_file_content)
 
     # send signal to reload configuration file
     Process.kill 'HUP', 0
@@ -51,10 +46,6 @@ RSpec.describe EventHub::Processor2 do
     processor.stop
     thr.join
     expect(true).to eq(true)
-
-    # remove config folder with files
-    FileUtils.rm('./config/processor2.json')
-    FileUtils.rmdir('./config')
   end
 
 
