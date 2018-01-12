@@ -32,22 +32,23 @@ RSpec.describe EventHub::Processor2 do
   end
 
   it 'reloads configuration file' do
-    config_file_content = '{ "development": { "processor": { "heartbeat_cycle_in_s": 60 }}}'
+    config_file_content = '{ "development": { "processor": { "restart_in_s": 0 }}}'
 
     processor = EventHub::Processor2.new
     thr = Thread.new { processor.start }
-    sleep 0.5
+    sleep 1
 
     # write new configuration file
     FileUtils.mkdir_p('./config')
     IO.write('./config/processor2.json', config_file_content)
+    sleep 1
 
     # send signal to reload configuration file
     Process.kill 'HUP', 0
     sleep 1
 
     # check value again
-    expect(EventHub::Configuration.processor[:heartbeat_cycle_in_s]).to eq(60)
+    expect(EventHub::Configuration.processor[:restart_in_s]).to eq(0)
 
     sleep 1
     processor.stop
