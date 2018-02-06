@@ -101,12 +101,17 @@ module EventHub
           host: 'localhost',
           vhost: 'event_hub',
           port: 5672,
-          tls: false
+          tls: false,
+          tls_cert: nil,
+          tls_key: nil,
+          tls_ca_certificates: [],
+          verify_peer: false,
+          show_bunny_logs: false
         },
         processor: {
           heartbeat_cycle_in_s: 300,
           watchdog_cycle_in_s: 15,
-          restart_in_s: 10,
+          restart_in_s: 15,
           listener_queues: [@name]
         }
       }

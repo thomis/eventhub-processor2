@@ -8,7 +8,7 @@ module EventHub
 
     def initialize(processor_instance)
       @actor_watchdog = ActorWatchdog.new_link
-      @connections= {}
+      @connections = {}
       @processor_instance = processor_instance
       start
     end
@@ -31,9 +31,6 @@ module EventHub
           EventHub.logger.info("#{queue_name}: [#{delivery_info.delivery_tag}]"\
                                  ' delivery')
 
-          # EventHub::logger.debug("delivery_info: #{delivery_info.inspect}")
-          # EventHub::logger.debug("metadata: #{metadata.inspect}")
-
           @processor_instance.statistics.measure(payload.size) do
             handle_payload(payload: payload,
                            connection: connection,
@@ -53,7 +50,9 @@ module EventHub
     end
 
     def with_listen(args = {}, &block)
-      connection = Bunny.new(bunny_connection_properties)
+      connection_string, connection_properties = connection_properties
+
+      connection = create_bunny_connection
       connection.start
       queue_name = args[:queue_name]
       @connections[queue_name] = connection
@@ -93,13 +92,13 @@ module EventHub
           # deadletter the message via dispatcher
           message.status_code = EventHub::STATUS_DEADLETTER
           message.status_message = exception
-          EventHub.logger.info("-> #{message.to_s} => return exception to diaptcher")
+          EventHub.logger.info("-> #{message.to_s} => return exception to dispatcher")
           response_messages << message
         end
       end
 
       Array(response_messages).each do |message|
-        publish(message: message.to_json, connection: connection)
+        Celluloid::Actor[:actor_publisher].publish(message: message.to_json, connection: connection)
       end
     end
 
@@ -108,54 +107,13 @@ module EventHub
       args.select{ |key| keys_to_pass.include?(key) }
     end
 
-    def publish(args = {})
-      with_publish(args) do |connection, exchange_name, message|
-        begin
-          channel = connection.create_channel
-          channel.confirm_select
-          exchange = channel.direct(exchange_name, durable: true)
-          exchange.publish(message, persistent: true)
-
-          success = channel.wait_for_confirms
-
-          unless success
-            raise 'Published message from Listener actor '\
-              'has not been confirmed by the server'
-          end
-        ensure
-          channel.close if channel
-        end
-      end
-    end
-
-
-    def with_publish(args = {}, &block)
-      message = args[:message]
-      return if message.nil?
-
-      need_to_close = false
-      connection = args[:connection]
-      if connection.nil?
-        connection = Bunny.new(bunny_connection_properties)
-        connection.start
-        need_to_close = true
-      end
-
-      exchange_name = args[:exchange_name] || EH_X_INBOUND
-
-      yield connection, exchange_name, message
-    ensure
-      connection.close if connection && need_to_close
-    end
-
-
     def cleanup
       EventHub.logger.info('Listener is cleanig up...')
       # close all open connections
+      return unless @connections
       @connections.values.each do |connection|
         connection.close if connection
       end
     end
-
   end
 end

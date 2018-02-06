@@ -19,31 +19,36 @@ module EventHub
       end.compact.join('.')
     end
 
-    def bunny_connection_properties
+    def create_bunny_connection
       server = EventHub::Configuration.server
 
-      if Configuration.server[:tls]
-        {
-          user: server[:user],
-          password: server[:password],
-          host: server[:host],
-          vhost: server[:vhost],
-          port: server[:port],
-          tls: server[:tls],
-          logger: Logger.new('/dev/null'), # logs from Bunny not required
-          network_recovery_interval: 15
-        }
-      else
-        {
-          user: server[:user],
-          password: server[:password],
-          host: server[:host],
-          vhost: server[:vhost],
-          port: server[:port],
-          logger: Logger.new('/dev/null'), # logs from Bunny not required
-          network_recovery_interval: 15
-        }
+      protocol = 'amqp'
+      connection_properties = {}
+      connection_properties[:user] = server[:user]
+      connection_properties[:pass] = server[:password]
+      connection_properties[:vhost] = server[:vhost]
+
+      # inject bunny logs on request
+      unless server[:show_bunny_logs]
+        connection_properties[:logger] = Logger.new('/dev/null')
       end
+
+      # we don't need it since reactors can deal with it
+      connection_properties[:automatically_recover] = false
+
+      # do we do tls?
+      if server[:tls]
+        protocol = "amqps"
+        connection_properties[:tls] = server[:tls]
+        connection_properties[:tls_cert] = server[:tls_cert]
+        connection_properties[:tls_key] = server[:tls_key]
+        connection_properties[:tls_ca_certificates] = server[:tls_ca_certificates]
+        connection_properties[:verify_peer] = server[:verify_peer]
+      end
+
+      connection_string = "#{protocol}://#{server[:host]}:#{server[:port]}"
+
+      Bunny.new(connection_string, connection_properties)
     end
 
     # Formats stamp into UTC format

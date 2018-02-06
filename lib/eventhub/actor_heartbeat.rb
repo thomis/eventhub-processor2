@@ -14,7 +14,7 @@ module EventHub
     def start
       EventHub.logger.info('Heartbeat is starting...')
 
-      every(60) { EventHub.logger.info("Running actors: #{Celluloid::Actor.all.size}: #{Celluloid::Actor.all.map{ |a| a.class }.join(', ') }") }
+      every(60) { EventHub.logger.info("Actual actors: #{Celluloid::Actor.all.size}: #{Celluloid::Actor.all.map{ |a| a.class }.join(', ') }") }
 
       publish(heartbeat(action: 'started'))
       loop do
@@ -32,7 +32,7 @@ module EventHub
     private
 
     def publish(message)
-      connection = Bunny.new(bunny_connection_properties)
+      connection = create_bunny_connection
       connection.start
       channel = connection.create_channel
       channel.confirm_select

@@ -1,21 +1,28 @@
+require_relative '../lib/eventhub/sleeper'
+
 # MyProcess
 class MyProcess
-  attr_reader :id
-  def initialize(id)
+  attr_reader :id, :name
+  def initialize(id, name)
     @id = id
+    @name = name
   end
 
   def restart
-    puts "Sending Signal HUP to process [#{@id}]"
+    puts "Sending Signal HUP to process [#{@id}/#{@name}]"
     Process.kill('HUP', @id)
   rescue Errno::ESRCH
   end
 
   def self.all
     processes = []
-    data = `ps | grep example.rb | grep ruby`
-    data.lines[0..-2].each do |line|
-      processes << MyProcess.new(line.split(' ')[0].to_i)
+
+    ['router', 'publisher', 'receiver'].each do |name|
+      data = `ps | grep #{name}.rb | grep ruby`
+      data.lines[0..-2].each do |line|
+        a = line.split(' ')
+        processes << MyProcess.new(a[0].to_i, a[-1])
+      end
     end
 
     puts "Found ids: #{processes.map{ |pr| pr.id}.join(', ')}"
@@ -25,6 +32,8 @@ end
 
 # Docker
 class Docker
+  attr_reader :name
+
   def initialize(name, time = 10)
     @name = name
     @time = time
@@ -42,15 +51,24 @@ def items
   a << Docker.new('processor-rabbitmq', 0)
   a << MyProcess.all
   a.flatten!
+
+  puts a.map{ |item| item.name }.join(', ')
+  a
 end
 
 run = true
-Signal.trap('INT') { run = false }
+sleeper = EventHub::Sleeper.new
+
+Signal.trap('INT') {
+  run = false
+  sleeper.stop
+}
 
 while run
-  to_sleep = rand(3600)
-  puts "Waiting [#{to_sleep}]..."
-  sleep to_sleep
+  to_sleep = rand(100)
+  puts "Waiting #{to_sleep} seconds..."
+  sleeper.start(to_sleep)
+  break unless run
   items.sample.restart
 end
 

@@ -54,8 +54,9 @@ RSpec.describe EventHub::Helper do
 
   context 'bunny_connection_properties' do
     it 'returns hash' do
-      h = bunny_connection_properties
-      expect(h.class).to eq(Hash)
+      EventHub::Configuration.load!
+      connection = create_bunny_connection
+      expect(connection.class).to eq(Bunny::Session)
     end
   end
 end

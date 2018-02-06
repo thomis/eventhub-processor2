@@ -39,7 +39,14 @@
       "arguments": {}
     },
     {
-      "name": "example",
+      "name": "example.inbound",
+      "vhost": "event_hub",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "example.outbound",
       "vhost": "event_hub",
       "durable": true,
       "auto_delete": false,
@@ -57,7 +64,16 @@
       "arguments": {}
     },
     {
-      "name": "example",
+      "name": "example.inbound",
+      "vhost": "event_hub",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "example.outbound",
       "vhost": "event_hub",
       "type": "direct",
       "durable": true,
@@ -76,9 +92,17 @@
       "arguments": {}
     },
     {
-      "source": "example",
+      "source": "example.inbound",
       "vhost": "event_hub",
-      "destination": "example",
+      "destination": "example.inbound",
+      "destination_type": "queue",
+      "routing_key": "",
+      "arguments": {}
+    },
+    {
+      "source": "example.outbound",
+      "vhost": "event_hub",
+      "destination": "example.outbound",
       "destination_type": "queue",
       "routing_key": "",
       "arguments": {}

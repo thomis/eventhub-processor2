@@ -2,9 +2,75 @@ require 'bunny'
 require 'celluloid/current'
 require 'json'
 require 'securerandom'
+require 'eventhub/components'
+
+# Example module
+module Example
+  def self.logger
+    unless @logger
+      @logger = ::EventHub::Components::MultiLogger.new
+      @logger.add_device(Logger.new(STDOUT))
+      @logger.add_device(
+        EventHub::Components::Logger.logstash('publisher', 'development')
+      )
+    end
+    @logger
+  end
+end
+
 
 Celluloid.logger = nil
-Celluloid.exception_handler { |ex| puts "Exception occured: #{ex}" }
+Celluloid.exception_handler { |ex| Example.logger.error "Exception occured: #{ex}}" }
+
+# Store to track pending files (files not yet confirmed to be sent)
+class Store
+  include Celluloid
+  finalizer :cleanup
+
+  def initialize
+    @filename = 'data/store.json'
+    if File.exist?(@filename)
+      cleanup
+    else
+      File.write(@filename, '{}')
+    end
+  end
+
+  def add(name)
+    store = read_store
+    store[name] = Time.now.strftime('%Y-%m-%d %H:%M:%S.%L')
+    write_store(store)
+  end
+
+  def del(name)
+    store = read_store
+    store.delete(name)
+    write_store(store)
+  end
+
+  def cleanup
+    # cleanup pending entries
+    Example.logger.info("Cleaning store...")
+    store = read_store
+    store.keys.each do |name|
+      name = "data/#{name}.json"
+      if File.exist?(name)
+        File.delete(name)
+        Example.logger.info("Deleted: #{name}")
+      end
+    end
+    write_store({})
+  end
+
+  private
+    def read_store
+      JSON.parse(File.read(@filename))
+    end
+
+    def write_store(store)
+      File.write(@filename, store.to_json)
+    end
+end
 
 # Publisher
 class Publisher
@@ -16,14 +82,9 @@ class Publisher
 
   def start
     connect
-    count = 1
     loop do
       do_the_work
-
-      sleep 0.001
-      print '.'
-      puts '' if (count % 80).zero?
-      count += 1
+      sleep 0.050
     end
   ensure
     @connection.close if @connection
@@ -38,21 +99,28 @@ class Publisher
     @connection.start
     @channel = @connection.create_channel
     @channel.confirm_select
-    @exchange = @channel.direct('example', durable: true)
+    @exchange = @channel.direct('example.outbound', durable: true)
   end
 
   def do_the_work
     id = SecureRandom.uuid
     data = { body: { id: id } }.to_json
 
-    file = File.open("data/#{id}.json", 'w')
+    file_name = "data/#{id}.json"
+    file = File.open(file_name, 'w')
     file.write(data)
     file.close
+    Example.logger.info("[#{id}] - Message/File created")
+    Celluloid::Actor[:store].add(id)
 
     @exchange.publish(data, persistent: true)
     success = @channel.wait_for_confirms
-
-    raise 'Published message not confirmed' unless success
+    if success
+      Example.logger.info("[#{id}] - Message sent")
+      Celluloid::Actor[:store].del(id)
+    else
+      Example.logger.error("[#{id}] -  Published message not confirmed")
+    end
   end
 end
 
@@ -62,22 +130,23 @@ class Application
     @run = true
     @config = Celluloid::Supervision::Configuration.define(
       [
+        { type: Store, as: :store },
         { type: Publisher, as: :publisher }
       ]
     )
 
     @config.injection!(:before_restart, proc do
-      puts 'Restarting in 5 seconds...'
-      sleep 5
+      Example.logger.info('Restarting in 15 seconds...')
+      sleep 15
     end)
   end
 
   def start
-    puts 'Publisher has been started'
+    Example.logger.info 'Publisher has been started'
     @config.deploy
     main_event_loop
     cleanup
-    puts 'Publisher has been stopped'
+    Example.logger.info 'Publisher has been stopped'
   end
 
   private

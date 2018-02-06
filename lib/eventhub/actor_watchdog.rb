@@ -25,7 +25,7 @@ module EventHub
     private
 
     def watch
-      connection = Bunny.new(bunny_connection_properties)
+      connection = create_bunny_connection
       connection.start
 
       EventHub::Configuration.processor[:listener_queues].each do |queue_name|

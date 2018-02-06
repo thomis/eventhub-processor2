@@ -25,6 +25,7 @@ module EventHub
 
       @command_queue = []
 
+      @sleeper = EventHub::Sleeper.new
       @started_at = Time.now
       @statistics = EventHub::Statistics.new
     end
@@ -59,7 +60,7 @@ module EventHub
     # pass message as string like: '{ "header": ... , "body": { .. }}'
     # and optionally exchange_name: 'your exchange name'
     def publish(args = {})
-      Celluloid::Actor[:actor_listener].publish(args)
+      Celluloid::Actor[:actor_publisher].publish(args)
     end
 
     def before_start
@@ -83,13 +84,15 @@ module EventHub
     def start_supervisor
       @config = Celluloid::Supervision::Configuration.define([
         {type: ActorHeartbeat, as: :actor_heartbeat, args: [ self ]},
+        {type: ActorPublisher, as: :actor_publisher, args: [ self ]},
         {type: ActorListener, as: :actor_listener, args: [ self ]}
       ])
 
+      sleeper = @sleeper
       @config.injection!(:before_restart, proc do
         restart_in_s = Configuration.processor[:restart_in_s]
         EventHub.logger.info("Restarting in #{restart_in_s} seconds...")
-        sleep restart_in_s
+        sleeper.start(restart_in_s)
       end )
 
       @config.deploy
@@ -104,6 +107,7 @@ module EventHub
         case
           when SIGNALS_FOR_TERMINATION.include?(command)
             EventHub.logger.info("Command [#{command}] received")
+            @sleeper.stop
             break
           when SIGNALS_FOR_RELOAD_CONFIG.include?(command)
             EventHub::Configuration.load!

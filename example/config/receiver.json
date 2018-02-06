@@ -1,0 +1,17 @@
+{
+  "development": {
+    "server": {
+      "user": "guest",
+      "password": "guest",
+      "host": "localhost",
+      "vhost": "event_hub",
+      "port": 5672,
+      "tls": false
+    },
+    "processor": {
+      "listener_queues": [
+        "example.inbound"
+      ]
+    }
+  }
+}
