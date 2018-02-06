@@ -23,7 +23,7 @@ Celluloid.logger = nil
 Celluloid.exception_handler { |ex| Example.logger.error "Exception occured: #{ex}}" }
 
 # Store to track pending files (files not yet confirmed to be sent)
-class Store
+class TransactionStore
   include Celluloid
   finalizer :cleanup
 
@@ -36,13 +36,13 @@ class Store
     end
   end
 
-  def add(name)
+  def start(name)
     store = read_store
     store[name] = Time.now.strftime('%Y-%m-%d %H:%M:%S.%L')
     write_store(store)
   end
 
-  def del(name)
+  def stop(name)
     store = read_store
     store.delete(name)
     write_store(store)
@@ -50,7 +50,7 @@ class Store
 
   def cleanup
     # cleanup pending entries
-    Example.logger.info("Cleaning store...")
+    Example.logger.info("Cleaning pending transactions...")
     store = read_store
     store.keys.each do |name|
       name = "data/#{name}.json"
@@ -103,21 +103,21 @@ class Publisher
   end
 
   def do_the_work
+    #prepare id and content
     id = SecureRandom.uuid
+    file_name = "data/#{id}.json"
     data = { body: { id: id } }.to_json
 
-    file_name = "data/#{id}.json"
-    file = File.open(file_name, 'w')
-    file.write(data)
-    file.close
+    # start transaction...
+    Celluloid::Actor[:transaction_store].start(id)
+    File.write(file_name, data)
     Example.logger.info("[#{id}] - Message/File created")
-    Celluloid::Actor[:store].add(id)
 
     @exchange.publish(data, persistent: true)
     success = @channel.wait_for_confirms
     if success
       Example.logger.info("[#{id}] - Message sent")
-      Celluloid::Actor[:store].del(id)
+      Celluloid::Actor[:transaction_store].stop(id) if Celluloid::Actor[:transaction_store]
     else
       Example.logger.error("[#{id}] -  Published message not confirmed")
     end
@@ -130,7 +130,7 @@ class Application
     @run = true
     @config = Celluloid::Supervision::Configuration.define(
       [
-        { type: Store, as: :store },
+        { type: TransactionStore, as: :transaction_store },
         { type: Publisher, as: :publisher }
       ]
     )

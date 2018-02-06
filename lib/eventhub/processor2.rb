@@ -112,7 +112,9 @@ module EventHub
           when SIGNALS_FOR_RELOAD_CONFIG.include?(command)
             EventHub::Configuration.load!
             EventHub.logger.info('Configuration file reloaded')
-            Celluloid::Actor[:actor_listener].async.restart
+
+            # restart listener when actor is known
+            Celluloid::Actor[:actor_listener].async.restart if Celluloid::Actor[:actor_listener]
           else
             sleep 0.5
         end

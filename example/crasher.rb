@@ -17,10 +17,11 @@ class MyProcess
   def self.all
     processes = []
 
-    ['router', 'publisher', 'receiver'].each do |name|
-      data = `ps | grep #{name}.rb | grep ruby`
+    ['router', 'receiver'].each do |name|
+      data = `ps | grep #{name}.rb`
       data.lines[0..-2].each do |line|
         a = line.split(' ')
+        next if a.size > 5
         processes << MyProcess.new(a[0].to_i, a[-1])
       end
     end
@@ -65,7 +66,7 @@ Signal.trap('INT') {
 }
 
 while run
-  to_sleep = rand(100)
+  to_sleep = rand(600)
   puts "Waiting #{to_sleep} seconds..."
   sleeper.start(to_sleep)
   break unless run
