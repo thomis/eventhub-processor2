@@ -61,6 +61,9 @@ module EventHub
     # and optionally exchange_name: 'your exchange name'
     def publish(args = {})
       Celluloid::Actor[:actor_publisher].publish(args)
+    rescue => error
+      EventHub.logger.error("Unexpected exeption with publish: #{error}")
+      raise
     end
 
     def before_start

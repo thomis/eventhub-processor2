@@ -48,8 +48,8 @@ end
 
 def items
   a = []
-  a << Docker.new('processor-rabbitmq')
-  a << Docker.new('processor-rabbitmq', 0)
+  #a << Docker.new('processor-rabbitmq')
+  #a << Docker.new('processor-rabbitmq', 0)
   a << MyProcess.all
   a.flatten!
 
