@@ -114,7 +114,11 @@ module EventHub
             EventHub.logger.info('Configuration file reloaded')
 
             # restart listener when actor is known
-            Celluloid::Actor[:actor_listener].async.restart if Celluloid::Actor[:actor_listener]
+            if Celluloid::Actor[:actor_listener]
+              Celluloid::Actor[:actor_listener].async.restart
+            else
+              EventHub.logger.info('Was unable to get a valid listener actor to restart... check!!!')
+            end
           else
             sleep 0.5
         end

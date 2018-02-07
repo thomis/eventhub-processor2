@@ -47,6 +47,10 @@ module EventHub
         end
         queue.subscribe_with(consumer, block: false)
       end
+
+    rescue => error
+      EventHub.logger.error("Unexpected exception: #{error}. It should restart now with this exception...")
+      raise
     end
 
     def with_listen(args = {}, &block)

@@ -31,4 +31,4 @@ require_relative 'actor_listener'
 require_relative 'processor2'
 
 Celluloid.logger = nil
-Celluloid.exception_handler { |ex| EventHub.logger.info "Exception occured: #{ex}" }
+Celluloid.exception_handler { |ex| EventHub.logger.error "Exception occured: #{ex}" }
