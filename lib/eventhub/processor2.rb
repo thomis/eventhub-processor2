@@ -87,7 +87,7 @@ module EventHub
     def start_supervisor
       @config = Celluloid::Supervision::Configuration.define([
         {type: ActorHeartbeat, as: :actor_heartbeat, args: [ self ]},
-        {type: ActorPublisher, as: :actor_publisher, args: [ self ]},
+        {type: ActorPublisher, as: :actor_publisher},
         {type: ActorListener, as: :actor_listener, args: [ self ]}
       ])
 

@@ -6,15 +6,18 @@ module EventHub
     include Helper
     finalizer :cleanup
 
-    def initialize(processor_instance)
-      @processor_instance = processor_instance
+    def initialize
       EventHub.logger.info('Publisher is starting...')
-
-      @connection = create_bunny_connection
-      @connection.start
+      @connection = nil
     end
 
     def publish(args = {})
+      # keep connection once established
+      unless @connection
+        @connection = create_bunny_connection
+        @connection.start
+      end
+
       message = args[:message]
       return if message.nil?
 

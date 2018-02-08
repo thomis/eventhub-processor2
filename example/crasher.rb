@@ -48,8 +48,8 @@ end
 
 def items
   a = []
-  #a << Docker.new('processor-rabbitmq')
-  #a << Docker.new('processor-rabbitmq', 0)
+  a << Docker.new('processor-rabbitmq')
+  a << Docker.new('processor-rabbitmq', 0)
   a << MyProcess.all
   a.flatten!
 
@@ -66,7 +66,7 @@ Signal.trap('INT') {
 }
 
 while run
-  to_sleep = rand(600)
+  to_sleep = (10..600).to_a.sample # min 10 seconds between crashing events
   puts "Waiting #{to_sleep} seconds..."
   sleeper.start(to_sleep)
   break unless run

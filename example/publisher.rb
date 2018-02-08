@@ -3,6 +3,7 @@ require 'celluloid/current'
 require 'json'
 require 'securerandom'
 require 'eventhub/components'
+require_relative '../lib/eventhub/sleeper'
 
 # Example module
 module Example
@@ -18,6 +19,9 @@ module Example
   end
 end
 
+SIGNALS_FOR_TERMINATION = [:INT, :TERM, :QUIT]
+SIGNALS_FOR_RELOAD_CONFIG = [:HUP]
+ALL_SIGNALS = SIGNALS_FOR_TERMINATION + SIGNALS_FOR_RELOAD_CONFIG
 
 Celluloid.logger = nil
 Celluloid.exception_handler { |ex| Example.logger.error "Exception occured: #{ex}}" }
@@ -127,7 +131,11 @@ end
 # Application
 class Application
   def initialize
-    @run = true
+    @sleeper = EventHub::Sleeper.new
+    @command_queue = []
+  end
+
+  def start_supervisor
     @config = Celluloid::Supervision::Configuration.define(
       [
         { type: TransactionStore, as: :transaction_store },
@@ -135,29 +143,51 @@ class Application
       ]
     )
 
+    sleeper = @sleeper
     @config.injection!(:before_restart, proc do
       Example.logger.info('Restarting in 15 seconds...')
-      sleep 15
+      sleeper.start(15)
     end)
+    @config.deploy
   end
 
   def start
     Example.logger.info 'Publisher has been started'
-    @config.deploy
+
+    setup_signal_handler
+    start_supervisor
     main_event_loop
-    cleanup
+
     Example.logger.info 'Publisher has been stopped'
   end
 
   private
 
   def main_event_loop
-    Signal.trap(:INT) { @run = false }
-    sleep 0.5 while @run
+    loop do
+      command = @command_queue.pop
+      case
+        when SIGNALS_FOR_TERMINATION.include?(command)
+          @sleeper.stop
+          break
+        else
+          sleep 0.5
+      end
+    end
+
+    Celluloid.shutdown
+    # make sure all actors are gone
+    while Celluloid.running?
+      sleep 0.1
+    end
   end
 
-  def cleanup
-    Celluloid.shutdown
+  def setup_signal_handler
+    # have a re-entrant signal handler by just using a simple array
+    # https://www.sitepoint.com/the-self-pipe-trick-explained/
+    ALL_SIGNALS.each do |signal|
+      Signal.trap(signal) { @command_queue << signal }
+    end
   end
 end
 
