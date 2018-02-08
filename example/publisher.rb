@@ -120,8 +120,8 @@ class Publisher
     @exchange.publish(data, persistent: true)
     success = @channel.wait_for_confirms
     if success
-      Example.logger.info("[#{id}] - Message sent")
       Celluloid::Actor[:transaction_store].stop(id) if Celluloid::Actor[:transaction_store]
+      Example.logger.info("[#{id}] - Message sent")
     else
       Example.logger.error("[#{id}] -  Published message not confirmed")
     end
