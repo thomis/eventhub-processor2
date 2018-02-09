@@ -10,7 +10,7 @@ Next generation gem to build ruby based eventhub processors. Implementation is b
 Processor2 has currently the following sub-components implemented
 * Heartbeater - send hearbeats to EventHub dispatcher every x minutes
 * Publisher - responsible for message publishing
-* Watchdog - Checks regularly connection to broker and for valid listener queue(s)
+* Watchdog - Checks regularly broker connection and defined listener queue(s)
 * Listener - Listens to defined queues, parses recevied message into a EventHub::Message instance and calls handle_message method as defined in derived class.
 
 ## Installation

@@ -20,7 +20,7 @@ module EventHub
     end
 
     def cleanup
-      EventHub.logger.info('Watchdog is cleanig up...')
+      EventHub.logger.info('Watchdog is cleaning up...')
     end
 
     private

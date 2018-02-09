@@ -26,7 +26,7 @@ module EventHub
     end
 
     def cleanup
-      EventHub.logger.info('Heartbeat is cleanig up...')
+      EventHub.logger.info('Heartbeat is cleaning up...')
       publish(heartbeat(action: 'stopped'))
       EventHub.logger.info('Heartbeat has sent a [stopped] beat')
     end

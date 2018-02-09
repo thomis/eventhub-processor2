@@ -113,7 +113,7 @@ module EventHub
     end
 
     def cleanup
-      EventHub.logger.info('Listener is cleanig up...')
+      EventHub.logger.info('Listener is cleaning up...')
       # close all open connections
       return unless @connections
       @connections.values.each do |connection|

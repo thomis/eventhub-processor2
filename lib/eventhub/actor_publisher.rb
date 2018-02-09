@@ -39,7 +39,7 @@ module EventHub
     end
 
     def cleanup
-      EventHub.logger.info('Publisher is cleanig up...')
+      EventHub.logger.info('Publisher is cleaning up...')
       @connection.close if @connection
     end
   end
