@@ -95,7 +95,7 @@ I, [2018-02-09T15:22:35.699161 #37966]  INFO -- : Listening to queue [example]
 
 ## Configuration
 
-If --config option is not provided processor tries to load config/{class_name}.json. If file does not exist it load default values as specified below.
+If --config option is not provided processor tries to load config/{class_name}.json. If file does not exist it loads default values as specified below.
 
 ```json
 {
@@ -125,7 +125,7 @@ If --config option is not provided processor tries to load config/{class_name}.j
 }
 ```
 
-Feel free to add additional hash keys outside of server and processor as required by your application.
+Feel free to define additional hash key/values (outside of server and processor key) as required by your application.
 
 ```json
 {
@@ -135,8 +135,8 @@ Feel free to add additional hash keys outside of server and processor as require
     "processor": {
     },
     "database": {
-      "user": "guest"
-      "password": "secret"
+      "user": "guest",
+      "password": "secret",
       "name": {
         "subname": "value"
       }
