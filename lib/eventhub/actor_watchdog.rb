@@ -7,6 +7,7 @@ module EventHub
     finalizer :cleanup
 
     def initialize
+      EventHub.logger.info('Watchdog is starting...')
       async.start
     end
 
