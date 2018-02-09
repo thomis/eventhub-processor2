@@ -9,7 +9,7 @@ Example folder contains a series of applications in order to test reliability an
 A message is passed throuhg the following components.
 publisher.rb => [example.outbound] => router.rb => [example.inbound] => receiver.rb
 
-1. publisher.rb generates a unique ID, creates a message with the ID as payload, passes the message to example.outbound queue.
+1. publisher.rb generates a unique ID, creates a json message with the ID as payload, save the message in a file, and passes the message to example.outbound queue.
 
 2. router.rb receives the message and passes it to exmaple.outbound queue
 
