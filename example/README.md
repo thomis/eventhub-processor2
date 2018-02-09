@@ -3,6 +3,10 @@
 ### Description
 
 Example folder contains a series of applications in order to test reliability and performance of processor2 gem.
+* publisher.rb - Creates a unique file and a message
+* router.rb - routes messges via queues
+* receiver.rb - receives message and does final processing
+* crasher.rb - restarts message broker or sends signals to other processes
 
 ### How does it work?
 
