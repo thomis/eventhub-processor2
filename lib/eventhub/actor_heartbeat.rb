@@ -14,19 +14,21 @@ module EventHub
     def start
       EventHub.logger.info('Heartbeat is starting...')
 
-      every(60) { EventHub.logger.info("Actual actors: #{Celluloid::Actor.all.size}: #{Celluloid::Actor.all.map{ |a| a.class }.join(', ') }") }
+      every(300) { EventHub.logger.info("Actual actors: #{Celluloid::Actor.all.size}: #{Celluloid::Actor.all.map{ |a| a.class }.join(', ') }") }
 
       publish(heartbeat(action: 'started'))
+      EventHub.logger.info('Heartbeat has sent [started] beat')
       loop do
         sleep Configuration.processor[:heartbeat_cycle_in_s]
-        EventHub.logger.info('Running heartbeat...')
         publish(heartbeat)
+        EventHub.logger.info('Heartbeat has sent a beat')
       end
     end
 
     def cleanup
       EventHub.logger.info('Heartbeat is cleanig up...')
       publish(heartbeat(action: 'stopped'))
+      EventHub.logger.info('Heartbeat has sent a [stopped] beat')
     end
 
     private
