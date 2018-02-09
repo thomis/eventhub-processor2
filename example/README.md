@@ -2,7 +2,7 @@
 
 ### Description
 
-Example application is a suite of applicaitons in order to test reliabiliy and performance of processor2 gem.
+Example folder contains a series of applications in order to test reliabiliy and performance of processor2 gem.
 
 How does it work?
 
@@ -15,16 +15,17 @@ publisher.rb => [example.outbound] => router.rb => [example.inbound] => receiver
 
 3. receiver.rb gets the message and deletes the file with the given ID
 
-Goal: What ever happens to these components (restarted, killed and restarted, stopped and started, message broker restarted) if you do a graceful shutdown at the end there should be no message in the /data folder.
+Goal: What ever happens to these components (restarted, killed and restarted, stopped and started, message broker killed, stopped and started) if you do a graceful shutdown at the end there should be no message in the /data folder.
 
 Graceful shutdown: Stop producer.rb. Leave the other components running until all messages in example.* queues are gone. Stop remaining components.
 
 
 ### How to use
 * Make sure docker container (process-rabbitmq) is running
-* Start one or more router.rb
-* Start one or more receier.rb
-* Start one or more publisher.rb
-* Start crasher.rb if you like (or do it manually)
+* Start one or more router with: bundle exec ruby router.rb
+* Start one or more receiver with: bundle exec ruby receier.rb
+* Start one publisher with: bundle exec ruby publisher.rb
+* Start one crasher with: bundle exec ruby crasher.rb (or do this manually)
 
 ### Note
+- Publisher has a simple transaction store implemented to deal with issues between file creation and file publishing. At the end of the publisher process in the cleanup method pending transaction get processed and coresponding files get deleted.
