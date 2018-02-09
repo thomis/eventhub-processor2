@@ -14,7 +14,7 @@ module EventHub
         EventHub.logger.error("[#{id}] - Unable to delete File: #{error}")
       end
 
-      []
+      nil
     end
   end
 end

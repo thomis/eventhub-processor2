@@ -8,7 +8,7 @@ module EventHub
       EventHub.logger.info("Received: [#{id}]")
       publish(message: message.to_json, exchange_name: 'example.inbound')
       EventHub.logger.info("Returned: [#{id}]")
-      []
+      nil
     end
   end
 end
