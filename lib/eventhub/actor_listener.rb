@@ -7,6 +7,7 @@ module EventHub
     finalizer :cleanup
 
     def initialize(processor_instance)
+      @actor_publisher = ActorPublisher.new_link
       @actor_watchdog = ActorWatchdog.new_link
       @connections = {}
       @processor_instance = processor_instance
@@ -102,7 +103,7 @@ module EventHub
       end
 
       Array(response_messages).each do |message|
-        Celluloid::Actor[:actor_publisher].publish(message: message.to_json, connection: connection)
+        publish(message: message.to_json, connection: connection)
       end
     end
 
@@ -119,5 +120,10 @@ module EventHub
         connection.close if connection
       end
     end
+
+    def publish(args)
+      @actor_publisher.publish(args)
+    end
+
   end
 end
