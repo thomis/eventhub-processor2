@@ -28,4 +28,5 @@ Graceful shutdown: Stop producer.rb. Leave the other components running until al
 * Start one crasher with: bundle exec ruby crasher.rb (or do this manually)
 
 ### Note
-- Publisher has a simple transaction store implemented to deal with issues between file creation and file publishing. At the end of the publisher process in the cleanup method pending transaction get processed and coresponding files get deleted.
+* Publisher has a simple transaction store implemented to deal with issues between file creation and file publishing. At the end of the publisher process in the cleanup method pending transaction get processed and coresponding files get deleted.
+* Watch for huge log files!
