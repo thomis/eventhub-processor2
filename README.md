@@ -13,6 +13,8 @@ Processor2 has currently the following sub-components implemented
 * Watchdog - Checks regularly broker connection and defined listener queue(s)
 * Listener - Listens to defined queues, parses recevied message into a EventHub::Message instance and calls handle_message method as defined in derived class.
 
+Processor2 is using Bunny http://rubybunny.info a feature complete RabbitMQ Client to interact with message broker. Processor2 can deal with long running message processing.
+
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -124,6 +126,8 @@ If --config option is not provided processor tries to load config/{class_name}.j
   }
 }
 ```
+
+More details about TLS configuration for underlying Bunny gem can be found here: http://rubybunny.info/articles/tls.html.
 
 Feel free to define additional hash key/values (outside of server and processor key) as required by your application.
 
