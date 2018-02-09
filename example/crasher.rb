@@ -66,7 +66,7 @@ Signal.trap('INT') {
 }
 
 while run
-  to_sleep = (10..600).to_a.sample # min 10 seconds between crashing events
+  to_sleep = (60..600).to_a.sample # min 60 seconds between crashing events
   puts "Waiting #{to_sleep} seconds..."
   sleeper.start(to_sleep)
   break unless run
