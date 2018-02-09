@@ -55,10 +55,10 @@ module EventHub
       # at the end return one of
       message # return message if sucessfull processing
 
-      # or if you have multiple messages to return to the event_hub.inbound queue
+      # or if you have multiple messages to return to event_hub.inbound queue
       [ message, new_message1, new_message2]
 
-      # or if there is no message to return the event_hub.inbound queue
+      # or if there is no message to return to event_hub.inbound queue
       nil # [] works as well
     end
   end
