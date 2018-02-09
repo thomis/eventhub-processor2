@@ -37,9 +37,9 @@ module EventHub
     end
 
     def handle_message(message, args = {})
-
       # deal with your parsed EventHub message
       # message.class => EventHub::Message
+      puts message.process_name # or whatever you need to do
 
       # args is a hash with currently following keys
       # => :queue_name (used when listening to multiple queues)
@@ -52,9 +52,14 @@ module EventHub
       # the processor2 gem and returned
       # to the event_hub.inbound queue
 
+      # at the end return one of
       message # return message if sucessfull processing
-      [ message, new_message1, new_message2] # you can return an array of messages
-      nil # or [] if there is no message to the event_hub.inbound queue
+
+      # or if you have multiple messages to return to the event_hub.inbound queue
+      [ message, new_message1, new_message2]
+
+      # or if there is no message to return the event_hub.inbound queue
+      nil # [] works as well
     end
   end
 end
