@@ -8,10 +8,10 @@
 Next generation gem to build ruby based eventhub processors. Implementation is based on Celluloid, an Actor-based concurrent object framework for Ruby https://celluloid.io. The main idea is to have sub-components in your application and have them supervised and automatically re-booted when they crash.
 
 Processor2 has currently the following sub-components implemented
-* Heartbeater (send hearbeats to EventHub dispatcher every x minutes)
-* Publisher (responsible for message publishing)
+* Heartbeater - send hearbeats to EventHub dispatcher every x minutes
+* Publisher - responsible for message publishing
 * Watchdog - Checks regularly connection to broker and for valid listener queue(s)
-* Listener - Listens to defined queues and handles messages
+* Listener - Listens to defined queues, parses recevied message into a EventHub::Message instance and calls handle_message method as defined in derived class.
 
 ## Installation
 
