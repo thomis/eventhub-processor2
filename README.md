@@ -69,15 +69,15 @@ EventHub::Example.new.start
 ```
 
 Start your processor and pass optional arguments
-```
-> bundle exec ruby example.rb --help
+```bash
+bundle exec ruby example.rb --help
 Usage: example [options]
     -e, --environment ENVIRONMENT    Define environment (default development)
     -d, --detached                   Run processor detached as a daemon
     -c, --config CONFIG              Define configuration file
 
-> bundle exec ruby example.rb
 
+bundle exec ruby example.rb
 I, [2018-02-09T15:22:35.649646 #37966]  INFO -- : example (1.1.0): has been started
 I, [2018-02-09T15:22:35.652592 #37966]  INFO -- : Heartbeat is starting...
 I, [2018-02-09T15:22:35.657200 #37966]  INFO -- : Publisher is starting...
@@ -86,7 +86,7 @@ I, [2018-02-09T15:22:35.658336 #37966]  INFO -- : Running watchdog...
 I, [2018-02-09T15:22:35.658522 #37966]  INFO -- : Listener is starting...
 I, [2018-02-09T15:22:35.699161 #37966]  INFO -- : Listening to queue [example]
 ```
-Note: If config file is not provided it is derived from class name > ./config/example.json
+Note: If config file is not provided it is derived from class name and read from ./config/class_name.json
 
 A processor2 configuration file looks as follows
 ```json
@@ -99,8 +99,8 @@ A processor2 configuration file looks as follows
       "vhost": "event_hub",
       "port": 5672,
       "tls": false,
-      "tls_cert": nil,
-      "tls_key": nil,
+      "tls_cert": null,
+      "tls_key": null,
       "tls_ca_certificates": [],
       "verify_peer": false,
       "show_bunny_logs": false
