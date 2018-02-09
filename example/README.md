@@ -15,7 +15,7 @@ publisher.rb => [example.outbound] => router.rb => [example.inbound] => receiver
 
 3. receiver.rb gets the message and deletes the file with the given ID
 
-Goal: What ever happens to these components (restarted, killed and restarted, stopped and started, message broker killed, stopped and started) if you do a graceful shutdown at the end there should be no message in the /data folder.
+*Goal*: What ever happens to these components (restarted, killed and restarted, stopped and started, message broker killed, stopped and started) if you do a graceful shutdown at the end there should be no message in the /data folder (except store.json).
 
 Graceful shutdown: Stop producer.rb. Leave the other components running until all messages in example.* queues are gone. Stop remaining components.
 
