@@ -4,7 +4,7 @@
 
 Example folder contains a series of applications in order to test reliability and performance of processor2 gem.
 
-How does it work?
+#### How does it work?
 
 A message is passed throuhg the following components.
 publisher.rb => [example.outbound] => router.rb => [example.inbound] => receiver.rb
@@ -15,12 +15,16 @@ publisher.rb => [example.outbound] => router.rb => [example.inbound] => receiver
 
 3. receiver.rb gets the message and deletes the file with the given ID
 
-*Goal*: What ever happens to these components (restarted, killed and restarted, stopped and started, message broker killed, stopped and started) if you do a graceful shutdown at the end there should be no message in the /data folder (except store.json).
+#### Goal
+What ever happens to these components (restarted, killed and restarted, stopped and started, message broker killed, stopped and started) if you do a graceful shutdown at the end there should be no message in the /data folder (except store.json).
 
-Graceful shutdown: Stop producer.rb. Leave the other components running until all messages in example.* queues are gone. Stop remaining components.
+Graceful shutdown with CTRL-C or TERM signal to pdi
+* Stop producer.rb. Leave the other components running until all messages in example.* queues are gone.
+* Stop remaining components
+* Check ./example/data folder
 
 
-### How to use
+#### How to use
 * Make sure docker container (process-rabbitmq) is running (see [readme](../docker/README.md))
 * Start one or more router with: bundle exec ruby router.rb
 * Start one or more receiver with: bundle exec ruby receier.rb
