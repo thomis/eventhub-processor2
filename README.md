@@ -92,9 +92,11 @@ I, [2018-02-09T15:22:35.658336 #37966]  INFO -- : Running watchdog...
 I, [2018-02-09T15:22:35.658522 #37966]  INFO -- : Listener is starting...
 I, [2018-02-09T15:22:35.699161 #37966]  INFO -- : Listening to queue [example]
 ```
-Note: If config file is not provided it is derived from class name and read from ./config/class_name.json
 
-A processor2 configuration file looks as follows
+## Configuration
+
+If --config option is not provided processor tries to load config/{class_name}.json. If file does not exist it load default values as specified below.
+
 ```json
 {
   "development": {
@@ -113,7 +115,7 @@ A processor2 configuration file looks as follows
     },
     "processor": {
       "listener_queues": [
-        "NAME_OF_PROCESSOR_CLASS"
+        "{class_name}"
       ],
       "heartbeat_cycle_in_s": 300,
       "watchdog_cycle_in_s": 15,
@@ -121,7 +123,33 @@ A processor2 configuration file looks as follows
     }
   }
 }
+```
 
+Feel free to add additional hash keys outside of server and processor as required by your application.
+
+```json
+{
+  "development": {
+    "server": {
+    },
+    "processor": {
+    },
+    "database": {
+      "user": "guest"
+      "password": "secret"
+      "name": {
+        "subname": "value"
+      }
+    }
+  }
+}
+```
+
+```ruby
+  # access configuration values in your application as follows
+  Configuration.processor.database[:user]           # => "guest"
+  Configuration.processor.database[:password]       # => "secret"
+  Configuration.processor.database[:name][:subname] # => "value"
 ```
 
 ## Development
