@@ -29,7 +29,12 @@ Or install it yourself as:
 Create example.rb
 
 ```ruby
-  class Example
+module EventHub
+  class Example < Processor2
+
+    def version
+      '1.0.0' # define your version
+    end
 
     def handle_message(message, args = {})
 
@@ -51,11 +56,11 @@ Create example.rb
       [ message, new_message1, new_message2] # you can return an array of messages
       nil # or [] if there is no message to the event_hub.inbound queue
     end
-
   end
+end
 
-  # start your processor instance
-  Example.new.start
+# start your processor instance
+EventHub::Example.new.start
 ```
 
 Start your processor and pass optional arguments
