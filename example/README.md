@@ -2,7 +2,7 @@
 
 ### Description
 
-Example folder contains a series of applications in order to test reliabiliy and performance of processor2 gem.
+Example folder contains a series of applications in order to test reliability and performance of processor2 gem.
 
 How does it work?
 
@@ -21,7 +21,7 @@ Graceful shutdown: Stop producer.rb. Leave the other components running until al
 
 
 ### How to use
-* Make sure docker container (process-rabbitmq) is running
+* Make sure docker container (process-rabbitmq) is running (see [readme](../docker/README.md))
 * Start one or more router with: bundle exec ruby router.rb
 * Start one or more receiver with: bundle exec ruby receier.rb
 * Start one publisher with: bundle exec ruby publisher.rb
