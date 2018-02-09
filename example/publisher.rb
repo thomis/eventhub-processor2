@@ -8,7 +8,7 @@ require_relative '../lib/eventhub/sleeper'
 SIGNALS_FOR_TERMINATION = [:INT, :TERM, :QUIT]
 SIGNALS_FOR_RELOAD_CONFIG = [:HUP]
 ALL_SIGNALS = SIGNALS_FOR_TERMINATION + SIGNALS_FOR_RELOAD_CONFIG
-PAUSE_BETWEEN_WORK = 0 # default is 0.05
+PAUSE_BETWEEN_WORK = 0.05 # default is 0.05
 
 Celluloid.logger = nil
 Celluloid.exception_handler { |ex| Publisher.logger.error "Exception occured: #{ex}}" }
