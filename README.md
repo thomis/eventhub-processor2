@@ -151,9 +151,9 @@ Feel free to define additional hash key/values (outside of server and processor 
 
 ```ruby
   # access configuration values in your application as follows
-  Configuration.processor.database[:user]           # => "guest"
-  Configuration.processor.database[:password]       # => "secret"
-  Configuration.processor.database[:name][:subname] # => "value"
+  EventHub::Configuration.processor.database[:user]           # => "guest"
+  EventHub::Configuration.processor.database[:password]       # => "secret"
+  EventHub::Configuration.processor.database[:name][:subname] # => "value"
 ```
 
 ## Development
