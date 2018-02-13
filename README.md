@@ -66,10 +66,13 @@ module EventHub
       publish(message: 'your message as string', exchange_name: 'your_specfic_exchange')
 
       # at the end return one of
-      message # return message if sucessfull processing
+      message_to_return = message.copy # return message if sucessfull processing
+                                       # message.copy sets status.code automatically
+                                       # to EventHub::STATUS_SUCCESS which signals
+                                       # dispatcher successful processing
 
       # or if you have multiple messages to return to event_hub.inbound queue
-      [ message, new_message1, new_message2]
+      [ message_to_return, new_message1, new_message2]
 
       # or if there is no message to return to event_hub.inbound queue
       nil # [] works as well
