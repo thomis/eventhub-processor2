@@ -62,7 +62,8 @@ module EventHub
 
       # it is possible to publish a message during message processing but it's a
       # good style to return one or multiple messages at end of handle_message
-      # publish(message: 'your message as string', exchange_name: 'your_specfic_exchange')
+      publish(message: 'your message as a string') # default exchange_name is 'event_hub.inbound'
+      publish(message: 'your message as string', exchange_name: 'your_specfic_exchange')
 
       # at the end return one of
       message # return message if sucessfull processing
