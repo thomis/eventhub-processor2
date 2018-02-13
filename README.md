@@ -60,6 +60,10 @@ module EventHub
       # the processor2 gem and returned
       # to the event_hub.inbound queue
 
+      # it is possible to publish a message during message processing but it's a
+      # good style to return one or multiple messages at end of handle_message
+      # publish(message: 'your message as string', exchange_name: 'your_specfic_exchange')
+
       # at the end return one of
       message # return message if sucessfull processing
 
@@ -149,11 +153,19 @@ Feel free to define additional hash key/values (outside of server and processor 
 }
 ```
 
+Processor2 symbolizes keys and sub-keys from configuration files automatically
 ```ruby
   # access configuration values in your application as follows
-  Configuration.processor.database[:user]           # => "guest"
-  Configuration.processor.database[:password]       # => "secret"
-  Configuration.processor.database[:name][:subname] # => "value"
+  # note that all keys are symbolized automatically
+  EventHub::Configuration.database[:user]             # => "guest"
+  EventHub::Configuration.database[:password]         # => "secret"
+  EventHub::Configuration.database[:name][:subname]   # => "value"
+
+  # If you need strings instead of symbols keys you can do
+  database = stringify_keys(EventHub::Configuration.database)
+  database['user']              # => "guest"
+  database['password']          # => "secret"
+  database['name']['subname']   # => "value"
 ```
 
 ## Development

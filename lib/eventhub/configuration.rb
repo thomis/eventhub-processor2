@@ -4,6 +4,7 @@ module EventHub
   module Configuration
     # it's a singleton (don't allow to instantiate this class)
     extend self
+    extend Helper
 
     attr_reader :name           # name of processor
     attr_reader :environment    # environment the processor is running
@@ -115,6 +116,18 @@ module EventHub
           listener_queues: [@name]
         }
       }
+    end
+
+    def instance
+      warn "[DEPRECATION] `instance` is deprecated. Please use new"\
+           " configuration access method."
+      self
+    end
+
+    def data
+      warn "[DEPRECATION] `data` is deprecated. Please use new configuration"\
+           " access method."
+      stringify_keys(@config_data)
     end
   end
 end

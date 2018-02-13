@@ -1,5 +1,3 @@
-require 'optparse'
-
 # EventHub module
 module EventHub
   # Helper module
@@ -55,6 +53,11 @@ module EventHub
     def now_stamp(now=nil)
       now ||= Time.now
       now.utc.strftime("%Y-%m-%dT%H:%M:%S.%6NZ")
+    end
+
+    # stringify hash keys
+    def stringify_keys(h)
+      JSON.parse(h.to_json)
     end
   end
 end

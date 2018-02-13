@@ -22,6 +22,11 @@ RSpec.describe EventHub::Processor2 do
     expect(EventHub::Configuration.config_file).to match(/config\/processor2.json$/)
   end
 
+  it 'raises exception if handle_message method is not implemented' do
+    p2 = EventHub::Processor2.new
+    expect{ p2.handle_message('msg') }.to raise_error(RuntimeError)
+  end
+
   it 'starts and stops' do
     processor = EventHub::Processor2.new
     thr = Thread.new { processor.start }

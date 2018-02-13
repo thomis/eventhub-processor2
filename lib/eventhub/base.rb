@@ -1,6 +1,7 @@
 require 'uuidtools'
 require 'json'
 require 'base64'
+require 'optparse'
 
 require 'eventhub/components'
 require 'logstash-logger'
@@ -16,6 +17,7 @@ end
 
 require_relative 'version'
 require_relative 'constant'
+require_relative 'base_exception'
 require_relative 'logger'
 require_relative 'helper'
 require_relative 'sleeper'

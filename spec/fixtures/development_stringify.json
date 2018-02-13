@@ -1,0 +1,33 @@
+{
+  "development": {
+    "server": {
+      "user": "guest_test",
+      "password": "guest_test",
+      "host": "localhost_test",
+      "vhost": "eventhub_test",
+      "port": 5674,
+      "tls": true
+    },
+    "processor": {
+      "heartbeat_cycle_in_s": 401,
+      "watchdog_cycle_in_s": 61,
+      "listener_queues": [
+        "demo"
+      ]
+    },
+    "a": "b",
+    "c": {
+      "d": "e"
+    },
+    "f": [
+      {
+        "g": "h"
+      },
+      {
+        "i": {
+          "k": "l"
+        }
+      }
+    ]
+  }
+}

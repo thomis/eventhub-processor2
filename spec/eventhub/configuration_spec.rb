@@ -118,4 +118,24 @@ RSpec.describe EventHub::Configuration do
       expect(EventHub::Configuration.server[:user]).to eq('guest_development')
     end
   end
+
+  context 'deprecated method' do
+    it 'returns configuration instance' do
+      expect(EventHub::Configuration.instance).to eq(EventHub::Configuration)
+    end
+
+    it 'returns configuration data' do
+      expect(EventHub::Configuration.instance.data.class).to eq(Hash)
+    end
+
+    it 'returns configuration keys as strings' do
+      EventHub::Configuration.load!(config_file: 'spec/fixtures/development_stringify.json')
+      data = EventHub::Configuration.instance.data
+
+      expect(data['a']).to eq('b')
+      expect(data['c']['d']).to eq('e')
+      expect(data['f'][0]['g']).to eq('h')
+      expect(data['f'][1]['i']['k']).to eq('l')
+    end
+  end
 end
