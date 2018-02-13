@@ -157,14 +157,14 @@ Feel free to define additional hash key/values (outside of server and processor 
 }
 ```
 
-Processor2 symbolizes keys and sub-keys from configuration files automatically
+Processor2 symbolizes keys and sub-keys from configuration files automatically.
 ```ruby
   # access configuration values in your application as follows
   EventHub::Configuration.database[:user]             # => "guest"
   EventHub::Configuration.database[:password]         # => "secret"
   EventHub::Configuration.database[:name][:subname]   # => "value"
 
-  # If you need strings instead of symbols keys you can do
+  # If you need strings instead of symbols you can do
   database = stringify_keys(EventHub::Configuration.database)
   database['user']              # => "guest"
   database['password']          # => "secret"
