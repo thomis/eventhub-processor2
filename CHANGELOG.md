@@ -1,5 +1,9 @@
 # Changelog of EventHub::Processor2
 
+## 1.4.1 / 2018-02-27
+
+* Upgrade to eventhub-components 0.2.2
+
 ## 1.4.0 / 2018-02-27
 
 * Upgrade to bunny 2.9.2
