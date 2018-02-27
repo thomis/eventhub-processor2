@@ -1,5 +1,10 @@
 # Changelog of EventHub::Processor2
 
+## 1.4.0 / 2018-02-27
+
+* Upgrade to bunny 2.9.2
+* Upgrade rake 12.3.0
+
 ## 1.3.0 / 2018-02-13
 
 * Have EventHub::BaseException for easier migration
