@@ -1,0 +1,10 @@
+version: '3.3'
+
+services:
+  rabbitmq:
+    build: .
+    container_name: eventhub.rabbitmq
+    image: eventhub.rabbitmq:1.0
+    ports:
+      - "5672:5672"
+      - "15672:15672"

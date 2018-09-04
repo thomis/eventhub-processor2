@@ -5,8 +5,8 @@ Please follow these steps to build and run a docker container with a predefined 
 
 * Have latest docker community edition installed (https://www.docker.com)
 * cd into the docker folder
-* docker build -t processor-rabbitmq .
-* docker run -d -p 5672:5672 -p 15672:15672 --name processor-rabbitmq processor-rabbitmq
+* docker-compose up --no-start
+* docker-compose start
 
 Is the docker container running fine?
 Go to http://localhost:15672 and login to RabbitMQ Management Console with guest/guest
