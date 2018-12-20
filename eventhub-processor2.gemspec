@@ -26,12 +26,12 @@ Gem::Specification.new do |spec|
   # spec.required_ruby_version = '~> 2.2.6'
 
   spec.add_dependency 'celluloid', '~> 0.17'
-  spec.add_dependency 'bunny', '~> 2.9'
+  spec.add_dependency 'bunny', '~> 2.12'
   spec.add_dependency 'eventhub-components', '~> 0.2'
   spec.add_dependency 'uuidtools', '~> 2.1'
 
-  spec.add_development_dependency 'bundler', '~> 1.16'
+  spec.add_development_dependency 'bundler', '~> 1.17'
   spec.add_development_dependency 'rake', '~> 12.3'
-  spec.add_development_dependency 'rspec', '~> 3.7'
-  spec.add_development_dependency 'simplecov', '~> 0.15'
+  spec.add_development_dependency 'rspec', '~> 3.8'
+  spec.add_development_dependency 'simplecov', '~> 0.16'
 end

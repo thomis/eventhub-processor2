@@ -1,5 +1,9 @@
 # Changelog of EventHub::Processor2
 
+## 1.5.0 / 2018-12-20
+
+* Upgrade dependencies: rspec 3.8, bunny 2.12, bundler 1.17, simplecov 0.16
+
 ## 1.4.1 / 2018-02-27
 
 * Upgrade to eventhub-components 0.2.2
