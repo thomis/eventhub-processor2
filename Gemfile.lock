@@ -1,8 +1,8 @@
 PATH
   remote: .
   specs:
-    eventhub-processor2 (1.5.0)
-      bunny (~> 2.12)
+    eventhub-processor2 (1.6.0)
+      bunny (~> 2.14)
       celluloid (~> 0.17)
       eventhub-components (~> 0.2)
       uuidtools (~> 2.1)
@@ -11,9 +11,9 @@ GEM
   remote: https://rubygems.org/
   specs:
     amq-protocol (2.3.0)
-    bunny (2.12.1)
+    bunny (2.14.0)
       amq-protocol (~> 2.3, >= 2.3.0)
-    celluloid (0.17.3)
+    celluloid (0.17.4)
       celluloid-essentials
       celluloid-extras
       celluloid-fsm
@@ -38,7 +38,7 @@ GEM
     logstash-event (1.2.02)
     logstash-logger (0.26.1)
       logstash-event (~> 1.2)
-    rake (12.3.0)
+    rake (12.3.2)
     rspec (3.8.0)
       rspec-core (~> 3.8.0)
       rspec-expectations (~> 3.8.0)
@@ -57,18 +57,18 @@ GEM
       json (>= 1.8, < 3)
       simplecov-html (~> 0.10.0)
     simplecov-html (0.10.2)
-    timers (4.2.0)
+    timers (4.3.0)
     uuidtools (2.1.5)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
-  bundler (~> 1.17)
+  bundler (~> 2.0)
   eventhub-processor2!
   rake (~> 12.3)
   rspec (~> 3.8)
   simplecov (~> 0.16)
 
 BUNDLED WITH
-   1.17.1
+   2.0.1
