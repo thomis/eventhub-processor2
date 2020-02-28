@@ -11,7 +11,7 @@ GEM
   remote: https://rubygems.org/
   specs:
     amq-protocol (2.3.0)
-    bunny (2.14.0)
+    bunny (2.14.4)
       amq-protocol (~> 2.3, >= 2.3.0)
     celluloid (0.17.4)
       celluloid-essentials
@@ -38,7 +38,7 @@ GEM
     logstash-event (1.2.02)
     logstash-logger (0.26.1)
       logstash-event (~> 1.2)
-    rake (12.3.2)
+    rake (13.0.1)
     rspec (3.8.0)
       rspec-core (~> 3.8.0)
       rspec-expectations (~> 3.8.0)
@@ -66,7 +66,7 @@ PLATFORMS
 DEPENDENCIES
   bundler (~> 2.0)
   eventhub-processor2!
-  rake (~> 12.3)
+  rake (~> 13.0)
   rspec (~> 3.8)
   simplecov (~> 0.16)
 
