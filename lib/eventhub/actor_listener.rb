@@ -96,7 +96,7 @@ module EventHub
           # this catches unexpected exceptions in handle message method
           # deadletter the message via dispatcher
           message.status_code = EventHub::STATUS_DEADLETTER
-          message.status_message = exception
+          message.status_message = exception.to_s
           EventHub.logger.info("-> #{message.to_s} => return exception to dispatcher")
           response_messages << message
         end

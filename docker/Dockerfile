@@ -1,4 +1,4 @@
-FROM rabbitmq:3.7.7-management
+FROM rabbitmq:3.8.2-management
 
 LABEL maintainer="thomas.steiner@ikey.ch"
 

@@ -80,6 +80,15 @@
       "auto_delete": false,
       "internal": false,
       "arguments": {}
+    },
+    {
+      "name": "an_exchange",
+      "vhost": "event_hub",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
     }
   ],
   "bindings": [
@@ -101,6 +110,14 @@
     },
     {
       "source": "example.outbound",
+      "vhost": "event_hub",
+      "destination": "example.outbound",
+      "destination_type": "queue",
+      "routing_key": "",
+      "arguments": {}
+    },
+    {
+      "source": "an_exchange",
       "vhost": "event_hub",
       "destination": "example.outbound",
       "destination_type": "queue",

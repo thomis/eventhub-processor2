@@ -4,7 +4,7 @@ services:
   rabbitmq:
     build: .
     container_name: eventhub.rabbitmq
-    image: eventhub.rabbitmq:1.0
+    image: eventhub.rabbitmq:3.8.2
     ports:
       - "5672:5672"
       - "15672:15672"

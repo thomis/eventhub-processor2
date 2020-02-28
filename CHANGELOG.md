@@ -1,5 +1,11 @@
 # Changelog of EventHub::Processor2
 
+## 1.7.0 / 2020-02-28
+
+* Upgrade dependencies: bundler 2.1, rake 13.0, rspec 3.9, simplecov 0.18
+* status_message always as string for general exception handling
+* fix rspec tests
+
 ## 1.6.0 / 2019-02-20
 
 * Upgrade dependencies: bunny 2.14, bundler 2.0
