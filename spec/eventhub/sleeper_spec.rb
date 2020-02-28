@@ -59,5 +59,4 @@ RSpec.describe EventHub::Message do
 
     expect(((stop - start) - 2) < 0.01).to eq(true), "Expected to wait for 2 seconds but was waiting #{stop-start} seconds"
   end
-
 end

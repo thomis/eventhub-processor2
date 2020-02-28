@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 RSpec.describe EventHub::Message do
-
   before(:each) do
     @m = EventHub::Message.new
   end
@@ -15,11 +14,9 @@ RSpec.describe EventHub::Message do
       expect(@m.to_s).to \
         match(/Msg: process \[undefined, 0, [0-9a-f-]+\], status \[0,,0\]/)
     end
-
   end
 
   context "initialization" do
-
     it "should have a valid header (structure and data)" do
       expect(@m.valid?).to eq(true)
     end
@@ -47,13 +44,11 @@ RSpec.describe EventHub::Message do
       # build message from string
       m = EventHub::Message.from_json(json)
 
-
       expect(m.valid?).to eq(true)
 
       EventHub::Message::REQUIRED_HEADERS.each do |key|
         expect(header.get(key)).to eq("1")
       end
-
     end
 
     it "should initialize to INVALID from an invalid json string" do
@@ -118,7 +113,6 @@ RSpec.describe EventHub::Message do
       expect(EventHub::Message.translate_status_code(EventHub::STATUS_SCHEDULE_PENDING)).to   eq('STATUS_SCHEDULE_PENDING')
     end
   end
-
 
   context "execution history" do
     it "should have a execution history entry" do
@@ -186,7 +180,5 @@ RSpec.describe EventHub::Message do
       @m.status_code = EventHub::STATUS_SCHEDULE_PENDING
       expect(@m.schedule_pending?).to eq(true)
     end
-
   end
-
 end

@@ -52,6 +52,4 @@ RSpec.describe EventHub::Processor2 do
     thr.join
     expect(true).to eq(true)
   end
-
-
 end

@@ -124,6 +124,5 @@ module EventHub
     def publish(args)
       @actor_publisher.publish(args)
     end
-
   end
 end

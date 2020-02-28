@@ -10,7 +10,6 @@ class EventHub::Statistics
     @mutex = Mutex.new
   end
 
-
   def measure(size, &block)
     begin
       start = Time.now
