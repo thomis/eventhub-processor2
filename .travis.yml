@@ -26,7 +26,7 @@ before_install:
 - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64
   > ./cc-test-reporter
 - chmod +x ./cc-test-reporter
-- gem install bundler --version '~> 2.0.1'
+- gem install bundler --version '~> 2.1.2'
 
 before_script:
 - "./cc-test-reporter before-build"

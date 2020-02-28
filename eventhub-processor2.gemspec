@@ -30,8 +30,8 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'eventhub-components', '~> 0.2'
   spec.add_dependency 'uuidtools', '~> 2.1'
 
-  spec.add_development_dependency 'bundler', '~> 2.0'
+  spec.add_development_dependency 'bundler', '~> 2.1'
   spec.add_development_dependency 'rake', '~> 13.0'
-  spec.add_development_dependency 'rspec', '~> 3.8'
-  spec.add_development_dependency 'simplecov', '~> 0.16'
+  spec.add_development_dependency 'rspec', '~> 3.9'
+  spec.add_development_dependency 'simplecov', '~> 0.18'
 end
