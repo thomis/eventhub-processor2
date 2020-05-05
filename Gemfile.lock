@@ -1,8 +1,8 @@
 PATH
   remote: .
   specs:
-    eventhub-processor2 (1.7.0)
-      bunny (~> 2.14)
+    eventhub-processor2 (1.8.0)
+      bunny (~> 2.15)
       celluloid (~> 0.17)
       eventhub-components (~> 0.2)
       uuidtools (~> 2.1)
@@ -10,9 +10,9 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    amq-protocol (2.3.0)
-    bunny (2.14.4)
-      amq-protocol (~> 2.3, >= 2.3.0)
+    amq-protocol (2.3.1)
+    bunny (2.15.0)
+      amq-protocol (~> 2.3, >= 2.3.1)
     celluloid (0.17.4)
       celluloid-essentials
       celluloid-extras
@@ -42,15 +42,15 @@ GEM
       rspec-core (~> 3.9.0)
       rspec-expectations (~> 3.9.0)
       rspec-mocks (~> 3.9.0)
-    rspec-core (3.9.1)
-      rspec-support (~> 3.9.1)
-    rspec-expectations (3.9.0)
+    rspec-core (3.9.2)
+      rspec-support (~> 3.9.3)
+    rspec-expectations (3.9.1)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.9.0)
     rspec-mocks (3.9.1)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.9.0)
-    rspec-support (3.9.2)
+    rspec-support (3.9.3)
     simplecov (0.18.5)
       docile (~> 1.1)
       simplecov-html (~> 0.11)

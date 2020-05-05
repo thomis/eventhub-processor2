@@ -26,7 +26,7 @@ Gem::Specification.new do |spec|
   # spec.required_ruby_version = '~> 2.2.6'
 
   spec.add_dependency 'celluloid', '~> 0.17'
-  spec.add_dependency 'bunny', '~> 2.14'
+  spec.add_dependency 'bunny', '~> 2.15'
   spec.add_dependency 'eventhub-components', '~> 0.2'
   spec.add_dependency 'uuidtools', '~> 2.1'
 

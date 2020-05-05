@@ -1,5 +1,11 @@
 # Changelog of EventHub::Processor2
 
+## 1.8.0 / 2020-05-05
+
+* Increase watchdog cycle time to 60s
+* Upgrade gem and gem dev dependencies
+* Upgrade travis ruby version to test
+
 ## 1.7.0 / 2020-02-28
 
 * Upgrade dependencies: bundler 2.1, rake 13.0, rspec 3.9, simplecov 0.18

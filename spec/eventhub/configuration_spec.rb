@@ -68,7 +68,7 @@ RSpec.describe EventHub::Configuration do
       expect(EventHub::Configuration.server[:port]).to eq(5672)
       expect(EventHub::Configuration.server[:tls]).to eq(false)
       expect(EventHub::Configuration.processor[:heartbeat_cycle_in_s]).to eq(300)
-      expect(EventHub::Configuration.processor[:watchdog_cycle_in_s]).to eq(15)
+      expect(EventHub::Configuration.processor[:watchdog_cycle_in_s]).to eq(60)
       expect(EventHub::Configuration.processor[:listener_queues]).to eq(['undefined'])
     end
 
