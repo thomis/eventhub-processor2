@@ -7,20 +7,19 @@ module EventHub
     finalizer :cleanup
 
     def initialize
-      EventHub.logger.info('Watchdog is starting...')
+      EventHub.logger.info("Watchdog is starting...")
       async.start
     end
 
     def start
       loop do
-        EventHub.logger.info('Running watchdog...')
         watch
         sleep Configuration.processor[:watchdog_cycle_in_s]
       end
     end
 
     def cleanup
-      EventHub.logger.info('Watchdog is cleaning up...')
+      EventHub.logger.info("Watchdog is cleaning up...")
     end
 
     private
@@ -36,7 +35,7 @@ module EventHub
         end
       end
     ensure
-      connection.close if connection
+      connection&.close
     end
   end
 end

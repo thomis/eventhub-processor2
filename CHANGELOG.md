@@ -1,5 +1,11 @@
 # Changelog of EventHub::Processor2
 
+## 1.9.0 / 2021-02-26
+
+* Updated gem dependencies
+* Appply ruby style guides
+* Reduce log noice
+
 ## 1.8.0 / 2020-05-05
 
 * Increase watchdog cycle time to 60s

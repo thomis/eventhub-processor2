@@ -3,9 +3,9 @@ module EventHub
   # BaseException class
   class BaseException < RuntimeError
     attr_accessor :code, :message
-    def initialize(message=nil, code=EventHub::STATUS_DEADLETTER)
+    def initialize(message = nil, code = EventHub::STATUS_DEADLETTER)
       @message = message
-      @code    = code
+      @code = code
       super(@message)
     end
   end

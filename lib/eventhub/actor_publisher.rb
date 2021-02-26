@@ -7,7 +7,7 @@ module EventHub
     finalizer :cleanup
 
     def initialize
-      EventHub.logger.info('Publisher is starting...')
+      EventHub.logger.info("Publisher is starting...")
       @connection = nil
     end
 
@@ -31,16 +31,16 @@ module EventHub
       success = channel.wait_for_confirms
 
       unless success
-        raise 'Published message from Listener actor '\
-              'has not been confirmed by the server'
+        raise "Published message from Listener actor "\
+              "has not been confirmed by the server"
       end
-      ensure
-        channel.close if channel
+    ensure
+      channel&.close
     end
 
     def cleanup
-      EventHub.logger.info('Publisher is cleaning up...')
-      @connection.close if @connection
+      EventHub.logger.info("Publisher is cleaning up...")
+      @connection&.close
     end
   end
 end

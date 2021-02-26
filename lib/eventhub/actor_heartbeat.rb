@@ -12,23 +12,23 @@ module EventHub
     end
 
     def start
-      EventHub.logger.info('Heartbeat is starting...')
+      EventHub.logger.info("Heartbeat is starting...")
 
-      every(300) { EventHub.logger.info("Actual actors: #{Celluloid::Actor.all.size}: #{Celluloid::Actor.all.map{ |a| a.class }.join(', ') }") }
+      every(60 * 60 * 24) { EventHub.logger.info("Actual actors: #{Celluloid::Actor.all.size}: #{Celluloid::Actor.all.map { |a| a.class }.join(", ")}") }
 
-      publish(heartbeat(action: 'started'))
-      EventHub.logger.info('Heartbeat has sent [started] beat')
+      publish(heartbeat(action: "started"))
+      EventHub.logger.info("Heartbeat has sent [started] beat")
       loop do
         sleep Configuration.processor[:heartbeat_cycle_in_s]
         publish(heartbeat)
-        EventHub.logger.info('Heartbeat has sent a beat')
+        EventHub.logger.info("Heartbeat has sent a beat")
       end
     end
 
     def cleanup
-      EventHub.logger.info('Heartbeat is cleaning up...')
-      publish(heartbeat(action: 'stopped'))
-      EventHub.logger.info('Heartbeat has sent a [stopped] beat')
+      EventHub.logger.info("Heartbeat is cleaning up...")
+      publish(heartbeat(action: "stopped"))
+      EventHub.logger.info("Heartbeat has sent a [stopped] beat")
     end
 
     private
@@ -43,29 +43,29 @@ module EventHub
       success = channel.wait_for_confirms
 
       unless success
-        raise 'Published heartbeat message has '\
-          'not been confirmed by the server'
+        raise "Published heartbeat message has "\
+          "not been confirmed by the server"
       end
     ensure
-      connection.close if connection
+      connection&.close
     end
 
-    def heartbeat(args = { action: 'running' })
+    def heartbeat(args = {action: "running"})
       message = EventHub::Message.new
-      message.origin_module_id  = EventHub::Configuration.name
-      message.origin_type       = 'processor'
-      message.origin_site_id    = 'global'
+      message.origin_module_id = EventHub::Configuration.name
+      message.origin_type = "processor"
+      message.origin_site_id = "global"
 
-      message.process_name      = 'event_hub.heartbeat'
+      message.process_name = "event_hub.heartbeat"
 
       now = Time.now
 
       # message structure needs more changes
       message.body = {
         version: @processor_instance.send(:version),
-        action:  args[:action],
-        pid:     Process.pid,
-        process_name: 'event_hub.heartbeat',
+        action: args[:action],
+        pid: Process.pid,
+        process_name: "event_hub.heartbeat",
         heartbeat: {
           started: now_stamp(started_at),
           stamp_last_beat: now_stamp(now),
@@ -90,11 +90,11 @@ module EventHub
     end
 
     def addresses
-      interfaces = Socket.getifaddrs.select do |interface|
+      interfaces = Socket.getifaddrs.select { |interface|
         !interface.addr.ipv4_loopback? && !interface.addr.ipv6_loopback?
-      end
+      }
 
-      interfaces.map do |interface|
+      interfaces.map { |interface|
         begin
           {
             interface: interface.name,
@@ -104,7 +104,7 @@ module EventHub
         rescue
           nil # will be ignored
         end
-      end.compact
+      }.compact
     end
 
     def messages_statistics

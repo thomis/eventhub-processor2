@@ -6,16 +6,16 @@ module EventHub
     extend self
     extend Helper
 
-    attr_reader :name           # name of processor
-    attr_reader :environment    # environment the processor is running
-    attr_reader :detached       # run processor run as a daemon
-    attr_reader :config_file    # name of configuration file
-    attr_reader :config_data    # data from configuration file
+    attr_reader :name # name of processor
+    attr_reader :environment # environment the processor is running
+    attr_reader :detached # run processor run as a daemon
+    attr_reader :config_file # name of configuration file
+    attr_reader :config_data # data from configuration file
 
-    @name = 'undefined'
-    @environment = 'development'
+    @name = "undefined"
+    @environment = "development"
     @detached = false
-    @config_file = File.join(Dir.getwd, 'config', "#{@name}.json")
+    @config_file = File.join(Dir.getwd, "config", "#{@name}.json")
     @config_data = {}
 
     # set name of processor
@@ -24,32 +24,32 @@ module EventHub
     end
 
     def reset
-      @name = 'undefined'
-      @environment = 'development'
+      @name = "undefined"
+      @environment = "development"
       @detached = false
-      @config_file = File.join(Dir.getwd, 'config', "#{@name}.json")
+      @config_file = File.join(Dir.getwd, "config", "#{@name}.json")
       @config_data = {}
     end
 
     # parse options from argument list
     def parse_options(argv = ARGV)
-      @config_file = File.join(Dir.getwd, 'config', "#{@name}.json")
+      @config_file = File.join(Dir.getwd, "config", "#{@name}.json")
 
-      OptionParser.new do |opts|
-        note = 'Define environment'
-        opts.on('-e', '--environment ENVIRONMENT', note) do |environment|
+      OptionParser.new { |opts|
+        note = "Define environment"
+        opts.on("-e", "--environment ENVIRONMENT", note) do |environment|
           @environment = environment
         end
 
-        opts.on('-d', '--detached', 'Run processor detached as a daemon') do
+        opts.on("-d", "--detached", "Run processor detached as a daemon") do
           @detached = true
         end
 
-        note = 'Define configuration file'
-        opts.on('-c', '--config CONFIG', note) do |config|
+        note = "Define configuration file"
+        opts.on("-c", "--config CONFIG", note) do |config|
           @config_file = config
         end
-      end.parse!(argv)
+      }.parse!(argv)
 
       true
     rescue OptionParser::InvalidOption => e
@@ -71,7 +71,7 @@ module EventHub
         new_data = JSON.parse(File.read(@config_file), symbolize_names: true)
       rescue => e
         EventHub.logger.warn("Exception while loading configuration file: #{e}")
-        EventHub.logger.info('Using default configuration values')
+        EventHub.logger.info("Using default configuration values")
       end
 
       deep_merge!(@config_data, default_configuration)
@@ -94,13 +94,18 @@ module EventHub
         fail(NoMethodError, "unknown configuration [#{name}]", caller)
     end
 
+    def respond_to_missing?(name, include_private = false)
+      return true if @config_data[name.to_sym]
+      false
+    end
+
     def default_configuration
       {
         server: {
-          user: 'guest',
-          password: 'guest',
-          host: 'localhost',
-          vhost: 'event_hub',
+          user: "guest",
+          password: "guest",
+          host: "localhost",
+          vhost: "event_hub",
           port: 5672,
           tls: false,
           tls_cert: nil,

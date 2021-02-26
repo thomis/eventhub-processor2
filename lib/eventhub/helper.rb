@@ -11,16 +11,16 @@ module EventHub
     # EventHub::NameSpace::DemoProcessor => name_space.demo_processor
     # NameSpace::Demo => name_space.demo
     def get_name_from_class(instance)
-      instance.class.to_s.split('::').map do |element|
-        next if element == 'EventHub'
-        element.split(/(?=[A-Z])/).join('_').downcase
-      end.compact.join('.')
+      instance.class.to_s.split("::").map { |element|
+        next if element == "EventHub"
+        element.split(/(?=[A-Z])/).join("_").downcase
+      }.compact.join(".")
     end
 
     def create_bunny_connection
       server = EventHub::Configuration.server
 
-      protocol = 'amqp'
+      protocol = "amqp"
       connection_properties = {}
       connection_properties[:user] = server[:user]
       connection_properties[:pass] = server[:password]
@@ -28,7 +28,7 @@ module EventHub
 
       # inject bunny logs on request
       unless server[:show_bunny_logs]
-        connection_properties[:logger] = Logger.new('/dev/null')
+        connection_properties[:logger] = Logger.new("/dev/null")
       end
 
       # we don't need it since reactors can deal with it
@@ -50,7 +50,7 @@ module EventHub
     end
 
     # Formats stamp into UTC format
-    def now_stamp(now=nil)
+    def now_stamp(now = nil)
       now ||= Time.now
       now.utc.strftime("%Y-%m-%dT%H:%M:%S.%6NZ")
     end

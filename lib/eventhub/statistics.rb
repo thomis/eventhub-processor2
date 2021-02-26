@@ -11,14 +11,12 @@ class EventHub::Statistics
   end
 
   def measure(size, &block)
-    begin
-      start = Time.now
-      yield
-      success(Time.now - start, size)
-    rescue
-      failure
-      raise
-    end
+    start = Time.now
+    yield
+    success(Time.now - start, size)
+  rescue
+    failure
+    raise
   end
 
   def success(process_time, size)

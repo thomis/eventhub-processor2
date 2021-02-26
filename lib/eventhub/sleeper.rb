@@ -8,7 +8,7 @@ module EventHub
     end
 
     def stop
-      @writer.close if @writer and !@writer.closed?
+      @writer.close if @writer && !@writer.closed?
     end
   end
 end

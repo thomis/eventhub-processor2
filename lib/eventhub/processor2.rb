@@ -1,4 +1,4 @@
-require_relative 'base'
+require_relative "base"
 
 # EventHub module
 module EventHub
@@ -15,7 +15,7 @@ module EventHub
     def initialize(args = {})
       # Set processor name
       EventHub::Configuration.name = args[:name] ||
-                                     get_name_from_class(self)
+        get_name_from_class(self)
 
       # Parse comand line options
       EventHub::Configuration.parse_options
@@ -54,7 +54,7 @@ module EventHub
     # get message as EventHub::Message class instance
     # args contain :queue_name, :content_type, :priority, :delivery_tag
     def handle_message(_message, _args = {})
-      raise 'need to be implemented in derived class'
+      raise "need to be implemented in derived class"
     end
 
     # pass message as string like: '{ "header": ... , "body": { .. }}'
@@ -86,8 +86,8 @@ module EventHub
 
     def start_supervisor
       @config = Celluloid::Supervision::Configuration.define([
-        {type: ActorHeartbeat, as: :actor_heartbeat, args: [ self ]},
-        {type: ActorListener, as: :actor_listener, args: [ self ]}
+        {type: ActorHeartbeat, as: :actor_heartbeat, args: [self]},
+        {type: ActorListener, as: :actor_listener, args: [self]}
       ])
 
       sleeper = @sleeper
@@ -95,34 +95,34 @@ module EventHub
         restart_in_s = Configuration.processor[:restart_in_s]
         EventHub.logger.info("Restarting in #{restart_in_s} seconds...")
         sleeper.start(restart_in_s)
-      end )
+      end)
 
       @config.deploy
     end
 
     def main_event_loop
+      Celluloid.boot
       setup_signal_handler
       start_supervisor
 
       loop do
         command = @command_queue.pop
-        case
-          when SIGNALS_FOR_TERMINATION.include?(command)
-            EventHub.logger.info("Command [#{command}] received")
-            @sleeper.stop
-            break
-          when SIGNALS_FOR_RELOAD_CONFIG.include?(command)
-            EventHub::Configuration.load!
-            EventHub.logger.info('Configuration file reloaded')
+        if SIGNALS_FOR_TERMINATION.include?(command)
+          EventHub.logger.info("Command [#{command}] received")
+          @sleeper.stop
+          break
+        elsif SIGNALS_FOR_RELOAD_CONFIG.include?(command)
+          EventHub::Configuration.load!
+          EventHub.logger.info("Configuration file reloaded")
 
-            # restart listener when actor is known
-            if Celluloid::Actor[:actor_listener]
-              Celluloid::Actor[:actor_listener].async.restart
-            else
-              EventHub.logger.info('Was unable to get a valid listener actor to restart... check!!!')
-            end
+          # restart listener when actor is known
+          if Celluloid::Actor[:actor_listener]
+            Celluloid::Actor[:actor_listener].async.restart
           else
-            sleep 0.5
+            EventHub.logger.info("Was unable to get a valid listener actor to restart... check!!!")
+          end
+        else
+          sleep 0.5
         end
       end
 
