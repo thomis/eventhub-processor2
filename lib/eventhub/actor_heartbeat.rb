@@ -21,7 +21,6 @@ module EventHub
       loop do
         sleep Configuration.processor[:heartbeat_cycle_in_s]
         publish(heartbeat)
-        EventHub.logger.info("Heartbeat has sent a beat")
       end
     end
 

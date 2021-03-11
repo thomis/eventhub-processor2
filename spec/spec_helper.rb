@@ -4,6 +4,7 @@ SimpleCov.start
 
 require "celluloid/test"
 require_relative "../lib/eventhub/base"
+require_relative "support/support"
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

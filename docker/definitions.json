@@ -1,5 +1,7 @@
 {
-  "rabbit_version": "3.6.14",
+  "rabbitmq_version": "3.8.14",
+  "product_name": "RabbitMQ",
+  "product_version": "3.8.14",
   "users": [
     {
       "name": "guest",
@@ -51,6 +53,13 @@
       "durable": true,
       "auto_delete": false,
       "arguments": {}
+    },
+    {
+      "name": "processor2",
+      "vhost": "event_hub",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
     }
   ],
   "exchanges": [
@@ -89,6 +98,15 @@
       "auto_delete": false,
       "internal": false,
       "arguments": {}
+    },
+    {
+      "name": "processor2",
+      "vhost": "event_hub",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
     }
   ],
   "bindings": [
@@ -120,6 +138,14 @@
       "source": "an_exchange",
       "vhost": "event_hub",
       "destination": "example.outbound",
+      "destination_type": "queue",
+      "routing_key": "",
+      "arguments": {}
+    },
+    {
+      "source": "processor2",
+      "vhost": "event_hub",
+      "destination": "processor2",
       "destination_type": "queue",
       "routing_key": "",
       "arguments": {}

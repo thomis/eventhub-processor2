@@ -2,16 +2,19 @@ require "spec_helper"
 require "fileutils"
 
 RSpec.describe EventHub::Processor2 do
-  around(:each) do |example|
-    example.run
+  before(:all) do
+    Support.ensure_rabbitmq_is_available
   end
+
+  let!(:processor) {
+    EventHub::Processor2.new
+  }
 
   it "has a version number" do
     expect(EventHub::VERSION).not_to be nil
   end
 
   it "gets a version" do
-    processor = EventHub::Processor2.new
     expect(processor.version).not_to eq(nil)
   end
 
@@ -20,12 +23,10 @@ RSpec.describe EventHub::Processor2 do
   end
 
   it "raises exception if handle_message method is not implemented" do
-    p2 = EventHub::Processor2.new
-    expect { p2.handle_message("msg") }.to raise_error(RuntimeError)
+    expect { processor.handle_message("msg") }.to raise_error(RuntimeError)
   end
 
   it "starts and stops" do
-    processor = EventHub::Processor2.new
     thr = Thread.new { processor.start }
     sleep 0.5
     processor.stop

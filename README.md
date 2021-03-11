@@ -173,7 +173,19 @@ Processor2 symbolizes keys and sub-keys from configuration files automatically.
 
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+```
+  # Get the source code
+  git clone https://github.com/thomis/eventhub-processor2.git
+
+  # Install dependencies
+  bundle
+
+  # Setup rabbitmq docker container with initial definitions. This can be run multiple times to get your container back into an initial state
+  bundle exec rake init
+
+  # Run all rspec tests
+  bundle exec rake
+```
 
 To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
 
