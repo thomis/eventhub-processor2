@@ -1,0 +1,40 @@
+name: cd
+
+on:
+  release:
+    types: [ published ]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout current code
+      uses: actions/checkout@v2
+
+    - name: Get current tag
+      id: vars
+      run: echo ::set-output name=tag::$(echo ${GITHUB_REF:10})
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.1'
+        bundler-cache: true
+        cache-version: 1
+
+    - name: Build realease
+      run: |
+        rake build
+
+    - name: Upload release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ./pkg/eventhub-processor2-${{steps.vars.outputs.tag}}.gem
+        asset_name: eventhub-processor2-${{steps.vars.outputs.tag}}.gem
+        asset_content_type: application/zip
+
