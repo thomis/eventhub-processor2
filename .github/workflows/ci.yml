@@ -38,6 +38,16 @@ jobs:
         cd docker && docker build -t processor-rabbitmq .
         docker run -d -p 5672:5672 -p 15672:15672 --name processor-rabbitmq processor-rabbitmq
 
+    - name: Code Climate Test Reporter
+      run: |
+        curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+        chmod +x ./cc-test-reporter
+        ./cc-test-reporter before-build
+
     - name: Run default task
       run: |
         bundle exec rake
+
+    - name: Publish to Code Climate
+      run: |
+        ./cc-test-reporter after-build --exit-code ${{ secrets.CLIMATE_REPORT_ID }}
