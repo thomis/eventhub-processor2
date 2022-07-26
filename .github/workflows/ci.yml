@@ -52,4 +52,4 @@ jobs:
 
     - name: Publish to Code Climate
       run: |
-        ./cc-test-reporter after-build --exit-code ${{ steps.rake_tests.exitcode }}
+        ./cc-test-reporter after-build --exit-code 0
