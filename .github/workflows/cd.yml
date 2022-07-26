@@ -50,6 +50,8 @@ jobs:
 
     - name: Push to Rubygems
       run: |
+        git config --global user.email "thomas.steiner@ikey.ch"
+        git config --global user.name "thomis"
         mkdir ~/.gem
         echo -e "---\n:rubygems_api_key: ${{ secrets.RUBYGEMS_API_KEY }}" > ~/.gem/credentials
         chmod 600 ~/.gem/credentials
