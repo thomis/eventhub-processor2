@@ -125,8 +125,8 @@ module EventHub
     end
 
     def to_s
-      "Msg: process "\
-        "[#{process_name}, #{process_step_position}, #{process_execution_id}]"\
+      "Msg: process " \
+        "[#{process_name}, #{process_step_position}, #{process_execution_id}]" \
         ", status [#{status_code},#{status_message},#{status_retried_count}]"
     end
 

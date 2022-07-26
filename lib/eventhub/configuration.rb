@@ -124,13 +124,13 @@ module EventHub
     end
 
     def instance
-      warn "[DEPRECATION] `instance` is deprecated. Please use new"\
+      warn "[DEPRECATION] `instance` is deprecated. Please use new" \
            " configuration access method."
       self
     end
 
     def data
-      warn "[DEPRECATION] `data` is deprecated. Please use new configuration"\
+      warn "[DEPRECATION] `data` is deprecated. Please use new configuration" \
            " access method."
       stringify_keys(@config_data)
     end

@@ -29,20 +29,20 @@ module EventHub
       with_listen(args) do |connection, channel, consumer, queue, queue_name|
         EventHub.logger.info("Listening to queue [#{queue_name}]")
         consumer.on_delivery do |delivery_info, metadata, payload|
-          EventHub.logger.info("#{queue_name}: [#{delivery_info.delivery_tag}]"\
+          EventHub.logger.info("#{queue_name}: [#{delivery_info.delivery_tag}]" \
                                  " delivery")
 
           @processor_instance.statistics.measure(payload.size) do
             handle_payload(payload: payload,
-                           connection: connection,
-                           queue_name: queue_name,
-                           content_type: metadata[:content_type],
-                           priority: metadata[:priority],
-                           delivery_tag: delivery_info.delivery_tag)
+              connection: connection,
+              queue_name: queue_name,
+              content_type: metadata[:content_type],
+              priority: metadata[:priority],
+              delivery_tag: delivery_info.delivery_tag)
             channel.acknowledge(delivery_info.delivery_tag, false)
           end
 
-          EventHub.logger.info("#{queue_name}: [#{delivery_info.delivery_tag}]"\
+          EventHub.logger.info("#{queue_name}: [#{delivery_info.delivery_tag}]" \
                                " acknowledged")
         end
         queue.subscribe_with(consumer, block: false)

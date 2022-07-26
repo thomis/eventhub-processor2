@@ -42,7 +42,7 @@ module EventHub
       success = channel.wait_for_confirms
 
       unless success
-        raise "Published heartbeat message has "\
+        raise "Published heartbeat message has " \
           "not been confirmed by the server"
       end
     ensure
