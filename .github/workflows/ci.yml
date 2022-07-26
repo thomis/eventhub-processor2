@@ -19,8 +19,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        ruby: [ '3.1.2', '3.0.4', '2.7.6', '2.6.10']
+        ruby: [ '3.1', '3.0', '2.7', '2.6']
 
     name: Ruby ${{ matrix.ruby }}
     steps:
@@ -45,9 +46,10 @@ jobs:
         ./cc-test-reporter before-build
 
     - name: Run default task
+      id: rake_tests
       run: |
         bundle exec rake
 
     - name: Publish to Code Climate
       run: |
-        ./cc-test-reporter after-build --exit-code ${{ secrets.CLIMATE_REPORT_ID }}
+        ./cc-test-reporter after-build --exit-code ${{ steps.rake_tests.exitcode }}
