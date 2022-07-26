@@ -4,3 +4,4 @@ coverage
 logs
 example/data
 pkg
+tmp
