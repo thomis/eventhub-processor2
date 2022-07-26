@@ -28,9 +28,9 @@ jobs:
 
     - name: Set up Ruby
       uses: actions/setup-ruby@v1
-        with:
-          ruby-version: ${{ matrix.ruby }}
-          bundler-cache: true
+      with:
+        ruby-version: ${{ matrix.ruby }}
+        bundler-cache: true
 
     - name: Setup RabbitMQ
     - run: |
