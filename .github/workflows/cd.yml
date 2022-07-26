@@ -26,7 +26,7 @@ jobs:
 
     - name: Build release
       run: |
-        bundle exec rake build
+        bundle exec rake build:checksum
 
     - name: Upload release
       uses: actions/upload-release-asset@v1
@@ -38,3 +38,12 @@ jobs:
         asset_name: eventhub-processor2-${{steps.vars.outputs.tag}}.gem
         asset_content_type: application/zip
 
+    - name: Upload release checksum
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ./checksums/eventhub-processor2-${{steps.vars.outputs.tag}}.gem.sha512
+        asset_name: eventhub-processor2-${{steps.vars.outputs.tag}}.gem.sha512
+        asset_content_type: text/plain
