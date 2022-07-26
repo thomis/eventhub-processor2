@@ -1,0 +1,51 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - "*"
+
+  pull_request:
+    branches:
+      - "*"
+
+  schedule:
+  - cron: 0 2 * * *
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ruby: [ '3.1.2', '3.0.4', '2.7.6', '2.6.10', '2.5.9' ]
+
+    name: Ruby ${{ matrix.ruby }}
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Set up Ruby
+      uses: actions/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+
+    - name: Setup RabbitMQ
+    - run: |
+      cd docker && docker build -t processor-rabbitmq .
+      docker run -d -p 5672:5672 -p 15672:15672 --name processor-rabbitmq processor-rabbitmq
+
+    - name: CodeClimate Pre-Step
+    - run: |
+      curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+      chmod +x ./cc-test-reporter
+
+    - name: Run rake default task
+      run: |
+        bundle exec rake
+
+    - name: CodeClimate Post-Step
+      run: |
+        ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
