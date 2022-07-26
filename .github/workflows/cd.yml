@@ -50,6 +50,7 @@ jobs:
 
     - name: Push to Rubygems
       run: |
+        mkdir ~/.gem
         echo -e "---\n:rubygems_api_key: ${{ secrets.RUBYGEMS_API_KEY }}" > ~/.gem/credentials
         chmod 600 ~/.gem/credentials
         bundle exec rake release
