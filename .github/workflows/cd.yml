@@ -47,3 +47,10 @@ jobs:
         asset_path: ./checksums/eventhub-processor2-${{steps.vars.outputs.tag}}.gem.sha512
         asset_name: eventhub-processor2-${{steps.vars.outputs.tag}}.gem.sha512
         asset_content_type: text/plain
+
+    - name: Push to Rubygems
+      run: |
+        echo -e "---\n:rubygems_api_key: ${{ secrets.RUBYGEMS_API_KEY }}" > ~/.gem/credentials
+        chmod 600 ~/.gem/credentials
+        bundle exec rake release
+        rm ~/.gem/credentials
