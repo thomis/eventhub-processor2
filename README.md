@@ -1,7 +1,7 @@
 [![Gem Version](https://badge.fury.io/rb/eventhub-processor2.svg)](https://badge.fury.io/rb/eventhub-processor2)
 [![Maintainability](https://api.codeclimate.com/v1/badges/9112358562f0614e0e02/maintainability)](https://codeclimate.com/github/thomis/eventhub-processor2/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/9112358562f0614e0e02/test_coverage)](https://codeclimate.com/github/thomis/eventhub-processor2/test_coverage)
-[![Build Status](https://travis-ci.org/thomis/eventhub-processor2.svg?branch=master)](https://travis-ci.org/thomis/eventhub-processor2)
+[![ci](https://github.com/thomis/eventhub-processor2/actions/workflows/ci.yml/badge.svg)](https://github.com/thomis/eventhub-processor2/actions/workflows/ci.yml)
 
 # EventHub::Processor2
 
