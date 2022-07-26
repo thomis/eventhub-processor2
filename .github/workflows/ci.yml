@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ruby: [ '3.1.2', '3.0.4', '2.7.6', '2.6.10', '2.5.9' ]
+        ruby: [ '3.1.2', '3.0.4', '2.7.6', '2.6.10']
 
     name: Ruby ${{ matrix.ruby }}
     steps:
