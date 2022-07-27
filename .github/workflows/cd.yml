@@ -12,10 +12,6 @@ jobs:
     - name: Checkout current code
       uses: actions/checkout@v2
 
-    - name: Get current tag
-      id: vars
-      run: echo ::set-output name=tag::$(echo ${GITHUB_REF:10})
-
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
