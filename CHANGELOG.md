@@ -6,6 +6,7 @@
 * Move to GitHub actions
 * Add Dependabot to keep dependencies up-to-date
 * Format corrections
+* Remove support for ruby 2.5
 
 ## 1.11.0 / 2021-05-01
 
