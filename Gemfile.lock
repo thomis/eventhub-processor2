@@ -19,7 +19,7 @@ GEM
       timers (~> 4)
     diff-lcs (1.5.0)
     docile (1.4.0)
-    eventhub-components (0.2.2)
+    eventhub-components (0.3.1)
       logstash-logger (~> 0.26)
     json (2.6.2)
     logstash-event (1.2.02)
