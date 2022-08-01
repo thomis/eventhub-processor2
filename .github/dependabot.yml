@@ -1,6 +1,9 @@
 version: 2
 updates:
-  - package-ecosystem: 'bundler'
-    directory: '/'
+  - package-ecosystem: "bundler"
+    directory: "/"
     schedule:
-      interval: 'weekly'
+      interval: "weekly"
+      day: "saturday"
+      time: "04:00"
+      timezone: "Europe/Zurich"
