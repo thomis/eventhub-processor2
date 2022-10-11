@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    eventhub-processor2 (1.13.0)
+    eventhub-processor2 (1.14.0)
       bunny (~> 2.19)
       celluloid (~> 0.18)
       eventhub-components (~> 0.2)
@@ -31,7 +31,7 @@ GEM
     rainbow (3.1.1)
     rake (13.0.6)
     rbtree (0.4.5)
-    regexp_parser (2.5.0)
+    regexp_parser (2.6.0)
     rexml (3.2.5)
     rspec (3.11.0)
       rspec-core (~> 3.11.0)
@@ -39,13 +39,13 @@ GEM
       rspec-mocks (~> 3.11.0)
     rspec-core (3.11.0)
       rspec-support (~> 3.11.0)
-    rspec-expectations (3.11.0)
+    rspec-expectations (3.11.1)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.11.0)
     rspec-mocks (3.11.1)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.11.0)
-    rspec-support (3.11.0)
+    rspec-support (3.11.1)
     rubocop (1.35.1)
       json (~> 2.3)
       parallel (~> 1.10)
@@ -62,7 +62,7 @@ GEM
       rubocop (>= 1.7.0, < 2.0)
       rubocop-ast (>= 0.4.0)
     ruby-progressbar (1.11.0)
-    set (1.0.2)
+    set (1.0.3)
     simplecov (0.21.2)
       docile (~> 1.1)
       simplecov-html (~> 0.11)
@@ -76,7 +76,7 @@ GEM
       rubocop (= 1.35.1)
       rubocop-performance (= 1.14.3)
     timers (4.3.4)
-    unicode-display_width (2.2.0)
+    unicode-display_width (2.3.0)
     uuidtools (2.2.0)
 
 PLATFORMS
@@ -93,4 +93,4 @@ DEPENDENCIES
   standard (~> 1.16)
 
 BUNDLED WITH
-   2.3.18
+   2.3.19
