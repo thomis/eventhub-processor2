@@ -35,7 +35,7 @@ jobs:
         ruby-version: ${{ matrix.ruby }}
         bundler: latest
         bundler-cache: true
-        cache-version: 2
+        cache-version: 3
 
     - name: Setup RabbitMQ
       run: |
