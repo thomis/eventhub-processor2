@@ -1,5 +1,9 @@
 # Changelog of EventHub::Processor2
 
+## 1.15.0 / 2022-10-28
+
+* Updated gem dependencies
+
 ## 1.14.2 / 2022-10-11
 
 * Updated gem dependencies
