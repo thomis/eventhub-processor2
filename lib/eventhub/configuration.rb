@@ -84,7 +84,7 @@ module EventHub
     def deep_merge!(target, data)
       return if data.nil?
       merger = proc do |_, v1, v2|
-        v1.is_a?(Hash) && v2.is_a?(Hash) ? v1.merge(v2, &merger) : v2
+        (v1.is_a?(Hash) && v2.is_a?(Hash)) ? v1.merge(v2, &merger) : v2
       end
       target.merge! data, &merger
     end
