@@ -12,7 +12,7 @@ GEM
   specs:
     amq-protocol (2.3.2)
     ast (2.4.2)
-    bunny (2.19.0)
+    bunny (2.20.0)
       amq-protocol (~> 2.3, >= 2.3.1)
       sorted_set (~> 1, >= 1.0.2)
     celluloid (0.18.0)
