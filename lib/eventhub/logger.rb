@@ -1,7 +1,7 @@
 # EventHub module
 module EventHub
   def self.logger
-    unless @logger
+    unless defined?(@logger)
       @logger = ::EventHub::Components::MultiLogger.new
       @logger.add_device(Logger.new($stdout))
       @logger.add_device(

@@ -3,6 +3,7 @@
 ## 1.16.0 / 2022-12-18
 
 * Updated gem dependencies
+* Improve access on undefined @logger instance
 
 ## 1.15.0 / 2022-10-28
 
