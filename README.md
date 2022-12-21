@@ -181,6 +181,16 @@ Processor2 symbolizes keys and sub-keys from configuration files automatically.
   database['name']['subname']   # => "value"
 ```
 
+Version 1.17 and newer allows you to load and merge more configuration files programmatically. All additional files are hash deep merged into one configration. Exceptions while loading of files will be catched and shown as warnings.
+```ruby
+  # specific a file with full path and name
+  EventHub::Configuration.load_more!(pattern: "config/another_config.json")
+
+  # specific a glob pattern to load multiple files
+  EventHub::Configuration.load_more!(pattern: "config/processes/**/*.json")
+  EventHub::Configuration.load_more!(pattern: "config/templates/**/*.json")
+```
+
 ## Development
 
 ```

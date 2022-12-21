@@ -176,6 +176,12 @@ RSpec.describe EventHub::Configuration do
       expect(EventHub::Configuration.processes[:c]).to eq("c_value2")
       expect(EventHub::Configuration.processes[:d]).to eq("d_value")
     end
+
+    it "handles empty pattern" do
+      expect {
+        EventHub::Configuration.load_more!
+      }.not_to raise_error
+    end
   end
 
   context "deprecated method" do

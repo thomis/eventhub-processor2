@@ -81,6 +81,8 @@ module EventHub
 
     # load and merge more configuration files
     def load_more!(args = {})
+      return unless args[:pattern]
+
       Dir.glob(args[:pattern]).each do |name|
         next if File.directory?(name)
 
