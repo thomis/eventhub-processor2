@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    eventhub-processor2 (1.16.0)
+    eventhub-processor2 (1.17.0)
       bunny (~> 2.20)
       celluloid (~> 0.18)
       eventhub-components (~> 0.2)
@@ -12,7 +12,7 @@ GEM
   specs:
     amq-protocol (2.3.2)
     ast (2.4.2)
-    bunny (2.20.0)
+    bunny (2.20.1)
       amq-protocol (~> 2.3, >= 2.3.1)
       sorted_set (~> 1, >= 1.0.2)
     celluloid (0.18.0)
@@ -47,7 +47,7 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.12.0)
     rspec-support (3.12.0)
-    rubocop (1.39.0)
+    rubocop (1.40.0)
       json (~> 2.3)
       parallel (~> 1.10)
       parser (>= 3.1.2.1)
@@ -73,9 +73,9 @@ GEM
     sorted_set (1.0.3)
       rbtree
       set (~> 1.0)
-    standard (1.19.1)
+    standard (1.20.0)
       language_server-protocol (~> 3.17.0.2)
-      rubocop (= 1.39.0)
+      rubocop (= 1.40.0)
       rubocop-performance (= 1.15.1)
     timers (4.3.5)
     unicode-display_width (2.3.0)
@@ -93,7 +93,7 @@ DEPENDENCIES
   rake (~> 13.0)
   rspec (~> 3.11)
   simplecov (~> 0.21)
-  standard (~> 1.17)
+  standard (~> 1.20)
 
 BUNDLED WITH
    2.3.26

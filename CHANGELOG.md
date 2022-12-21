@@ -1,5 +1,10 @@
 # Changelog of EventHub::Processor2
 
+## 1.17.0 / 2022-12-21
+
+* Ability to load and merge more config file based on a name or a pattern
+* Update dependencies
+
 ## 1.16.0 / 2022-12-18
 
 * Updated gem dependencies

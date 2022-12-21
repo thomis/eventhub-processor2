@@ -124,6 +124,60 @@ RSpec.describe EventHub::Configuration do
     end
   end
 
+  context "more configuration files" do
+    before(:each) do
+      EventHub::Configuration.load!(config_file: "spec/fixtures/test.json", environment: "test")
+    end
+
+    it "ignores missing files" do
+      expect {
+        EventHub::Configuration.load_more!(pattern: "unkown.json")
+      }.not_to raise_error
+      expect(EventHub::Configuration.server[:user]).to eq("guest_test")
+      expect(EventHub::Configuration.server[:password]).to eq("guest_test")
+      expect(EventHub::Configuration.server[:host]).to eq("localhost_test")
+      expect(EventHub::Configuration.server[:vhost]).to eq("eventhub_test")
+      expect(EventHub::Configuration.server[:port]).to eq(5674)
+      expect(EventHub::Configuration.server[:tls]).to eq(true)
+      expect(EventHub::Configuration.processor[:heartbeat_cycle_in_s]).to eq(401)
+      expect(EventHub::Configuration.processor[:watchdog_cycle_in_s]).to eq(61)
+      expect(EventHub::Configuration.processor[:listener_queues]).to eq(["demo"])
+    end
+
+    it "ignores folders" do
+      expect {
+        EventHub::Configuration.load_more!(pattern: "spec/fixtures/more_configs")
+      }.not_to raise_error
+    end
+
+    it "ignores invalid configuration file" do
+      expect {
+        EventHub::Configuration.load_more!(pattern: "spec/fixtures/bad.json")
+      }.not_to raise_error
+    end
+
+    it "loads multiple with given pattern" do
+      EventHub::Configuration.load_more!(pattern: "spec/fixtures/more_configs/**/*.json")
+
+      # content from initial load
+      expect(EventHub::Configuration.server[:user]).to eq("guest_test")
+      expect(EventHub::Configuration.server[:password]).to eq("guest_test")
+      expect(EventHub::Configuration.server[:host]).to eq("localhost_test")
+      expect(EventHub::Configuration.server[:vhost]).to eq("eventhub_test")
+      expect(EventHub::Configuration.server[:port]).to eq(5674)
+      expect(EventHub::Configuration.server[:tls]).to eq(true)
+      expect(EventHub::Configuration.processor[:heartbeat_cycle_in_s]).to eq(401)
+      expect(EventHub::Configuration.processor[:watchdog_cycle_in_s]).to eq(61)
+      expect(EventHub::Configuration.processor[:listener_queues]).to eq(["demo"])
+
+      # content from more loaded files
+      expect(EventHub::Configuration.processes[:a]).to eq("a_value")
+      expect(EventHub::Configuration.processes[:b]).to eq("b_value")
+      expect(EventHub::Configuration.processes[:c]).to eq("c_value2")
+      expect(EventHub::Configuration.processes[:d]).to eq("d_value")
+    end
+  end
+
   context "deprecated method" do
     it "returns configuration instance" do
       expect(EventHub::Configuration.instance).to eq(EventHub::Configuration)
