@@ -1,0 +1,7 @@
+{
+	"test": {
+		"processes": {
+			"c": "c_value2"
+		}
+	}
+}

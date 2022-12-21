@@ -79,6 +79,24 @@ module EventHub
       deep_merge!(@config_data, new_data)
     end
 
+    # load and merge more configuration files
+    def load_more!(args = {})
+      return unless args[:pattern]
+
+      Dir.glob(args[:pattern]).each do |name|
+        next if File.directory?(name)
+
+        begin
+          EventHub.logger.info("About to load file [#{name}]...")
+          new_data = JSON.parse(File.read(name), symbolize_names: true)
+          new_data = new_data[@environment.to_sym]
+          deep_merge!(@config_data, new_data)
+        rescue => e
+          EventHub.logger.warn("Exception while loading file [#{name}]: #{e}")
+        end
+      end
+    end
+
     # Deep merging of hashes
     # deep_merge by Stefan Rusterholz, see http://www.ruby-forum.com/topic/142809
     def deep_merge!(target, data)
