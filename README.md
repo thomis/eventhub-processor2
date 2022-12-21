@@ -203,7 +203,6 @@ If you have conflicting hashes, the previous settings will be overwritten.
 ```
 2nd file loaded
 ```json
-  # file loading sequence #2
   {
     "test": {
       "b": "another_value"
