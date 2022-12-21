@@ -181,7 +181,7 @@ Processor2 symbolizes keys and sub-keys from configuration files automatically.
   database['name']['subname']   # => "value"
 ```
 
-Version 1.17 and newer allows you to load and merge more configuration files programmatically. It is expected to call load! once and then load_more! zero, one, or multiple times. All additional files loaded with load_more! are hash deep merged into one configuration structure. Exceptions while loading of files will be catched and shown as warnings.
+Version 1.17 and newer allows you to load and merge more configuration files programmatically. It is expected that load! is called once (implicit during class initialization) and then load_more! zero, one, or multiple times. All additional files loaded with load_more! are hash deep merged into one configuration structure. Exceptions while loading of files will be catched and shown as warnings.
 ```ruby
   # specify a file
   EventHub::Configuration.load_more!(pattern: "config/another_config.json")
