@@ -190,6 +190,32 @@ Version 1.17 and newer allows you to load and merge more configuration files pro
   EventHub::Configuration.load_more!(pattern: "config/processes/**/*.json")
   EventHub::Configuration.load_more!(pattern: "config/templates/**/*.json")
 ```
+If you have conflicting hashes, the previous settings will be overwritten.
+```json
+  # file loading sequence #1
+  {
+    "test": {
+      "a": "a_value",
+      "b": "b_value"
+    }
+  }
+
+  # file loading sequence #2
+  {
+    "test": {
+      "b": "another_value"
+    }
+  }
+
+  # will result into
+  {
+    "test": {
+      "a": "a_value",
+      "b": "another_value"
+    }
+  }
+
+```
 
 ## Development
 
