@@ -1,5 +1,9 @@
 # Changelog of EventHub::Processor2
 
+## 1.18.0 / 2023-01-30
+
+* Update dependencies
+
 ## 1.17.0 / 2022-12-21
 
 * Ability to load and merge more config file based on a name or a pattern
