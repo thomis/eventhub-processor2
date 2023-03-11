@@ -83,7 +83,7 @@ module EventHub
     def load_more!(args = {})
       return unless args[:pattern]
 
-      Dir.glob(args[:pattern]).each do |name|
+      Dir.glob(args[:pattern]).sort.each do |name|
         next if File.directory?(name)
 
         begin
