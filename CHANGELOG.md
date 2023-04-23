@@ -1,5 +1,9 @@
 # Changelog of EventHub::Processor2
 
+## 1.19.0 / 2023-04-23
+
+* Update dependencies
+
 ## 1.18.0 / 2023-01-30
 
 * Update dependencies

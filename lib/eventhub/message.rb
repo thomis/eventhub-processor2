@@ -145,7 +145,7 @@ module EventHub
     end
 
     def append_to_execution_history(processor_name)
-      header.set("execution_history", []) unless \
+      header.set("execution_history", []) unless
         header.get("execution_history")
       header.get("execution_history") << \
         {"processor" => processor_name, "timestamp" => now_stamp}
