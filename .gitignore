@@ -6,3 +6,4 @@ example/data
 pkg
 tmp
 checksums
+Gemfile.lock
