@@ -31,7 +31,7 @@ Currently supported and tested ruby versions are:
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'eventhub-processor2'
+gem "eventhub-processor2"
 ```
 
 And then execute:
@@ -52,7 +52,7 @@ module EventHub
   class Example < Processor2
 
     def version
-      '1.0.0' # define your version
+      "1.0.0" # define your version
     end
 
     def handle_message(message, args = {})
@@ -73,8 +73,8 @@ module EventHub
 
       # it is possible to publish a message during message processing but it's a
       # good style to return one or multiple messages at end of handle_message
-      publish(message: 'your message as a string') # default exchange_name is 'event_hub.inbound'
-      publish(message: 'your message as string', exchange_name: 'your_specfic_exchange')
+      publish(message: "your message as a string") # default exchange_name is 'event_hub.inbound'
+      publish(message: "your message as string", exchange_name: "your_specfic_exchange")
 
       # at the end return one of
       message_to_return = message.copy # return message if sucessfull processing
@@ -177,9 +177,9 @@ Processor2 symbolizes keys and sub-keys from configuration files automatically.
 
   # If you need strings instead of symbols you can do
   database = stringify_keys(EventHub::Configuration.database)
-  database['user']              # => "guest"
-  database['password']          # => "secret"
-  database['name']['subname']   # => "value"
+  database["user"]              # => "guest"
+  database["password"]          # => "secret"
+  database["name"]["subname"]   # => "value"
 ```
 
 Version 1.17 and newer allows you to load and merge more configuration files programmatically. It is expected that load! is called once (implicit during class initialization) and then load_more! zero, one, or multiple times. All additional files loaded with load_more! are hash deep merged into one configuration structure. Exceptions while loading of files will be catched and shown as warnings.
