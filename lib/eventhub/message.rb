@@ -32,7 +32,7 @@ module EventHub
         self.header.get(header)
       end
 
-      define_method("#{name}=") do |value|
+      define_method(:"#{name}=") do |value|
         self.header.set(header, value)
       end
     end
