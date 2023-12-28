@@ -10,6 +10,7 @@ RSpec.describe EventHub::Configuration do
       EventHub::Configuration.parse_options
       expect(EventHub::Configuration.environment).to eq("development")
       expect(EventHub::Configuration.detached).to eq(false)
+      expect(EventHub::Configuration.console_log_only).to eq(false)
     end
 
     it "parses environment" do
@@ -42,6 +43,11 @@ RSpec.describe EventHub::Configuration do
       success = EventHub::Configuration.parse_options(["-c", "a_configuration_file"])
       expect(success).to eq(true)
       expect(EventHub::Configuration.config_file).to eq("a_configuration_file")
+    end
+
+    it "supports logging to console only" do
+      EventHub::Configuration.parse_options(["--console-log-only"])
+      expect(EventHub::Configuration.console_log_only).to eq(true)
     end
   end
 

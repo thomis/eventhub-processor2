@@ -10,6 +10,7 @@ module EventHub
     attr_reader :environment # environment the processor is running
     attr_reader :detached # run processor run as a daemon
     attr_reader :config_file # name of configuration file
+    attr_reader :console_log_only # only log to console
     attr_reader :config_data # data from configuration file
 
     @name = "undefined"
@@ -29,6 +30,7 @@ module EventHub
       @detached = false
       @config_file = File.join(Dir.getwd, "config", "#{@name}.json")
       @config_data = {}
+      @console_log_only = false
     end
 
     # parse options from argument list
@@ -43,6 +45,10 @@ module EventHub
 
         opts.on("-d", "--detached", "Run processor detached as a daemon") do
           @detached = true
+        end
+
+        opts.on(nil, "--console-log-only", "Only log to console (containers)") do
+          @console_log_only = true
         end
 
         note = "Define configuration file"

@@ -4,10 +4,13 @@ module EventHub
     unless defined?(@logger)
       @logger = ::EventHub::Components::MultiLogger.new
       @logger.add_device(Logger.new($stdout))
-      @logger.add_device(
-        EventHub::Components::Logger.logstash(Configuration.name,
-          Configuration.environment)
-      )
+
+      unless Configuration.console_log_only
+        @logger.add_device(
+          EventHub::Components::Logger.logstash(Configuration.name,
+            Configuration.environment)
+        )
+      end
     end
     @logger
   end

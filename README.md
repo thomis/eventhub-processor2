@@ -19,6 +19,7 @@ Processor2 is using Bunny http://rubybunny.info a feature complete RabbitMQ Clie
 
 Currently supported and tested ruby versions are:
 
+- 3.3
 - 3.2
 - 3.1
 - 3.0
@@ -101,7 +102,7 @@ Usage: example [options]
     -e, --environment ENVIRONMENT    Define environment (default development)
     -d, --detached                   Run processor detached as a daemon
     -c, --config CONFIG              Define configuration file
-
+        --console-log-only           Logs to console only (E.g. containers)
 
 bundle exec ruby example.rb
 I, [2018-02-09T15:22:35.649646 #37966]  INFO -- : example (1.1.0): has been started

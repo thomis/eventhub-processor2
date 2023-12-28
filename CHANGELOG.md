@@ -1,8 +1,10 @@
 # Changelog of EventHub::Processor2
 
-## 1.20.0 / 2023-12-25
+## 1.20.0 / 2023-12-28
 
-* Update development dependencies
+* Update dependencies
+* Support Ruby 3.3.0
+* Have a console log only option
 
 ## 1.19.0 / 2023-04-23
 
