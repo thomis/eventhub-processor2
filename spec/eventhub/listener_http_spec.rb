@@ -1,12 +1,14 @@
 require "spec_helper"
+require "uri"
+require "net/http"
 
 RSpec.describe EventHub::ActorListenerHttp do
   before(:all) do
     Support.ensure_rabbitmq_is_available
   end
 
-  let!(:listener) {
-    EventHub::ActorListenerHttp.new
+  let(:listener) {
+    EventHub::ActorListenerHttp.new(nil, 8081, "/")
   }
 
   it "gives a valid actor" do
@@ -15,6 +17,18 @@ RSpec.describe EventHub::ActorListenerHttp do
   end
 
   it "succeeds to call rest endpoint" do
-    # expect { listener.publish(message: EventHub::Message.new.to_json) }.not_to raise_error
+    uri = URI("http://localhost:8081")
+    res = Net::HTTP.get_response(uri)
+
+    expect(res.is_a?(Net::HTTPSuccess)).to eq(true)
+    expect(res.body).to eq("Is running")
+  end
+
+  it "fails with method not allowed" do
+    uri = URI("http://localhost:8081")
+    res = Net::HTTP.post(uri, nil)
+
+    expect(res.is_a?(Net::HTTPMethodNotAllowed)).to eq(true)
+    expect(res.body).to eq("Method not allowed")
   end
 end

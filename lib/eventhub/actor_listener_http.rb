@@ -7,20 +7,25 @@ module EventHub
     include Celluloid
     finalizer :cleanup
 
-    def initialize(host = "0.0.0.0", port: 8091)
+    def initialize(host = "localhost", port = 8080, path = "/status")
       @host = host
       @port = port
+      @path = path
       start
     end
 
     def start
-      EventHub.logger.info("Listener http is starting...")
+      EventHub.logger.info("Listener http is starting [#{@host}, #{@port}], #{@path}...")
       @async_server = Thread.new do
-        @server = WEBrick::HTTPServer.new(Port: @port, BindAddress: @host)
-        @server.mount_proc "/" do |req, res|
+        @server = WEBrick::HTTPServer.new(
+          BindAddress: @host,
+          Port: @port,
+          Logger: WEBrick::Log.new("/dev/null"),
+          AccessLog: []
+        )
+        @server.mount_proc @path do |req, res|
           handle_request(req, res)
         end
-        trap("INT") { @server.shutdown }
         @server.start
       end
     end
@@ -29,16 +34,16 @@ module EventHub
       case req.request_method
       when "GET"
         res.status = 200
-        res.body = "Hello, World!"
+        res.body = "Is running"
       else
         res.status = 405
-        res.body = "Method Not Allowed"
+        res.body = "Method not allowed"
       end
     end
 
     def cleanup
       EventHub.logger.info("Listener http is cleaning up...")
-      @async_server & kill
+      @async_server&.kill
     end
   end
 end

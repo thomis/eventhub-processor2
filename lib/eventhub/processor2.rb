@@ -87,8 +87,8 @@ module EventHub
     def start_supervisor
       @config = Celluloid::Supervision::Configuration.define([
         {type: ActorHeartbeat, as: :actor_heartbeat, args: [self]},
-        {type: ActorListener, as: :actor_listener_amqp, args: [self]},
-        {type: ActorListenerHttp, as: :actor_listener_http, args: [self]}
+        {type: ActorListenerAmqp, as: :actor_listener_amqp, args: [self]},
+        {type: ActorListenerHttp, as: :actor_listener_http, args: []}
       ])
 
       sleeper = @sleeper
@@ -117,8 +117,8 @@ module EventHub
           EventHub.logger.info("Configuration file reloaded")
 
           # restart listener when actor is known
-          if Celluloid::Actor[:actor_listener]
-            Celluloid::Actor[:actor_listener].async.restart
+          if Celluloid::Actor[:actor_listener_amqp]
+            Celluloid::Actor[:actor_listener_amqp].async.restart
           else
             EventHub.logger.info("Was unable to get a valid listener actor to restart... check!!!")
           end
