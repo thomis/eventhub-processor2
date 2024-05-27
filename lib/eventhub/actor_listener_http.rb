@@ -1,7 +1,4 @@
-require "async"
-require "async/http/server"
-require "async/http/endpoint"
-require "async/http/protocol/https"
+require "webrick"
 
 # EventHub module
 module EventHub
@@ -10,32 +7,38 @@ module EventHub
     include Celluloid
     finalizer :cleanup
 
-    def initialize(host = "0.0.0.0", port: 8090)
-      @endpoint = Async::HTTP::Endpoint.parse("http://#{host}:#{port}")
-      start(host, port)
+    def initialize(host = "0.0.0.0", port: 8091)
+      @host = host
+      @port = port
+      start
     end
 
-    def start(host, port)
+    def start
       EventHub.logger.info("Listener http is starting...")
-      @async_task = Thread.new do
-        Async do |task|
-          server = Async::HTTP::Server.new(method(:handle_request), @endpoint)
-          server.run
+      @async_server = Thread.new do
+        @server = WEBrick::HTTPServer.new(Port: @port, BindAddress: @host)
+        @server.mount_proc "/" do |req, res|
+          handle_request(req, res)
         end
+        trap("INT") { @server.shutdown }
+        @server.start
       end
     end
 
-    def handle_request(request)
-      if request.method == "GET"
-        Async::HTTP::Response[200, {}, ["Component is running"]]
+    def handle_request(req, res)
+      case req.request_method
+      when "GET"
+        res.status = 200
+        res.body = "Hello, World!"
       else
-        Async::HTTP::Response[405, {}, ["Method Not Allowed"]]
+        res.status = 405
+        res.body = "Method Not Allowed"
       end
     end
 
     def cleanup
       EventHub.logger.info("Listener http is cleaning up...")
-      @async_task&.kill
+      @async_server & kill
     end
   end
 end
