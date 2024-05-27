@@ -60,7 +60,7 @@ module EventHub
     # pass message as string like: '{ "header": ... , "body": { .. }}'
     # and optionally exchange_name: 'your exchange name'
     def publish(args = {})
-      Celluloid::Actor[:actor_listener].publish(args)
+      Celluloid::Actor[:actor_listener_amqp].publish(args)
     rescue => error
       EventHub.logger.error("Unexpected exeption while publish: #{error}")
       raise
@@ -87,7 +87,8 @@ module EventHub
     def start_supervisor
       @config = Celluloid::Supervision::Configuration.define([
         {type: ActorHeartbeat, as: :actor_heartbeat, args: [self]},
-        {type: ActorListener, as: :actor_listener, args: [self]}
+        {type: ActorListener, as: :actor_listener_amqp, args: [self]},
+        {type: ActorListenerHttp, as: :actor_listener_http, args: [self]}
       ])
 
       sleeper = @sleeper

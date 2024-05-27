@@ -22,7 +22,8 @@ require_relative "consumer"
 require_relative "actor_heartbeat"
 require_relative "actor_watchdog"
 require_relative "actor_publisher"
-require_relative "actor_listener"
+require_relative "actor_listener_amqp"
+require_relative "actor_listener_http"
 require_relative "processor2"
 
 Celluloid.logger = nil

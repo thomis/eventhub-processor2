@@ -1,12 +1,12 @@
 require "spec_helper"
 
-RSpec.describe EventHub::ActorListener do
+RSpec.describe EventHub::ActorListenerAmqp do
   before(:all) do
     Support.ensure_rabbitmq_is_available
   end
 
   let!(:listener) {
-    EventHub::ActorListener.new(EventHub::Processor2.new)
+    EventHub::ActorListenerAmqp.new(EventHub::Processor2.new)
   }
 
   it "gives a valid actor" do
@@ -24,7 +24,7 @@ RSpec.describe EventHub::ActorListener do
 
   it "raises exception when restart" do
     expect(listener).not_to eq(nil)
-    expect { listener.restart }.to raise_error(RuntimeError, "Listener is restarting...")
+    expect { listener.restart }.to raise_error(RuntimeError, "Listener amqp is restarting...")
   end
 
   it "handles payload" do
