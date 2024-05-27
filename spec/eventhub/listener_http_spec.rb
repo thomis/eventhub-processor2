@@ -17,6 +17,7 @@ RSpec.describe EventHub::ActorListenerHttp do
   end
 
   it "succeeds to call rest endpoint" do
+    sleep 0.2
     uri = URI("http://localhost:8081")
     res = Net::HTTP.get_response(uri)
 
@@ -25,6 +26,7 @@ RSpec.describe EventHub::ActorListenerHttp do
   end
 
   it "fails with method not allowed" do
+    sleep 0.1
     uri = URI("http://localhost:8081")
     res = Net::HTTP.post(uri, nil)
 
