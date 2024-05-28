@@ -7,10 +7,10 @@ module EventHub
     include Celluloid
     finalizer :cleanup
 
-    def initialize(host = "localhost", port = 8080, path = "/status")
-      @host = host
-      @port = port
-      @path = path
+    def initialize(args = {})
+      @host = args[:bind_address] || EventHub::Configuration.server.dig(:heartbeat, :bind_address)
+      @port = args[:port] || EventHub::Configuration.server.dig(:heartbeat, :port)
+      @path = args[:path] || EventHub::Configuration.server.dig(:heartbeat, :path)
       start
     end
 
@@ -34,10 +34,10 @@ module EventHub
       case req.request_method
       when "GET"
         res.status = 200
-        res.body = "Is running"
+        res.body = "OK"
       else
         res.status = 405
-        res.body = "Method not allowed"
+        res.body = "Method Not Allowed"
       end
     end
 

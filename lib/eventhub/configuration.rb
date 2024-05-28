@@ -136,7 +136,12 @@ module EventHub
           tls_key: nil,
           tls_ca_certificates: [],
           verify_peer: false,
-          show_bunny_logs: false
+          show_bunny_logs: false,
+          heartbeat: {
+            bind_address: "localhost",
+            port: 8080,
+            path: "/svc/#{@name}/heartbeat"
+          }
         },
         processor: {
           heartbeat_cycle_in_s: 300,
