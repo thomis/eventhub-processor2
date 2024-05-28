@@ -15,7 +15,7 @@ module EventHub
     end
 
     def start
-      EventHub.logger.info("Listener http is starting [#{@host}, #{@port}], #{@path}...")
+      EventHub.logger.info("Listener http is starting [#{@host}, #{@port}, #{@path}]...")
       @async_server = Thread.new do
         @server = WEBrick::HTTPServer.new(
           BindAddress: @host,

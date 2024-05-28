@@ -1,6 +1,6 @@
 # Changelog of EventHub::Processor2
 
-## 1.21.0 / 2024-05-28
+## 1.21.1 / 2024-05-28
 
 * Update dependencies
 * Support Ruby 3.3.1
