@@ -11,7 +11,8 @@ Processor2 has currently the following sub-components implemented
 * Heartbeater - send hearbeats to EventHub dispatcher every x minutes
 * Publisher - responsible for message publishing
 * Watchdog - Checks regularly broker connection and defined listener queue(s)
-* Listener - Listens to defined queues, parses recevied message into a EventHub::Message instance and calls handle_message method as defined in derived class.
+* Listener AMQP - Listens to defined AMQP queues, parses recevied message into a EventHub::Message instance and calls handle_message method as defined in derived class.
+* Listener HTTP - Provides an http endpoint for health checks (Exp.  /svc/{class_name}/heartbeat)
 
 Processor2 is using Bunny http://rubybunny.info a feature complete RabbitMQ Client to interact with message broker. Processor2 can deal with long running message processing.
 
@@ -132,7 +133,12 @@ If --config option is not provided processor tries to load config/{class_name}.j
       "tls_key": null,
       "tls_ca_certificates": [],
       "verify_peer": false,
-      "show_bunny_logs": false
+      "show_bunny_logs": false,
+      "heartbeat": {
+        "bind_address": "localhost",
+        "port": 8080,
+        "path": "/svc/{class_name}/heartbeat"
+      }
     },
     "processor": {
       "listener_queues": [
@@ -145,6 +151,7 @@ If --config option is not provided processor tries to load config/{class_name}.j
   }
 }
 ```
+Default configuration will dynamically resolve {class_name}. Exp. if your class is called MyClass and is derived from Processor2, value of {class_name} would be "my_class". You can overwrite config settings as needed.
 
 More details about TLS configuration for underlying Bunny gem can be found here: http://rubybunny.info/articles/tls.html.
 

@@ -1,6 +1,6 @@
 # EventHub module
 module EventHub
-  # Heartbeat class
+  # Publisher class
   class ActorPublisher
     include Celluloid
     include Helper

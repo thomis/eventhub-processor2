@@ -1,7 +1,7 @@
 # EventHub module
 module EventHub
   # Listner Class
-  class ActorListener
+  class ActorListenerAmqp
     include Celluloid
     include Helper
     finalizer :cleanup
@@ -15,14 +15,14 @@ module EventHub
     end
 
     def start
-      EventHub.logger.info("Listener is starting...")
+      EventHub.logger.info("Listener amqp is starting...")
       EventHub::Configuration.processor[:listener_queues].each_with_index do |queue_name, index|
         async.listen(queue_name: queue_name, index: index)
       end
     end
 
     def restart
-      raise "Listener is restarting..."
+      raise "Listener amqp is restarting..."
     end
 
     def listen(args = {})
@@ -109,7 +109,7 @@ module EventHub
     end
 
     def cleanup
-      EventHub.logger.info("Listener is cleaning up...")
+      EventHub.logger.info("Listener amqp is cleaning up...")
       # close all open connections
       return unless @connections
       @connections.values.each do |connection|
