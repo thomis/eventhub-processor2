@@ -1,5 +1,10 @@
 # Changelog of EventHub::Processor2
 
+## 1.22.0 / 2024-07-24
+
+* Structured (json) console log only
+* Update of dependencies (bunny, eventhub-components, rake, rspec, standard)
+
 ## 1.21.1 / 2024-05-28
 
 * Update dependencies
