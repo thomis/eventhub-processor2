@@ -1,5 +1,9 @@
 # Changelog of EventHub::Processor2
 
+# 1.22.1 / 2024-09-03
+
+* Add logger as dependency for future ruby versions
+
 ## 1.22.0 / 2024-07-24
 
 * Structured (json) console log only

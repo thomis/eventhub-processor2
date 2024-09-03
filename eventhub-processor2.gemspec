@@ -28,6 +28,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "eventhub-components", "~> 0.4"
   spec.add_dependency "uuidtools", "~> 2.1"
   spec.add_dependency "base64", "~> 0.2.0"
+  spec.add_dependency "logger", "~> 1.6"
 
   spec.add_development_dependency "bundler", "~> 2.3"
   spec.add_development_dependency "rake", "~> 13.2"
