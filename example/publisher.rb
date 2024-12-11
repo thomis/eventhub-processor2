@@ -115,7 +115,7 @@ module Publisher
     def connect
       @connection = Bunny.new(vhost: "event_hub",
         automatic_recovery: false,
-        logger: Logger.new("/dev/null"))
+        logger: Logger.new(File::NULL))
       @connection.start
       @channel = @connection.create_channel
       @channel.confirm_select

@@ -28,7 +28,7 @@ module EventHub
 
       # inject bunny logs on request
       unless server[:show_bunny_logs]
-        connection_properties[:logger] = Logger.new("/dev/null")
+        connection_properties[:logger] = Logger.new(File::NULL)
       end
 
       # we don't need it since reactors can deal with it

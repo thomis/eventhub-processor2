@@ -20,7 +20,7 @@ module EventHub
         @server = WEBrick::HTTPServer.new(
           BindAddress: @host,
           Port: @port,
-          Logger: WEBrick::Log.new("/dev/null"),
+          Logger: WEBrick::Log.new(File::NULL),
           AccessLog: []
         )
         @server.mount_proc @path do |req, res|
