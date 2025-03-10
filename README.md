@@ -20,9 +20,10 @@ Processor2 is using Bunny http://rubybunny.info a feature complete RabbitMQ Clie
 
 Currently supported and tested ruby versions are:
 
+- 3.4
 - 3.3
 - 3.2
-- 3.1
+- 3.1 (EOL: 2025-03-31)
 - 3.0 (EOL: 2024-04-23)
 
 ## Installation
