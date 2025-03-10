@@ -1,5 +1,10 @@
 # Changelog of EventHub::Processor2
 
+# 1.23.0 / 2025-03-10
+
+* Update dependency (uuid
+* Add more tests
+
 # 1.22.1 / 2024-09-03
 
 * Add logger as dependency for future ruby versions
