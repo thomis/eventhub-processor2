@@ -26,7 +26,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "webrick", "~> 1.8"
   spec.add_dependency "bunny", "~> 2.23"
   spec.add_dependency "eventhub-components", "~> 0.4"
-  spec.add_dependency "uuidtools", "~> 2.1"
+  spec.add_dependency "uuidtools", ">= 2.1", "< 4.0"
   spec.add_dependency "base64", "~> 0.2.0"
   spec.add_dependency "logger", "~> 1.6"
 
