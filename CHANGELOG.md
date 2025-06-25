@@ -1,8 +1,12 @@
 # Changelog of EventHub::Processor2
 
+# 1.24.0 / 2025-06-25
+
+* Update dependency (base64)
+
 # 1.23.0 / 2025-03-10
 
-* Update dependency (uuid
+* Update dependency (uuid)
 * Add more tests
 
 # 1.22.1 / 2024-09-03
