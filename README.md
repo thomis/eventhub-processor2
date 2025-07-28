@@ -1,6 +1,4 @@
 [![Gem Version](https://badge.fury.io/rb/eventhub-processor2.svg)](https://badge.fury.io/rb/eventhub-processor2)
-[![Maintainability](https://api.codeclimate.com/v1/badges/9112358562f0614e0e02/maintainability)](https://codeclimate.com/github/thomis/eventhub-processor2/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/9112358562f0614e0e02/test_coverage)](https://codeclimate.com/github/thomis/eventhub-processor2/test_coverage)
 [![ci](https://github.com/thomis/eventhub-processor2/actions/workflows/ci.yml/badge.svg)](https://github.com/thomis/eventhub-processor2/actions/workflows/ci.yml)
 
 # EventHub::Processor2
@@ -20,11 +18,13 @@ Processor2 is using Bunny http://rubybunny.info a feature complete RabbitMQ Clie
 
 Currently supported and tested ruby versions are:
 
-- 3.4
-- 3.3
-- 3.2
-- 3.1 (EOL: 2025-03-31)
-- 3.0 (EOL: 2024-04-23)
+- 3.4 (EOL 2028-03-31)
+- 3.3 (EOL 2027-03-31)
+- 3.2 (EOL 2026-03-31)
+
+Ruby versions not tested anymore:
+- 3.1 (EOL 2025-03-31)
+- 3.0 (EOL 2024-04-23)
 
 ## Installation
 
