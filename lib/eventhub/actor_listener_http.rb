@@ -5,6 +5,7 @@ module EventHub
   # Listner Class
   class ActorListenerHttp
     include Celluloid
+
     finalizer :cleanup
 
     def initialize(args = {})

@@ -4,6 +4,7 @@ module EventHub
   class ActorListenerAmqp
     include Celluloid
     include Helper
+
     finalizer :cleanup
 
     def initialize(processor_instance)

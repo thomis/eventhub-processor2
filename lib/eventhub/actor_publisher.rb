@@ -4,6 +4,7 @@ module EventHub
   class ActorPublisher
     include Celluloid
     include Helper
+
     finalizer :cleanup
 
     def initialize

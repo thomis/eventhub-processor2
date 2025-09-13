@@ -30,6 +30,7 @@ module Publisher
   # Store to track pending files (files not yet confirmed to be sent)
   class TransactionStore
     include Celluloid
+
     finalizer :cleanup
 
     def initialize
