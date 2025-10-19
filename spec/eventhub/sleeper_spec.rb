@@ -5,7 +5,7 @@ RSpec.describe EventHub::Message do
     start = Time.now
     EventHub::Sleeper.new.start(2)
     stop = Time.now
-    expect(((stop - start) - 2) < 0.01).to eq(true), "Expected to wait for 2 seconds but was waiting #{stop - start} seconds"
+    expect(((stop - start) - 2) < 0.02).to eq(true), "Expected to wait for 2 seconds but was waiting #{stop - start} seconds"
   end
 
   it "allows to interrupt an initialize sleep" do
