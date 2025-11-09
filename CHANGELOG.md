@@ -1,5 +1,9 @@
 # Changelog of EventHub::Processor2
 
+# 1.24.1 / 2025-11-09
+
+* Enable Trusted Publishing
+
 # 1.24.0 / 2025-06-25
 
 * Update dependency (base64)
