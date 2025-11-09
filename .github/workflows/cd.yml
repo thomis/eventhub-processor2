@@ -7,6 +7,9 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # Required for OIDC
+      contents: write  # Required for pushing tags
 
     steps:
     - name: Checkout current code
@@ -19,14 +22,8 @@ jobs:
         bundler-cache: true
         cache-version: 1
 
+    - name: Build gem
+      run: gem build *.gemspec
+
     - name: Push to Rubygems
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        git config --global user.email "thomas.steiner@ikey.ch"
-        git config --global user.name "thomis"
-        mkdir ~/.gem
-        echo -e "---\n:rubygems_api_key: ${{ secrets.RUBYGEMS_API_KEY }}" > ~/.gem/credentials
-        chmod 600 ~/.gem/credentials
-        bundle exec rake release
-        rm ~/.gem/credentials
+      uses: rubygems/release-gem@v1
