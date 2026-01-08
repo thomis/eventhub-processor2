@@ -18,6 +18,10 @@ RSpec.describe EventHub::Processor2 do
     expect(processor.version).not_to eq(nil)
   end
 
+  it "gets default company_name" do
+    expect(processor.company_name).to eq("")
+  end
+
   it "get configuration file" do
     expect(EventHub::Configuration.config_file).to match(/config\/processor2.json$/)
   end

@@ -29,8 +29,8 @@ Gem::Specification.new do |spec|
   spec.add_dependency "uuidtools", "~> 3.0"
   spec.add_dependency "base64", "~> 0.3.0"
   spec.add_dependency "logger", "~> 1.6"
+  spec.add_dependency "kramdown", "~> 2.5"
 
-  spec.add_development_dependency "bundler", "~> 2.3"
   spec.add_development_dependency "rake", "~> 13.2"
   spec.add_development_dependency "rspec", "~> 3.13"
   spec.add_development_dependency "simplecov", "~> 0.21"

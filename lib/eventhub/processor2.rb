@@ -51,6 +51,10 @@ module EventHub
       EventHub::VERSION
     end
 
+    def company_name
+      ""
+    end
+
     # get message as EventHub::Message class instance
     # args contain :queue_name, :content_type, :priority, :delivery_tag
     def handle_message(_message, _args = {})
@@ -88,7 +92,7 @@ module EventHub
       @config = Celluloid::Supervision::Configuration.define([
         {type: ActorHeartbeat, as: :actor_heartbeat, args: [self]},
         {type: ActorListenerAmqp, as: :actor_listener_amqp, args: [self]},
-        {type: ActorListenerHttp, as: :actor_listener_http, args: []}
+        {type: ActorListenerHttp, as: :actor_listener_http, args: [self]}
       ])
 
       sleeper = @sleeper

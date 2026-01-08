@@ -1,5 +1,0 @@
-# stopping, deleting an rebuilding rabbitmq docker container
-docker compose stop
-docker rm eventhub.rabbitmq
-docker rmi $(docker images 'eventhub.rabbitmq' -q)
-docker compose up -d

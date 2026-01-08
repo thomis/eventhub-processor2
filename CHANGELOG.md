@@ -1,19 +1,29 @@
 # Changelog of EventHub::Processor2
 
-# 1.24.1 / 2025-11-09
+## 1.25.0 / 2026-01-04
+
+* Bundler 4.0.0 compatible
+* Add HTTP endpoints: /version, /docs, /changelog with Bulma CSS layout
+* Add kramdown dependency for markdown rendering
+* Add customization methods: version, company_name, docs, changelog
+* Bundle Bulma CSS with gem for offline use
+* Add Docker rake tasks (docker:start, docker:stop, docker:status, docker:logs, docker:reset)
+* Update README documentation
+
+## 1.24.1 / 2025-11-09
 
 * Enable Trusted Publishing
 
-# 1.24.0 / 2025-06-25
+## 1.24.0 / 2025-06-25
 
 * Update dependency (base64)
 
-# 1.23.0 / 2025-03-10
+## 1.23.0 / 2025-03-10
 
 * Update dependency (uuid)
 * Add more tests
 
-# 1.22.1 / 2024-09-03
+## 1.22.1 / 2024-09-03
 
 * Add logger as dependency for future ruby versions
 

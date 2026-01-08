@@ -10,7 +10,7 @@ Processor2 has currently the following sub-components implemented
 * Publisher - responsible for message publishing
 * Watchdog - Checks regularly broker connection and defined listener queue(s)
 * Listener AMQP - Listens to defined AMQP queues, parses recevied message into a EventHub::Message instance and calls handle_message method as defined in derived class.
-* Listener HTTP - Provides an http endpoint for health checks (Exp.  /svc/{class_name}/heartbeat)
+* Listener HTTP - Provides HTTP endpoints for health checks, version info, and documentation
 
 Processor2 is using Bunny http://rubybunny.info a feature complete RabbitMQ Client to interact with message broker. Processor2 can deal with long running message processing.
 
@@ -228,20 +228,78 @@ Final configuration result
 
 ```
 
+## HTTP Endpoints
+
+The Listener HTTP component provides a documentation site with Bulma CSS styling on the configured port (default: 8080). All endpoints are served under a configurable base path (default: `/svc/{class_name}`):
+
+| Endpoint | Description |
+|----------|-------------|
+| `/` | Redirects to `{base_path}/docs` |
+| `{base_path}/docs` | Renders `./docs/README.md` with Bulma layout |
+| `{base_path}/changelog` | Renders `./docs/CHANGELOG.md` with Bulma layout |
+| `{base_path}/version` | Returns JSON: `{"version":"1.0.0"}` |
+| `{base_path}/heartbeat` | Health check endpoint, returns `OK` |
+
+The base path is derived from the `heartbeat.path` configuration. For example, if `path` is `/svc/my_processor/heartbeat`, then `base_path` is `/svc/my_processor`.
+
+The layout includes a navbar with the processor name and links to Docs/Changelog, plus a footer with version and optional company name.
+
+### Customization Methods
+
+Define these methods in your processor class to customize the HTTP endpoints:
+
+```ruby
+module EventHub
+  class Example < Processor2
+
+    def version
+      "1.0.0"  # Shown in /version and footer
+    end
+
+    def company_name
+      "Your Company"  # Shown in footer as "Copyright Your Company"
+    end
+
+    # Optional: Return custom HTML to completely override /docs
+    def docs
+      "<html>...your custom HTML...</html>"
+    end
+
+    # Optional: Return custom HTML to completely override /changelog
+    def changelog
+      "<html>...your custom HTML...</html>"
+    end
+  end
+end
+```
+
+If `docs` or `changelog` methods are not defined, the default behavior renders the respective markdown files from `./docs/` with the Bulma layout.
+
 ## Development
 
+```bash
+# Get the source code
+git clone https://github.com/thomis/eventhub-processor2.git
+
+# Install dependencies
+bundle
+
+# Setup rabbitmq docker container
+bundle exec rake docker:start
+
+# Run all rspec tests
+bundle exec rake
 ```
-  # Get the source code
-  git clone https://github.com/thomis/eventhub-processor2.git
 
-  # Install dependencies
-  bundle
+### Docker Tasks
 
-  # Setup rabbitmq docker container with initial definitions. This can be run multiple times to get your container back into an initial state
-  bundle exec rake init
-
-  # Run all rspec tests
-  bundle exec rake
+```bash
+rake docker:start   # Start RabbitMQ container
+rake docker:stop    # Stop RabbitMQ container
+rake docker:status  # Show container status
+rake docker:logs    # Show container logs
+rake docker:reset   # Full reset (stop, remove, rebuild, start)
+rake init           # Alias for docker:reset
 ```
 
 To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
