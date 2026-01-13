@@ -62,7 +62,7 @@ module EventHub
       @raw = raw
 
       # set message defaults, that we have required headers
-      @header.set("message_id", UUIDTools::UUID.timestamp_create.to_s, false)
+      @header.set("message_id", SecureRandom.uuid, false)
       @header.set("version", VERSION, false)
       @header.set("created_at", now_stamp, false)
 
@@ -71,8 +71,7 @@ module EventHub
       @header.set("origin.site_id", "undefined", false)
 
       @header.set("process.name", "undefined", false)
-      @header.set("process.execution_id",
-        UUIDTools::UUID.timestamp_create.to_s, false)
+      @header.set("process.execution_id", SecureRandom.uuid, false)
       @header.set("process.step_position", 0, false)
 
       @header.set("status.retried_count", 0, false)
@@ -137,7 +136,7 @@ module EventHub
       copied_header = Marshal.load(Marshal.dump(header))
       copied_body = Marshal.load(Marshal.dump(body))
 
-      copied_header.set("message_id", UUIDTools::UUID.timestamp_create.to_s)
+      copied_header.set("message_id", SecureRandom.uuid)
       copied_header.set("created_at", now_stamp)
       copied_header.set("status.code", status_code)
 

@@ -1,4 +1,4 @@
-require "uuidtools"
+require "securerandom"
 require "json"
 require "base64"
 require "optparse"

@@ -21,6 +21,14 @@ RSpec.describe EventHub::Message do
       expect(@m.valid?).to eq(true)
     end
 
+    it "should generate valid UUID for message_id" do
+      expect(@m.message_id).to match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)
+    end
+
+    it "should generate valid UUID for process.execution_id" do
+      expect(@m.process_execution_id).to match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)
+    end
+
     it "should be invalid if one or more values are nil" do
       EventHub::Message::REQUIRED_HEADERS.each do |key|
         m = @m.dup

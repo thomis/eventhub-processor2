@@ -1,5 +1,9 @@
 # Changelog of EventHub::Processor2
 
+# 1.25.0 / 2026-01-13
+
+* Replace uuidtools dependency with Ruby's built-in SecureRandom
+
 # 1.24.1 / 2025-11-09
 
 * Enable Trusted Publishing
