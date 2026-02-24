@@ -8,7 +8,8 @@ module EventHub
     finalizer :cleanup
 
     def initialize
-      EventHub.logger.info("Watchdog is starting...")
+      cycle = Configuration.processor[:watchdog_cycle_in_s]
+      EventHub.logger.info("Watchdog is starting [cycle: #{cycle}s]...")
       async.start
     end
 

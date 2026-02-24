@@ -1,5 +1,14 @@
 # Changelog of EventHub::Processor2
 
+# 1.26.0 / 2026-02-24
+
+* Add HTTP resources for version, docs, and changelog with HTML rendering
+* Heartbeat endpoint returns detailed JSON status (version, pid, uptime, messages)
+* Simplify HTTP configuration with shared `http.bind_address`, `http.port`, and `http.base_path`
+* Add distributed tracing with correlation_id and execution_id in structured log output
+* Log AMQP connection settings on listener start
+* Add kramdown dependency for markdown to HTML conversion
+
 # 1.25.0 / 2026-01-13
 
 * Replace uuidtools dependency with Ruby's built-in SecureRandom

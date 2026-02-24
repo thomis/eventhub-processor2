@@ -16,8 +16,18 @@ module EventHub
     end
 
     def start
-      EventHub.logger.info("Listener amqp is starting...")
-      EventHub::Configuration.processor[:listener_queues].each_with_index do |queue_name, index|
+      server = EventHub::Configuration.server
+      queues = EventHub::Configuration.processor[:listener_queues]
+      settings = [
+        server[:user],
+        server[:host],
+        server[:port],
+        server[:vhost],
+        "tls=#{server[:tls]}",
+        queues.join(", ")
+      ].join(", ")
+      EventHub.logger.info("Listener amqp is starting [#{settings}]...")
+      queues.each_with_index do |queue_name, index|
         async.listen(queue_name: queue_name, index: index)
       end
     end
@@ -30,21 +40,26 @@ module EventHub
       with_listen(args) do |connection, channel, consumer, queue, queue_name|
         EventHub.logger.info("Listening to queue [#{queue_name}]")
         consumer.on_delivery do |delivery_info, metadata, payload|
-          EventHub.logger.info("#{queue_name}: [#{delivery_info.delivery_tag}]" \
-                                 " delivery")
+          CorrelationId.with(metadata[:correlation_id]) do
+            EventHub.logger.info("#{queue_name}: [#{delivery_info.delivery_tag}]" \
+                                   " delivery")
 
-          @processor_instance.statistics.measure(payload.size) do
-            handle_payload(payload: payload,
-              connection: connection,
-              queue_name: queue_name,
-              content_type: metadata[:content_type],
-              priority: metadata[:priority],
-              delivery_tag: delivery_info.delivery_tag)
-            channel.acknowledge(delivery_info.delivery_tag, false)
+            @processor_instance.statistics.measure(payload.size) do
+              handle_payload(payload: payload,
+                connection: connection,
+                queue_name: queue_name,
+                content_type: metadata[:content_type],
+                priority: metadata[:priority],
+                delivery_tag: delivery_info.delivery_tag,
+                correlation_id: metadata[:correlation_id])
+              channel.acknowledge(delivery_info.delivery_tag, false)
+            end
+
+            EventHub.logger.info("#{queue_name}: [#{delivery_info.delivery_tag}]" \
+                                 " acknowledged")
+          ensure
+            ExecutionId.clear
           end
-
-          EventHub.logger.info("#{queue_name}: [#{delivery_info.delivery_tag}]" \
-                               " acknowledged")
         end
         queue.subscribe_with(consumer, block: false)
       end
@@ -77,6 +92,15 @@ module EventHub
       # convert to EventHub message
       message = EventHub::Message.from_json(args[:payload])
 
+      # set execution_id for logging
+      ExecutionId.current = message.process_execution_id if message.valid?
+
+      # use execution_id as correlation_id if not already set from AMQP metadata
+      if CorrelationId.current.nil? && message.valid?
+        CorrelationId.current = message.process_execution_id
+        args[:correlation_id] ||= message.process_execution_id
+      end
+
       # append to execution history
       message.append_to_execution_history(EventHub::Configuration.name)
 
@@ -105,7 +129,7 @@ module EventHub
     end
 
     def pass_arguments(args = {})
-      keys_to_pass = [:queue_name, :content_type, :priority, :delivery_tag]
+      keys_to_pass = [:queue_name, :content_type, :priority, :delivery_tag, :correlation_id]
       args.select { |key| keys_to_pass.include?(key) }
     end
 

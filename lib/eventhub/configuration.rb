@@ -137,6 +137,16 @@ module EventHub
           tls_ca_certificates: [],
           verify_peer: false,
           show_bunny_logs: false,
+          http: {
+            bind_address: "localhost",
+            port: 8080,
+            base_path: "/svc/#{@name}",
+            docs: {
+              readme_path: nil,
+              changelog_path: nil
+            }
+          },
+          # deprecated: use http instead (kept for backward compatibility)
           heartbeat: {
             bind_address: "localhost",
             port: 8080,

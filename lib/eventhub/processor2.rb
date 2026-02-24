@@ -32,6 +32,7 @@ module EventHub
 
     def start
       EventHub.logger.info("#{Configuration.name} (#{version}): has been started")
+      log_general_settings
 
       before_start
       main_event_loop
@@ -76,6 +77,15 @@ module EventHub
 
     private
 
+    def log_general_settings
+      console = Configuration.console_log_only ? "yes" : "no"
+      settings = [
+        Configuration.environment,
+        "console=#{console}"
+      ].join(", ")
+      EventHub.logger.info("Settings [#{settings}]")
+    end
+
     def setup_signal_handler
       # have a re-entrant signal handler by just using a simple array
       # https://www.sitepoint.com/the-self-pipe-trick-explained/
@@ -88,7 +98,7 @@ module EventHub
       @config = Celluloid::Supervision::Configuration.define([
         {type: ActorHeartbeat, as: :actor_heartbeat, args: [self]},
         {type: ActorListenerAmqp, as: :actor_listener_amqp, args: [self]},
-        {type: ActorListenerHttp, as: :actor_listener_http, args: []}
+        {type: ActorListenerHttp, as: :actor_listener_http, args: [{processor: self}]}
       ])
 
       sleeper = @sleeper

@@ -29,6 +29,19 @@ RSpec.describe EventHub::Message do
       expect(@m.process_execution_id).to match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)
     end
 
+    it "should use correlation_id for execution_id when available" do
+      EventHub::CorrelationId.current = "test-correlation-123"
+      m = EventHub::Message.new
+      expect(m.process_execution_id).to eq("test-correlation-123")
+      EventHub::CorrelationId.clear
+    end
+
+    it "should generate new UUID for execution_id when correlation_id not set" do
+      EventHub::CorrelationId.clear
+      m = EventHub::Message.new
+      expect(m.process_execution_id).to match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)
+    end
+
     it "should be invalid if one or more values are nil" do
       EventHub::Message::REQUIRED_HEADERS.each do |key|
         m = @m.dup
