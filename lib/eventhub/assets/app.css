@@ -94,6 +94,33 @@ body {
   width: auto;
 }
 
+/* Config table */
+.config-table thead th {
+  background-color: #1a1a1a !important;
+  color: #cccccc !important;
+}
+
+.config-table .is-section td {
+  background-color: #e8e8e8;
+  color: #363636;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.config-table tbody tr:not(.is-section):hover td {
+  background-color: hsl(212, 55%, 93%) !important;
+}
+
+.config-table .config-key {
+  width: 30%;
+  padding-left: 2rem;
+}
+
+.config-table .redacted {
+  color: #b5b5b5;
+  font-style: italic;
+}
+
 /* Footer */
 .footer {
   padding: 1.5rem;

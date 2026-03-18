@@ -2,11 +2,11 @@
 
 # 1.26.0 / 2026-03-18
 
-* Add HTTP resources for version, docs, and changelog with HTML rendering
+* Add HTTP resources for version, docs, changelog, and configuration with HTML rendering
+* Add processor hooks for HTTP resource customization: `version`, `company_name`, `readme_as_html`, `changelog_as_html`, `configuration_as_html`, `sensitive_keys`, and `http_resources`
 * Heartbeat endpoint returns detailed JSON status (version, pid, uptime, messages)
-* Simplify HTTP configuration with shared `http.bind_address`, `http.port`, and `http.base_path`
 * Add distributed tracing with correlation_id and execution_id in structured log output
-* Log AMQP connection settings on listener start
+* Simplify HTTP configuration with shared `http.bind_address`, `http.port`, and `http.base_path`
 * Add kramdown dependency for markdown to HTML conversion
 * Rename GitHub Actions workflows and add test step to release workflow
 

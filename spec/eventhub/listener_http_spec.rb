@@ -315,6 +315,140 @@ RSpec.describe EventHub::ActorListenerHttp do
     end
   end
 
+  describe "config endpoint" do
+    it "returns HTML with configuration table" do
+      EventHub::ActorListenerHttp.new(
+        port: 8105,
+        base_path: "/api"
+      )
+      sleep 0.2
+      uri = URI("http://localhost:8105/api/docs/configuration")
+      res = Net::HTTP.get_response(uri)
+
+      expect(res.is_a?(Net::HTTPSuccess)).to eq(true)
+      expect(res["Content-Type"]).to include("text/html")
+      expect(res.body).to include("<!DOCTYPE html>")
+      expect(res.body).to include("config-table")
+      expect(res.body).to include("server")
+    end
+
+    it "redacts sensitive values" do
+      EventHub::ActorListenerHttp.new(
+        port: 8106,
+        base_path: "/api"
+      )
+      sleep 0.2
+      uri = URI("http://localhost:8106/api/docs/configuration")
+      res = Net::HTTP.get_response(uri)
+
+      expect(res.is_a?(Net::HTTPSuccess)).to eq(true)
+      expect(res.body).to include("[REDACTED]")
+      # password value should be redacted, but user value "guest" is visible
+      expect(res.body).to match(/password.*\[REDACTED\]/m)
+    end
+
+    it "fails with method not allowed for POST" do
+      EventHub::ActorListenerHttp.new(
+        port: 8107,
+        base_path: "/api"
+      )
+      sleep 0.2
+      uri = URI("http://localhost:8107/api/docs/configuration")
+      res = Net::HTTP.post(uri, nil)
+
+      expect(res.is_a?(Net::HTTPMethodNotAllowed)).to eq(true)
+    end
+
+    context "with custom configuration_as_html method" do
+      let(:processor_with_custom_config) {
+        Class.new do
+          def configuration_as_html
+            "<h1>Custom Configuration</h1>"
+          end
+        end.new
+      }
+
+      it "uses custom configuration_as_html method" do
+        EventHub::ActorListenerHttp.new(
+          port: 8108,
+          processor: processor_with_custom_config,
+          base_path: "/api"
+        )
+        sleep 0.2
+        uri = URI("http://localhost:8108/api/docs/configuration")
+        res = Net::HTTP.get_response(uri)
+
+        expect(res.is_a?(Net::HTTPSuccess)).to eq(true)
+        expect(res.body).to include("<h1>Custom Configuration</h1>")
+      end
+    end
+
+    context "with custom sensitive_keys method" do
+      let(:processor_with_custom_sensitive_keys) {
+        Class.new do
+          def sensitive_keys
+            %w[password user]
+          end
+        end.new
+      }
+
+      it "redacts custom sensitive keys" do
+        EventHub::ActorListenerHttp.new(
+          port: 8109,
+          processor: processor_with_custom_sensitive_keys,
+          base_path: "/api"
+        )
+        sleep 0.2
+        uri = URI("http://localhost:8109/api/docs/configuration")
+        res = Net::HTTP.get_response(uri)
+
+        expect(res.is_a?(Net::HTTPSuccess)).to eq(true)
+        expect(res.body).to match(/user.*\[REDACTED\]/m)
+        expect(res.body).to match(/password.*\[REDACTED\]/m)
+      end
+    end
+  end
+
+  describe "http_resources" do
+    context "with configuration disabled" do
+      let(:processor_without_config) {
+        Class.new do
+          def http_resources
+            [:heartbeat, :version, :docs, :changelog]
+          end
+        end.new
+      }
+
+      it "returns 404 for disabled configuration endpoint" do
+        EventHub::ActorListenerHttp.new(
+          port: 8110,
+          processor: processor_without_config,
+          base_path: "/api"
+        )
+        sleep 0.2
+        uri = URI("http://localhost:8110/api/docs/configuration")
+        res = Net::HTTP.get_response(uri)
+
+        expect(res.is_a?(Net::HTTPNotFound)).to eq(true)
+      end
+
+      it "hides configuration link in navbar" do
+        EventHub::ActorListenerHttp.new(
+          port: 8111,
+          processor: processor_without_config,
+          base_path: "/api"
+        )
+        sleep 0.2
+        uri = URI("http://localhost:8111/api/docs")
+        res = Net::HTTP.get_response(uri)
+
+        expect(res.is_a?(Net::HTTPSuccess)).to eq(true)
+        expect(res.body).not_to include("/api/docs/configuration")
+        expect(res.body).to include("/api/docs/changelog")
+      end
+    end
+  end
+
   describe "assets endpoint" do
     it "serves CSS files" do
       EventHub::ActorListenerHttp.new(

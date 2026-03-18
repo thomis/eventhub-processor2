@@ -20,9 +20,16 @@
         </div>
         <div class="navbar-menu">
           <div class="navbar-end">
+<% if http_resources.include?(:configuration) %>
+            <a class="navbar-item" href="<%= base_path %>/docs/configuration">
+              Configuration
+            </a>
+<% end %>
+<% if http_resources.include?(:changelog) %>
             <a class="navbar-item" href="<%= base_path %>/docs/changelog">
               Changelog
             </a>
+<% end %>
           </div>
         </div>
       </div>

@@ -10,6 +10,8 @@ module EventHub
     DEFAULT_CHANGELOG_LOCATIONS = ["CHANGELOG.md", "doc/CHANGELOG.md"].freeze
     DEFAULT_COMPANY_NAME = "Novartis"
 
+    DEFAULT_HTTP_RESOURCES = [:heartbeat, :version, :docs, :changelog, :configuration].freeze
+
     def initialize(processor:, base_path:)
       @processor = processor
       @base_path = base_path
@@ -23,6 +25,11 @@ module EventHub
     def render_changelog
       content = changelog_html
       render_layout(title: "CHANGELOG", content: content, content_class: "changelog")
+    end
+
+    def render_config
+      content = config_html
+      render_layout(title: "Configuration", content: content, content_class: "config")
     end
 
     def asset(name)
@@ -74,6 +81,67 @@ module EventHub
       "No #{(type == :readme) ? "README" : "CHANGELOG"} available."
     end
 
+    def config_html
+      return @processor.configuration_as_html if @processor&.class&.method_defined?(:configuration_as_html)
+
+      config = EventHub::Configuration.config_data
+      return "<p>No configuration available.</p>" if config.nil? || config.empty?
+
+      intro = "<h1>Configuration</h1>" \
+        "<p>Active configuration for the <strong>#{ERB::Util.html_escape(EventHub::Configuration.environment)}</strong> environment. " \
+        "Sensitive values such as passwords, tokens, and keys are automatically redacted.</p>"
+
+      intro + config_to_html_table(config)
+    end
+
+    def config_to_html_table(hash, depth = 0)
+      rows = hash.map do |key, value|
+        if value.is_a?(Hash)
+          "<tr class=\"is-section\"><td colspan=\"2\"><strong>#{ERB::Util.html_escape(key)}</strong></td></tr>\n" \
+          "#{config_to_html_table(value, depth + 1)}"
+        elsif value.is_a?(Array)
+          format_array_rows(key, value, depth)
+        else
+          display_value = sensitive_key?(key) ? "<span class=\"redacted\">[REDACTED]</span>" : ERB::Util.html_escape(value.to_s)
+          "<tr><td class=\"config-key\">#{ERB::Util.html_escape(key)}</td><td>#{display_value}</td></tr>"
+        end
+      end.join("\n")
+
+      if depth == 0
+        "<table class=\"table is-bordered is-striped is-fullwidth config-table\">\n<thead><tr><th>Key</th><th>Value</th></tr></thead>\n<tbody>\n#{rows}\n</tbody>\n</table>"
+      else
+        rows
+      end
+    end
+
+    def format_array_rows(key, array, depth)
+      if array.any? { |item| item.is_a?(Hash) }
+        array.each_with_index.map do |item, index|
+          if item.is_a?(Hash)
+            "<tr class=\"is-section\"><td colspan=\"2\"><strong>#{ERB::Util.html_escape(key)}[#{index}]</strong></td></tr>\n" \
+            "#{config_to_html_table(item, depth + 1)}"
+          else
+            display_value = sensitive_key?(key) ? "<span class=\"redacted\">[REDACTED]</span>" : ERB::Util.html_escape(item.to_s)
+            "<tr><td class=\"config-key\">#{ERB::Util.html_escape(key)}[#{index}]</td><td>#{display_value}</td></tr>"
+          end
+        end.join("\n")
+      else
+        display_value = sensitive_key?(key) ? "<span class=\"redacted\">[REDACTED]</span>" : ERB::Util.html_escape(array.join(", "))
+        "<tr><td class=\"config-key\">#{ERB::Util.html_escape(key)}</td><td>#{display_value}</td></tr>"
+      end
+    end
+
+    DEFAULT_SENSITIVE_KEYS = %w[password secret token api_key credential].freeze
+
+    def sensitive_key?(key)
+      keys = if @processor&.class&.method_defined?(:sensitive_keys)
+        @processor.sensitive_keys
+      else
+        DEFAULT_SENSITIVE_KEYS
+      end
+      keys.any? { |pattern| key.to_s.downcase == pattern.downcase }
+    end
+
     def markdown_to_html(markdown)
       Kramdown::Document.new(markdown).to_html
     end
@@ -88,6 +156,7 @@ module EventHub
       company_name = processor_company_name
       base_path = @base_path
       year = Time.now.year
+      http_resources = processor_http_resources
       bulma_css = asset("bulma.min.css")
       app_css = asset("app.css")
 
@@ -104,6 +173,12 @@ module EventHub
       return DEFAULT_COMPANY_NAME unless @processor
       return DEFAULT_COMPANY_NAME unless @processor.class.method_defined?(:company_name)
       @processor.company_name
+    end
+
+    def processor_http_resources
+      return DEFAULT_HTTP_RESOURCES unless @processor
+      return DEFAULT_HTTP_RESOURCES unless @processor.class.method_defined?(:http_resources)
+      @processor.http_resources
     end
   end
 end

@@ -10,6 +10,7 @@ module EventHub
     include Helper
 
     DEFAULT_VERSION = "?.?.?"
+    DEFAULT_HTTP_RESOURCES = [:heartbeat, :version, :docs, :changelog, :configuration].freeze
     CONTENT_TYPES = {
       ".css" => "text/css",
       ".svg" => "image/svg+xml",
@@ -52,18 +53,21 @@ module EventHub
 
       # API resources
       @server.mount_proc "#{@base_path}/heartbeat" do |req, res|
-        handle_heartbeat_request(req, res)
+        resource_enabled?(:heartbeat) ? handle_heartbeat_request(req, res) : handle_not_found(res)
       end
       @server.mount_proc "#{@base_path}/version" do |req, res|
-        handle_version_request(req, res)
+        resource_enabled?(:version) ? handle_version_request(req, res) : handle_not_found(res)
       end
 
       # Documentation resources
       @server.mount_proc "#{@base_path}/docs" do |req, res|
-        handle_docs_request(req, res)
+        resource_enabled?(:docs) ? handle_docs_request(req, res) : handle_not_found(res)
       end
       @server.mount_proc "#{@base_path}/docs/changelog" do |req, res|
-        handle_changelog_request(req, res)
+        resource_enabled?(:changelog) ? handle_changelog_request(req, res) : handle_not_found(res)
+      end
+      @server.mount_proc "#{@base_path}/docs/configuration" do |req, res|
+        resource_enabled?(:configuration) ? handle_config_request(req, res) : handle_not_found(res)
       end
 
       # Assets
@@ -131,6 +135,18 @@ module EventHub
       end
     end
 
+    def handle_config_request(req, res)
+      case req.request_method
+      when "GET"
+        res.status = 200
+        res["Content-Type"] = "text/html; charset=utf-8"
+        res.body = docs_renderer.render_config
+      else
+        res.status = 405
+        res.body = "Method Not Allowed"
+      end
+    end
+
     def handle_asset_request(req, res)
       case req.request_method
       when "GET"
@@ -170,6 +186,21 @@ module EventHub
       # Try new http config first, fall back to deprecated heartbeat config
       EventHub::Configuration.server.dig(:http, key) ||
         EventHub::Configuration.server.dig(:heartbeat, key)
+    end
+
+    def resource_enabled?(name)
+      enabled_http_resources.include?(name)
+    end
+
+    def handle_not_found(res)
+      res.status = 404
+      res.body = "Not Found"
+    end
+
+    def enabled_http_resources
+      return DEFAULT_HTTP_RESOURCES unless @processor
+      return DEFAULT_HTTP_RESOURCES unless @processor.class.method_defined?(:http_resources)
+      @processor.http_resources
     end
 
     def docs_renderer

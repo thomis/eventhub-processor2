@@ -318,6 +318,7 @@ Resources are mounted under the `base_path`:
 - `{base_path}/heartbeat` - Health check
 - `{base_path}/version` - Version info as JSON
 - `{base_path}/docs` - README documentation as HTML
+- `{base_path}/docs/configuration` - Configuration as HTML table
 - `{base_path}/docs/changelog` - CHANGELOG as HTML
 - `{base_path}/assets/*` - Static assets (CSS, images)
 
@@ -451,6 +452,66 @@ Or override completely by defining a `changelog_as_html` method in your processo
 class MyProcessor < EventHub::Processor2
   def changelog_as_html
     "<h1>Custom Changelog</h1><p>Your changes here.</p>"
+  end
+end
+```
+
+### Configuration
+
+Displays the active configuration as an HTML table. Sensitive values (passwords, tokens, keys) are automatically redacted.
+
+```
+GET {base_path}/docs/configuration
+```
+
+**Response:** `200 OK` with HTML page
+
+By default, the following keys are redacted: `password`, `secret`, `token`, `api_key`, `credential`. You can customize the list by defining a `sensitive_keys` method in your processor:
+
+```ruby
+# Override the entire list
+class MyProcessor < EventHub::Processor2
+  def sensitive_keys
+    %w[password secret token api_key credential connection_string]
+  end
+end
+
+# Or extend the default list
+class MyProcessor < EventHub::Processor2
+  def sensitive_keys
+    EventHub::DocsRenderer::DEFAULT_SENSITIVE_KEYS + %w[connection_string]
+  end
+end
+```
+
+Or override the entire page by defining a `configuration_as_html` method:
+
+```ruby
+class MyProcessor < EventHub::Processor2
+  def configuration_as_html
+    "<h1>Custom Configuration</h1><p>Your content here.</p>"
+  end
+end
+```
+
+### Disabling Resources
+
+By default, all HTTP resources are enabled. You can control which resources are available by defining an `http_resources` method in your processor. The navbar adapts automatically.
+
+```ruby
+class MyProcessor < EventHub::Processor2
+  def http_resources
+    [:heartbeat, :version, :docs, :changelog, :configuration]  # default: all enabled
+  end
+end
+```
+
+To disable the configuration page for example:
+
+```ruby
+class MyProcessor < EventHub::Processor2
+  def http_resources
+    [:heartbeat, :version, :docs, :changelog]
   end
 end
 ```
