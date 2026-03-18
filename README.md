@@ -1,5 +1,6 @@
 [![Gem Version](https://badge.fury.io/rb/eventhub-processor2.svg)](https://badge.fury.io/rb/eventhub-processor2)
-[![ci](https://github.com/thomis/eventhub-processor2/actions/workflows/ci.yml/badge.svg)](https://github.com/thomis/eventhub-processor2/actions/workflows/ci.yml)
+[![01 - Test](https://github.com/thomis/eventhub-processor2/actions/workflows/01_test.yml/badge.svg)](https://github.com/thomis/eventhub-processor2/actions/workflows/01_test.yml)
+[![02 - Test, Build and Release](https://github.com/thomis/eventhub-processor2/actions/workflows/02_test_build_and_release.yml/badge.svg)](https://github.com/thomis/eventhub-processor2/actions/workflows/02_test_build_and_release.yml)
 
 # EventHub::Processor2
 
