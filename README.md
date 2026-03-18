@@ -546,13 +546,21 @@ end
   bundle exec rake
 ```
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+To install this gem onto your local machine, run `bundle exec rake install`.
 
 ## Publishing
 
-This project uses [Trusted Publishing](https://guides.rubygems.org/trusted-publishing/) to securely publish gems to RubyGems.org. Trusted Publishing eliminates the need for long-lived API tokens by using OpenID Connect (OIDC) to establish a trusted relationship between GitHub Actions and RubyGems.org.
+This project uses [Trusted Publishing](https://guides.rubygems.org/trusted-publishing/) to securely publish gems to RubyGems.org via GitHub Actions. To release a new version:
 
-With Trusted Publishing configured, gem releases are automatically published to RubyGems when the release workflow runs, providing a more secure and streamlined publishing process.
+1. Update the version number in `lib/eventhub/version.rb`
+2. Merge changes to `main`
+3. Create a version tag either via command line or GitHub:
+   ```
+   git tag v1.x.x
+   git push origin v1.x.x
+   ```
+   Or on GitHub: go to **Releases** → **Create a new release** → enter the tag name (e.g. `v1.26.0`), select `main` as target, and publish.
+4. The `02 - Test, Build and Release` workflow triggers automatically, runs tests, builds the gem, and publishes it to [rubygems.org](https://rubygems.org)
 
 ## Contributing
 
