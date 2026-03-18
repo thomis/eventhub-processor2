@@ -19,11 +19,12 @@ Processor2 is using Bunny http://rubybunny.info a feature complete RabbitMQ Clie
 
 Currently supported and tested ruby versions are:
 
+- 4.0 (EOL 2029-03-31)
 - 3.4 (EOL 2028-03-31)
 - 3.3 (EOL 2027-03-31)
-- 3.2 (EOL 2026-03-31)
 
 Ruby versions not tested anymore:
+- 3.2 (EOL 2026-03-31)
 - 3.1 (EOL 2025-03-31)
 - 3.0 (EOL 2024-04-23)
 
