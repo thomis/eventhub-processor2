@@ -1,0 +1,132 @@
+/* Navbar */
+.navbar {
+  background-color: hsl(212, 55%, 48%);
+}
+
+.navbar-item,
+.navbar-link {
+  color: white;
+}
+
+.navbar-item:hover,
+.navbar-link:hover {
+  background-color: hsl(212, 55%, 40%);
+  color: white;
+}
+
+.navbar-brand .navbar-item:hover {
+  background-color: transparent;
+}
+
+.navbar-item .logo {
+  height: 24px;
+  margin-right: 8px;
+}
+
+.navbar-item .processor-name {
+  font-weight: 600;
+}
+
+/* Content */
+body {
+  background-color: white;
+}
+
+.section {
+  padding-top: 5rem;
+  min-height: calc(100vh - 100px);
+}
+
+.content {
+  max-width: 100%;
+}
+
+.content h1:first-child {
+  margin-top: 0;
+}
+
+.content ul {
+  list-style-type: square;
+}
+
+.content ul ul {
+  list-style-type: square;
+}
+
+/* Changelog styling for markdown (h2 + ul looks like message component) */
+.content.changelog h2 {
+  background-color: #1a1a1a;
+  color: #cccccc;
+  padding: 0.75rem 1rem;
+  margin: 1.5rem 0 0 0 !important;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 4px 4px 0 0;
+  width: 100%;
+  display: block;
+}
+
+.content.changelog h2:first-of-type {
+  margin-top: 0 !important;
+}
+
+.content.changelog h2 + ul {
+  background-color: #f5f5f5;
+  color: #1a1a1a;
+  margin: 0 !important;
+  padding: 1rem 1rem 1rem 2.5rem;
+  border-radius: 0 0 4px 4px;
+  width: 100%;
+  display: block;
+  list-style-position: inside;
+  margin-left: 0 !important;
+}
+
+.content.changelog h2 + ul li {
+  margin-left: 0;
+  margin-top: 0;
+}
+
+.content.changelog h2 + ul ul {
+  background-color: transparent;
+  margin: 0.5rem 0 !important;
+  padding-left: 1.5rem;
+  width: auto;
+}
+
+/* Config table */
+.config-table thead th {
+  background-color: #1a1a1a !important;
+  color: #cccccc !important;
+}
+
+.config-table .is-section td {
+  background-color: #e8e8e8;
+  color: #363636;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.config-table tbody tr:not(.is-section):hover td {
+  background-color: hsl(212, 55%, 93%) !important;
+}
+
+.config-table .config-key {
+  width: 30%;
+  padding-left: 2rem;
+}
+
+.config-table .redacted {
+  color: #b5b5b5;
+  font-style: italic;
+}
+
+/* Footer */
+.footer {
+  padding: 1.5rem;
+  background-color: #f5f5f5;
+}
+
+.footer .level {
+  align-items: flex-start;
+}

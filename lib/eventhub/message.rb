@@ -71,7 +71,7 @@ module EventHub
       @header.set("origin.site_id", "undefined", false)
 
       @header.set("process.name", "undefined", false)
-      @header.set("process.execution_id", SecureRandom.uuid, false)
+      @header.set("process.execution_id", CorrelationId.current || SecureRandom.uuid, false)
       @header.set("process.step_position", 0, false)
 
       @header.set("status.retried_count", 0, false)

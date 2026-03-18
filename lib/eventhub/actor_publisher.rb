@@ -28,7 +28,11 @@ module EventHub
       channel.confirm_select
       exchange = channel.direct(exchange_name, durable: true)
 
-      exchange.publish(message, persistent: true)
+      publish_options = {persistent: true}
+      correlation_id = args[:correlation_id] || CorrelationId.current
+      publish_options[:correlation_id] = correlation_id if correlation_id
+
+      exchange.publish(message, publish_options)
       success = channel.wait_for_confirms
 
       unless success

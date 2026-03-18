@@ -13,7 +13,8 @@ module EventHub
     end
 
     def start
-      EventHub.logger.info("Heartbeat is starting...")
+      cycle = Configuration.processor[:heartbeat_cycle_in_s]
+      EventHub.logger.info("Heartbeat is starting [cycle: #{cycle}s]...")
 
       every(60 * 60 * 24) { EventHub.logger.info("Actual actors: #{Celluloid::Actor.all.size}: #{Celluloid::Actor.all.map { |a| a.class }.join(", ")}") }
 

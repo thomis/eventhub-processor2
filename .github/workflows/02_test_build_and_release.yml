@@ -1,0 +1,57 @@
+name: 02 - Test, Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+
+  test:
+    runs-on: ubuntu-latest
+    env:
+      CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '4.0'
+        bundler: latest
+        bundler-cache: true
+        cache-version: 4
+
+    - name: Setup RabbitMQ
+      run: |
+        cd docker && docker build -t processor-rabbitmq .
+        docker run -d -p 5672:5672 -p 15672:15672 --name processor-rabbitmq processor-rabbitmq
+
+    - name: Run default task
+      run: |
+        bundle exec rake
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # Required for OIDC
+      contents: write  # Required for pushing tags
+
+    steps:
+    - name: Checkout current code
+      uses: actions/checkout@v6
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '4.0'
+        bundler-cache: true
+        cache-version: 1
+
+    - name: Build gem
+      run: gem build *.gemspec
+
+    - name: Push to Rubygems
+      uses: rubygems/release-gem@v1

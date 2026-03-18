@@ -1,4 +1,4 @@
-name: ci
+name: 01 - Test
 
 on:
   push:

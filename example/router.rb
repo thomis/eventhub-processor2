@@ -3,6 +3,10 @@ require_relative "../lib/eventhub/base"
 module EventHub
   # Demo class
   class Router < Processor2
+    def version
+      "1.0.0"
+    end
+
     def handle_message(message, args = {})
       id = message.body["id"]
       EventHub.logger.info("Received: [#{id}]")

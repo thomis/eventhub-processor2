@@ -28,6 +28,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "eventhub-components", "~> 0.4"
   spec.add_dependency "base64", "~> 0.3.0"
   spec.add_dependency "logger", "~> 1.6"
+  spec.add_dependency "kramdown", "~> 2.4"
 
   spec.add_development_dependency "rake", "~> 13.2"
   spec.add_development_dependency "rspec", "~> 3.13"
