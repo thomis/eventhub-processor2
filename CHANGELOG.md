@@ -1,5 +1,9 @@
 # Changelog of EventHub::Processor2
 
+# 1.26.1 / 2026-03-20
+
+* Show only processor name in browser tab title
+
 # 1.26.0 / 2026-03-18
 
 * Add HTTP resources for version, docs, changelog, and configuration with HTML rendering
