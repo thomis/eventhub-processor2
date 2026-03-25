@@ -184,8 +184,15 @@ module EventHub
 
     def http_config(key)
       # Try new http config first, fall back to deprecated heartbeat config
-      EventHub::Configuration.server.dig(:http, key) ||
-        EventHub::Configuration.server.dig(:heartbeat, key)
+      heartbeat_value = EventHub::Configuration.server.dig(:heartbeat, key)
+      http_value = EventHub::Configuration.server.dig(:http, key)
+
+      if heartbeat_value && http_value != heartbeat_value
+        EventHub.logger.warn("[DEPRECATION] heartbeat.#{key} is deprecated. Please use http.#{key} instead.")
+        return heartbeat_value
+      end
+
+      http_value
     end
 
     def resource_enabled?(name)

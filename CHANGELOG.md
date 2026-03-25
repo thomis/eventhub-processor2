@@ -1,5 +1,10 @@
 # Changelog of EventHub::Processor2
 
+# 1.26.2 / 2026-03-25
+
+* Change default `http.bind_address` from `localhost` to `0.0.0.0` for container compatibility (ECS, Docker, K8s)
+* Add deprecation warning when legacy `heartbeat` configuration block is used
+
 # 1.26.1 / 2026-03-20
 
 * Show only processor name in browser tab title

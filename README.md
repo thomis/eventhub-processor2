@@ -204,7 +204,7 @@ If --config option is not provided processor tries to load config/{class_name}.j
       "verify_peer": false,
       "show_bunny_logs": false,
       "http": {
-        "bind_address": "localhost",
+        "bind_address": "0.0.0.0",
         "port": 8080,
         "base_path": "/svc/{class_name}"
       }
@@ -307,13 +307,15 @@ Processor2 exposes HTTP resources for health checks and monitoring. All resource
 {
   "server": {
     "http": {
-      "bind_address": "localhost",
+      "bind_address": "0.0.0.0",
       "port": 8080,
       "base_path": "/svc/{class_name}"
     }
   }
 }
 ```
+
+The default `bind_address` is `0.0.0.0` (all interfaces), which is required for containerized deployments (ECS, Docker, K8s) where health checks come from outside the container.
 
 Resources are mounted under the `base_path`:
 - `{base_path}/heartbeat` - Health check
@@ -325,7 +327,7 @@ Resources are mounted under the `base_path`:
 
 Accessing `{base_path}` or `{base_path}/` redirects to `{base_path}/docs`.
 
-**Backward Compatibility:** If you have existing configuration using the old `heartbeat` block with `bind_address`, `port`, and `path`, it will continue to work. The new `http` configuration takes precedence when both are present.
+**Backward Compatibility:** If you have existing configuration using the old `heartbeat` block with `bind_address`, `port`, and `path`, it will continue to work but will emit a deprecation warning. Please migrate to the `http` configuration block. The `heartbeat` block will be removed in a future major version.
 
 ### Heartbeat
 

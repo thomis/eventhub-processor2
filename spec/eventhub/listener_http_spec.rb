@@ -14,6 +14,18 @@ RSpec.describe EventHub::ActorListenerHttp do
     EventHub::Configuration.load!
   end
 
+  describe "deprecated heartbeat config fallback" do
+    it "logs deprecation warning when heartbeat config differs from http config" do
+      # Override heartbeat config with a different bind_address
+      EventHub::Configuration.server[:heartbeat][:bind_address] = "127.0.0.1"
+
+      expect(EventHub.logger).to receive(:warn).with(/DEPRECATION.*heartbeat\.bind_address.*http\.bind_address/)
+
+      listener = EventHub::ActorListenerHttp.new(port: 8112)
+      listener.terminate
+    end
+  end
+
   describe "heartbeat endpoint" do
     let(:listener) {
       EventHub::ActorListenerHttp.new(port: 8081)

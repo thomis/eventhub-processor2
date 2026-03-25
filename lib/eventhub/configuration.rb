@@ -138,7 +138,7 @@ module EventHub
           verify_peer: false,
           show_bunny_logs: false,
           http: {
-            bind_address: "localhost",
+            bind_address: "0.0.0.0",
             port: 8080,
             base_path: "/svc/#{@name}",
             docs: {
@@ -148,7 +148,7 @@ module EventHub
           },
           # deprecated: use http instead (kept for backward compatibility)
           heartbeat: {
-            bind_address: "localhost",
+            bind_address: "0.0.0.0",
             port: 8080,
             path: "/svc/#{@name}/heartbeat"
           }
