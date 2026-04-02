@@ -147,11 +147,7 @@ module EventHub
             }
           },
           # deprecated: use http instead (kept for backward compatibility)
-          heartbeat: {
-            bind_address: "0.0.0.0",
-            port: 8080,
-            path: "/svc/#{@name}/heartbeat"
-          }
+          heartbeat: {}
         },
         processor: {
           heartbeat_cycle_in_s: 300,

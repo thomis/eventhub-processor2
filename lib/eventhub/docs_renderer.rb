@@ -10,7 +10,7 @@ module EventHub
     DEFAULT_CHANGELOG_LOCATIONS = ["CHANGELOG.md", "doc/CHANGELOG.md"].freeze
     DEFAULT_COMPANY_NAME = "Novartis"
 
-    DEFAULT_HTTP_RESOURCES = [:heartbeat, :version, :docs, :changelog, :configuration].freeze
+    DEFAULT_HTTP_RESOURCES = [:heartbeat, :version, :docs, :changelog].freeze
 
     def initialize(processor:, base_path:)
       @processor = processor
@@ -91,19 +91,101 @@ module EventHub
         "<p>Active configuration for the <strong>#{ERB::Util.html_escape(EventHub::Configuration.environment)}</strong> environment. " \
         "Sensitive values such as passwords, tokens, and keys are automatically redacted.</p>"
 
-      intro + config_to_html_table(config)
+      filter = '<div class="config-filter">' \
+        '<div class="config-filter-row">' \
+        '<input type="text" id="config-filter-input" class="input" placeholder="Filter configuration keys..." autocomplete="off">' \
+        '<button type="button" id="config-filter-reset" class="config-filter-reset" title="Reset filter">&times;</button>' \
+        "</div>" \
+        '<p id="config-filter-count" class="config-filter-count"></p>' \
+        "</div>"
+
+      script = <<~JS
+        <script>
+        (function() {
+          var input = document.getElementById('config-filter-input');
+          var reset = document.getElementById('config-filter-reset');
+          var count = document.getElementById('config-filter-count');
+          var table = document.querySelector('.config-table');
+          if (!input || !table) return;
+
+          input.addEventListener('input', function() {
+            var term = this.value.toLowerCase();
+            var rows = table.querySelectorAll('tbody tr');
+            var visible = 0;
+            var total = 0;
+
+            // Filter individual rows by content (includes sub-tables)
+            rows.forEach(function(row) {
+              if (row.classList.contains('is-section')) {
+                row.style.display = '';
+                return;
+              }
+              total++;
+              if (!term || row.textContent.toLowerCase().indexOf(term) !== -1) {
+                row.style.display = '';
+                visible++;
+              } else {
+                row.style.display = 'none';
+              }
+            });
+
+            // Hide section headers with no visible rows after them
+            var sections = table.querySelectorAll('tbody tr.is-section');
+            sections.forEach(function(section) {
+              var next = section.nextElementSibling;
+              var hasVisible = false;
+              while (next && !next.classList.contains('is-section')) {
+                if (next.style.display !== 'none') hasVisible = true;
+                next = next.nextElementSibling;
+              }
+              section.style.display = hasVisible ? '' : 'none';
+            });
+
+            if (term) {
+              count.textContent = visible + ' of ' + total + ' entries';
+            } else {
+              count.textContent = '';
+            }
+          });
+          reset.addEventListener('click', function() {
+            input.value = '';
+            input.dispatchEvent(new Event('input'));
+            input.focus();
+          });
+        })();
+        </script>
+      JS
+
+      intro + filter + config_to_html_table(config) + script
     end
 
-    def config_to_html_table(hash, depth = 0)
+    def config_to_html_table(hash, depth = 0, prefix = "")
       rows = hash.map do |key, value|
-        if value.is_a?(Hash)
-          "<tr class=\"is-section\"><td colspan=\"2\"><strong>#{ERB::Util.html_escape(key)}</strong></td></tr>\n" \
-          "#{config_to_html_table(value, depth + 1)}"
+        full_key = prefix.empty? ? key.to_s : "#{prefix}.#{key}"
+        if depth == 0 && value.is_a?(Hash) && !value.empty?
+          "<tr class=\"is-section is-section-top\"><td colspan=\"2\"><strong>#{ERB::Util.html_escape(full_key)}</strong></td></tr>\n" \
+          "#{config_to_html_table(value, 1, full_key)}"
+        elsif value.is_a?(Hash) && value.empty?
+          "<tr><td class=\"config-key\">#{ERB::Util.html_escape(full_key)}</td><td><span class=\"not-set\">(empty)</span></td></tr>"
+        elsif value.is_a?(Hash) && value.values.all? { |v| v.is_a?(Hash) && v.empty? }
+          items = value.keys.map { |k| "<li>#{ERB::Util.html_escape(k)}</li>" }.join("\n")
+          "<tr><td class=\"config-key\">#{ERB::Util.html_escape(full_key)}</td><td><ul class=\"config-array\">#{items}</ul></td></tr>"
+        elsif value.is_a?(Hash) && compact_hash?(value)
+          "<tr><td class=\"config-key\">#{ERB::Util.html_escape(full_key)}</td><td>#{format_nested_value(value)}</td></tr>"
+        elsif value.is_a?(Hash)
+          "<tr class=\"is-section\"><td colspan=\"2\"><strong>#{ERB::Util.html_escape(full_key)}</strong></td></tr>\n" \
+          "#{config_to_html_table(value, depth + 1, full_key)}"
         elsif value.is_a?(Array)
-          format_array_rows(key, value, depth)
+          format_array_rows(full_key, key, value, depth)
         else
-          display_value = sensitive_key?(key) ? "<span class=\"redacted\">[REDACTED]</span>" : ERB::Util.html_escape(value.to_s)
-          "<tr><td class=\"config-key\">#{ERB::Util.html_escape(key)}</td><td>#{display_value}</td></tr>"
+          display_value = if sensitive_key?(key)
+            "<span class=\"redacted\">***</span>"
+          elsif value.nil? || value.to_s.strip.empty?
+            "<span class=\"not-set\">(not set)</span>"
+          else
+            ERB::Util.html_escape(value.to_s)
+          end
+          "<tr><td class=\"config-key\">#{ERB::Util.html_escape(full_key)}</td><td>#{display_value}</td></tr>"
         end
       end.join("\n")
 
@@ -114,24 +196,59 @@ module EventHub
       end
     end
 
-    def format_array_rows(key, array, depth)
-      if array.any? { |item| item.is_a?(Hash) }
-        array.each_with_index.map do |item, index|
-          if item.is_a?(Hash)
-            "<tr class=\"is-section\"><td colspan=\"2\"><strong>#{ERB::Util.html_escape(key)}[#{index}]</strong></td></tr>\n" \
-            "#{config_to_html_table(item, depth + 1)}"
-          else
-            display_value = sensitive_key?(key) ? "<span class=\"redacted\">[REDACTED]</span>" : ERB::Util.html_escape(item.to_s)
-            "<tr><td class=\"config-key\">#{ERB::Util.html_escape(key)}[#{index}]</td><td>#{display_value}</td></tr>"
-          end
-        end.join("\n")
+    def format_array_rows(full_key, key, array, _depth)
+      return "<tr><td class=\"config-key\">#{ERB::Util.html_escape(full_key)}</td><td><span class=\"not-set\">(empty)</span></td></tr>" if array.empty?
+
+      if sensitive_key?(key)
+        return "<tr><td class=\"config-key\">#{ERB::Util.html_escape(full_key)}</td><td><span class=\"redacted\">***</span></td></tr>"
+      end
+
+      inner = array.map { |item| format_array_item(item) }.join("\n")
+      "<tr><td class=\"config-key\">#{ERB::Util.html_escape(full_key)}</td><td><ul class=\"config-array\">#{inner}</ul></td></tr>"
+    end
+
+    def format_array_item(item)
+      if item.is_a?(Hash)
+        rows = item.map do |k, v|
+          value = format_nested_value(v)
+          "<tr><td>#{ERB::Util.html_escape(k)}</td><td>#{value}</td></tr>"
+        end.join
+        "<li><table class=\"table is-bordered is-narrow config-subtable\">#{rows}</table></li>"
+      elsif item.is_a?(Array)
+        inner = item.map { |i| format_array_item(i) }.join("\n")
+        "<li><ul class=\"config-array\">#{inner}</ul></li>"
       else
-        display_value = sensitive_key?(key) ? "<span class=\"redacted\">[REDACTED]</span>" : ERB::Util.html_escape(array.join(", "))
-        "<tr><td class=\"config-key\">#{ERB::Util.html_escape(key)}</td><td>#{display_value}</td></tr>"
+        "<li>#{ERB::Util.html_escape(item.to_s)}</li>"
       end
     end
 
-    DEFAULT_SENSITIVE_KEYS = %w[password secret token api_key credential].freeze
+    def format_nested_value(value)
+      if value.is_a?(Hash)
+        rows = value.map do |k, v|
+          "<tr><td>#{ERB::Util.html_escape(k)}</td><td>#{format_nested_value(v)}</td></tr>"
+        end.join
+        "<table class=\"table is-bordered is-narrow config-subtable\">#{rows}</table>"
+      elsif value.is_a?(Array)
+        items = value.map { |i| format_array_item(i) }.join("\n")
+        "<ul class=\"config-array\">#{items}</ul>"
+      elsif value.nil? || value.to_s.strip.empty?
+        "<span class=\"not-set\">(not set)</span>"
+      else
+        ERB::Util.html_escape(value.to_s)
+      end
+    end
+
+    def compact_hash?(hash)
+      hash.values.all? do |v|
+        if v.is_a?(Hash)
+          compact_hash?(v)
+        else
+          !v.is_a?(Array)
+        end
+      end
+    end
+
+    DEFAULT_SENSITIVE_KEYS = %w[password secret token api_key credential username user login].freeze
 
     def sensitive_key?(key)
       keys = if @processor&.class&.method_defined?(:sensitive_keys)

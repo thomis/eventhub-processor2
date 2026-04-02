@@ -5,7 +5,7 @@ RSpec.describe EventHub::Message do
     start = Time.now
     EventHub::Sleeper.new.start(2)
     stop = Time.now
-    expect(((stop - start) - 2) < 0.02).to eq(true), "Expected to wait for 2 seconds but was waiting #{stop - start} seconds"
+    expect(stop - start).to be_within(0.1).of(2), "Expected to wait for 2 seconds but was waiting #{stop - start} seconds"
   end
 
   it "allows to interrupt an initialize sleep" do
@@ -33,7 +33,7 @@ RSpec.describe EventHub::Message do
     threads.each { |thr| thr.join }
     stop = Time.now
 
-    expect(((stop - start) - 2) < 0.01).to eq(true), "Expected to wait for 2 seconds but was waiting #{stop - start} seconds"
+    expect(stop - start).to be_within(0.1).of(2), "Expected to wait for 2 seconds but was waiting #{stop - start} seconds"
   end
 
   it "interrupts a sleep multiple times" do
@@ -57,6 +57,6 @@ RSpec.describe EventHub::Message do
     threads.each { |thr| thr.join }
     stop = Time.now
 
-    expect(((stop - start) - 2) < 0.01).to eq(true), "Expected to wait for 2 seconds but was waiting #{stop - start} seconds"
+    expect(stop - start).to be_within(0.1).of(2), "Expected to wait for 2 seconds but was waiting #{stop - start} seconds"
   end
 end

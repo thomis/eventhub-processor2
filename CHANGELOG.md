@@ -1,5 +1,14 @@
 # Changelog of EventHub::Processor2
 
+# 1.27.0 / 2026-04-01
+
+* Adapt to Bunny 3.0 publisher confirms: use `confirm_select(tracking: true)` for automatic backpressure, remove manual `wait_for_confirms` calls
+* Remove `:configuration` from default HTTP resources to prevent automatic exposure of sensitive config on upgrade (opt-in via `http_resources` method)
+* Improve configuration page: compact rendering for nested hashes and arrays, show `(not set)` for empty values, add client-side filter with reset button, visual distinction for top-level sections
+* Fix deprecation logic to only warn when `heartbeat.*` and `http.*` values actually differ; remove defaults from deprecated `heartbeat` config block
+* Fix example processors: add unique HTTP ports, create missing `data/` directory in publisher
+* Fix flaky sleeper specs by widening timing tolerance and using idiomatic RSpec `be_within` matcher
+
 # 1.26.2 / 2026-03-25
 
 * Change default `http.bind_address` from `localhost` to `0.0.0.0` for container compatibility (ECS, Docker, K8s)

@@ -38,15 +38,9 @@ module EventHub
       connection = create_bunny_connection
       connection.start
       channel = connection.create_channel
-      channel.confirm_select
+      channel.confirm_select(tracking: true)
       exchange = channel.direct(EventHub::EH_X_INBOUND, durable: true)
       exchange.publish(message, persistent: true)
-      success = channel.wait_for_confirms
-
-      unless success
-        raise "Published heartbeat message has " \
-          "not been confirmed by the server"
-      end
     ensure
       connection&.close
     end

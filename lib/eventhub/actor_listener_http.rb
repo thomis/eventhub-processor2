@@ -10,7 +10,7 @@ module EventHub
     include Helper
 
     DEFAULT_VERSION = "?.?.?"
-    DEFAULT_HTTP_RESOURCES = [:heartbeat, :version, :docs, :changelog, :configuration].freeze
+    DEFAULT_HTTP_RESOURCES = [:heartbeat, :version, :docs, :changelog].freeze
     CONTENT_TYPES = {
       ".css" => "text/css",
       ".svg" => "image/svg+xml",
@@ -183,16 +183,17 @@ module EventHub
     private
 
     def http_config(key)
-      # Try new http config first, fall back to deprecated heartbeat config
+      # Prefer deprecated heartbeat config for backward compatibility,
+      # fall back to http config. Only warn when values actually differ.
       heartbeat_value = EventHub::Configuration.server.dig(:heartbeat, key)
       http_value = EventHub::Configuration.server.dig(:http, key)
 
-      if heartbeat_value && http_value != heartbeat_value
+      if heartbeat_value && http_value && heartbeat_value != http_value
         EventHub.logger.warn("[DEPRECATION] heartbeat.#{key} is deprecated. Please use http.#{key} instead.")
         return heartbeat_value
       end
 
-      http_value
+      http_value || heartbeat_value
     end
 
     def resource_enabled?(name)

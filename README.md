@@ -321,7 +321,7 @@ Resources are mounted under the `base_path`:
 - `{base_path}/heartbeat` - Health check
 - `{base_path}/version` - Version info as JSON
 - `{base_path}/docs` - README documentation as HTML
-- `{base_path}/docs/configuration` - Configuration as HTML table
+- `{base_path}/docs/configuration` - Configuration as HTML table (opt-in, see [Enabling Resources](#enabling-resources))
 - `{base_path}/docs/changelog` - CHANGELOG as HTML
 - `{base_path}/assets/*` - Static assets (CSS, images)
 
@@ -469,7 +469,7 @@ GET {base_path}/docs/configuration
 
 **Response:** `200 OK` with HTML page
 
-By default, the following keys are redacted: `password`, `secret`, `token`, `api_key`, `credential`. You can customize the list by defining a `sensitive_keys` method in your processor:
+By default, the following keys are redacted: `password`, `secret`, `token`, `api_key`, `credential`, `username`, `user`, `login`. You can customize the list by defining a `sensitive_keys` method in your processor:
 
 ```ruby
 # Override the entire list
@@ -497,27 +497,21 @@ class MyProcessor < EventHub::Processor2
 end
 ```
 
-### Disabling Resources
+### Enabling Resources
 
-By default, all HTTP resources are enabled. You can control which resources are available by defining an `http_resources` method in your processor. The navbar adapts automatically.
+By default, the following HTTP resources are enabled: `:heartbeat`, `:version`, `:docs`, and `:changelog`. The `:configuration` resource is **disabled by default** because it displays server configuration which may contain sensitive values. Although passwords, tokens, and keys are automatically redacted, we prefer a secure-by-default approach where processors must explicitly opt in to exposing configuration.
 
-```ruby
-class MyProcessor < EventHub::Processor2
-  def http_resources
-    [:heartbeat, :version, :docs, :changelog, :configuration]  # default: all enabled
-  end
-end
-```
-
-To disable the configuration page for example:
+To enable the configuration page, define an `http_resources` method in your processor:
 
 ```ruby
 class MyProcessor < EventHub::Processor2
   def http_resources
-    [:heartbeat, :version, :docs, :changelog]
+    [:heartbeat, :version, :docs, :changelog, :configuration]
   end
 end
 ```
+
+You can also use `http_resources` to disable any of the default resources. The navbar adapts automatically.
 
 ### Customizing Footer
 

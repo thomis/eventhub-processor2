@@ -328,9 +328,18 @@ RSpec.describe EventHub::ActorListenerHttp do
   end
 
   describe "config endpoint" do
+    let(:processor_with_config) {
+      Class.new do
+        def http_resources
+          [:heartbeat, :version, :docs, :changelog, :configuration]
+        end
+      end.new
+    }
+
     it "returns HTML with configuration table" do
       EventHub::ActorListenerHttp.new(
         port: 8105,
+        processor: processor_with_config,
         base_path: "/api"
       )
       sleep 0.2
@@ -347,6 +356,7 @@ RSpec.describe EventHub::ActorListenerHttp do
     it "redacts sensitive values" do
       EventHub::ActorListenerHttp.new(
         port: 8106,
+        processor: processor_with_config,
         base_path: "/api"
       )
       sleep 0.2
@@ -354,14 +364,15 @@ RSpec.describe EventHub::ActorListenerHttp do
       res = Net::HTTP.get_response(uri)
 
       expect(res.is_a?(Net::HTTPSuccess)).to eq(true)
-      expect(res.body).to include("[REDACTED]")
-      # password value should be redacted, but user value "guest" is visible
-      expect(res.body).to match(/password.*\[REDACTED\]/m)
+      expect(res.body).to include("***")
+      expect(res.body).to match(/password.*\*\*\*/m)
+      expect(res.body).to match(/user.*\*\*\*/m)
     end
 
     it "fails with method not allowed for POST" do
       EventHub::ActorListenerHttp.new(
         port: 8107,
+        processor: processor_with_config,
         base_path: "/api"
       )
       sleep 0.2
@@ -374,6 +385,10 @@ RSpec.describe EventHub::ActorListenerHttp do
     context "with custom configuration_as_html method" do
       let(:processor_with_custom_config) {
         Class.new do
+          def http_resources
+            [:heartbeat, :version, :docs, :changelog, :configuration]
+          end
+
           def configuration_as_html
             "<h1>Custom Configuration</h1>"
           end
@@ -398,6 +413,10 @@ RSpec.describe EventHub::ActorListenerHttp do
     context "with custom sensitive_keys method" do
       let(:processor_with_custom_sensitive_keys) {
         Class.new do
+          def http_resources
+            [:heartbeat, :version, :docs, :changelog, :configuration]
+          end
+
           def sensitive_keys
             %w[password user]
           end
@@ -415,8 +434,8 @@ RSpec.describe EventHub::ActorListenerHttp do
         res = Net::HTTP.get_response(uri)
 
         expect(res.is_a?(Net::HTTPSuccess)).to eq(true)
-        expect(res.body).to match(/user.*\[REDACTED\]/m)
-        expect(res.body).to match(/password.*\[REDACTED\]/m)
+        expect(res.body).to match(/user.*\*\*\*/m)
+        expect(res.body).to match(/password.*\*\*\*/m)
       end
     end
   end

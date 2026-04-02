@@ -6,6 +6,10 @@ module EventHub
       "1.0.0" # define your version
     end
 
+    def http_resources
+      [:heartbeat, :version, :docs, :changelog, :configuration]
+    end
+
     def handle_message(message, args = {})
       # deal with your parsed EventHub message
       # message.class => EventHub::Message

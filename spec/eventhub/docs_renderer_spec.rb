@@ -62,12 +62,14 @@ RSpec.describe EventHub::DocsRenderer do
         ]
       end
 
-      it "renders each hash with indexed section header" do
+      it "renders each hash as a nested sub-table" do
         html = renderer.render_config
-        expect(html).to include("connections[0]")
-        expect(html).to include("connections[1]")
+        expect(html).to include("config-subtable")
+        expect(html).to include("config-array")
         expect(html).to include("db1.example.com")
         expect(html).to include("db2.example.com")
+        expect(html).to include("5432")
+        expect(html).to include("5433")
       end
     end
 
@@ -79,19 +81,169 @@ RSpec.describe EventHub::DocsRenderer do
         ]
       end
 
-      it "renders hashes as sections and scalars as indexed rows" do
+      it "renders hashes as sub-tables and scalars as list items" do
         html = renderer.render_config
-        expect(html).to include("items[0]")
         expect(html).to include("first")
-        expect(html).to include("items[1]")
         expect(html).to include("plain_value")
+        expect(html).to include("config-array")
       end
     end
 
     context "with simple array" do
-      it "renders as comma-separated values" do
+      it "renders as list items" do
         html = renderer.render_config
+        expect(html).to include("config-array")
         expect(html).to include("processor2")
+      end
+    end
+
+    context "with empty array" do
+      before do
+        EventHub::Configuration.config_data[:empty_list] = []
+      end
+
+      it "renders as (empty)" do
+        html = renderer.render_config
+        expect(html).to include("(empty)")
+      end
+    end
+
+    context "with empty hash value" do
+      before do
+        EventHub::Configuration.config_data[:empty_section] = {}
+      end
+
+      it "renders as (empty)" do
+        html = renderer.render_config
+        expect(html).to include("empty_section")
+        expect(html).to include("(empty)")
+      end
+    end
+
+    context "with hash of all empty hashes (like queues)" do
+      before do
+        EventHub::Configuration.config_data[:process] = {
+          queues: {
+            inbound: {},
+            order: {},
+            load: {},
+            feedback: {}
+          }
+        }
+      end
+
+      it "renders keys as list items in a single row" do
+        html = renderer.render_config
+        expect(html).to include("process.queues")
+        expect(html).to include("config-array")
+        expect(html).to include("<li>inbound</li>")
+        expect(html).to include("<li>feedback</li>")
+        expect(html).not_to include("process.queues.inbound")
+      end
+    end
+
+    context "with flat hash values (like steps with routing_key)" do
+      before do
+        EventHub::Configuration.config_data[:process] = {
+          steps: {
+            "1" => {routing_key: "store.load"},
+            "2" => {routing_key: "bios.outbound"}
+          }
+        }
+      end
+
+      it "renders flat hashes as compact sub-tables without section headers" do
+        html = renderer.render_config
+        expect(html).to include("config-subtable")
+        expect(html).to include("store.load")
+        expect(html).to include("bios.outbound")
+        expect(html).not_to include("process.steps.1")
+        expect(html).not_to include("process.steps.2")
+      end
+    end
+
+    context "with deeply nested array of hashes" do
+      before do
+        EventHub::Configuration.config_data[:steps] = [
+          {name: "step1", targets: {queue: "q1", exchange: "ex1"}},
+          {name: "step2", targets: {queue: "q2", exchange: "ex2"}}
+        ]
+      end
+
+      it "renders nested hashes recursively" do
+        html = renderer.render_config
+        expect(html).to include("step1")
+        expect(html).to include("step2")
+        expect(html).to include("q1")
+        expect(html).to include("ex2")
+        expect(html).to include("config-subtable")
+      end
+    end
+
+    context "with sensitive array key" do
+      before do
+        EventHub::Configuration.config_data[:auth] = {
+          token: ["secret1", "secret2"]
+        }
+      end
+
+      it "redacts sensitive array values" do
+        html = renderer.render_config
+        expect(html).to include("***")
+        expect(html).not_to include("secret1")
+        expect(html).not_to include("secret2")
+      end
+    end
+
+    context "with nested arrays" do
+      before do
+        EventHub::Configuration.config_data[:matrix] = {
+          grid: [["a", "b"], ["c", "d"]]
+        }
+      end
+
+      it "renders nested arrays recursively" do
+        html = renderer.render_config
+        expect(html).to include("config-array")
+        expect(html).to include("a")
+        expect(html).to include("d")
+      end
+    end
+
+    context "with array value inside array of hashes" do
+      before do
+        EventHub::Configuration.config_data[:connections] = [
+          {host: "db1", tags: ["primary", "backup"]}
+        ]
+      end
+
+      it "renders arrays within sub-table values" do
+        html = renderer.render_config
+        expect(html).to include("db1")
+        expect(html).to include("primary")
+        expect(html).to include("backup")
+        expect(html).to include("config-array")
+        expect(html).to include("config-subtable")
+      end
+    end
+
+    context "with deep non-compact hash" do
+      before do
+        EventHub::Configuration.config_data[:services] = {
+          api: {
+            endpoints: {
+              health: {path: "/health", method: "GET"}
+            }
+          }
+        }
+      end
+
+      it "renders with section headers for non-compact nested hashes" do
+        html = renderer.render_config
+        expect(html).to include("is-section")
+        expect(html).to include("services.api")
+        expect(html).to include("/health")
+        expect(html).to include("GET")
       end
     end
   end

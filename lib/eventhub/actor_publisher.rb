@@ -25,7 +25,7 @@ module EventHub
       exchange_name = args[:exchange_name] || EH_X_INBOUND
 
       channel = @connection.create_channel
-      channel.confirm_select
+      channel.confirm_select(tracking: true)
       exchange = channel.direct(exchange_name, durable: true)
 
       publish_options = {persistent: true}
@@ -33,12 +33,6 @@ module EventHub
       publish_options[:correlation_id] = correlation_id if correlation_id
 
       exchange.publish(message, publish_options)
-      success = channel.wait_for_confirms
-
-      unless success
-        raise "Published message from Listener actor " \
-              "has not been confirmed by the server"
-      end
     ensure
       channel&.close
     end

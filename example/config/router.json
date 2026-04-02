@@ -6,7 +6,10 @@
       "host": "localhost",
       "vhost": "event_hub",
       "port": 5672,
-      "tls": false
+      "tls": false,
+      "http": {
+        "port": 8082
+      }
     },
     "processor": {
       "listener_queues": [

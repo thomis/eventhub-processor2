@@ -1,5 +1,6 @@
 require "bunny"
 require "celluloid"
+require "fileutils"
 require "json"
 require "securerandom"
 require "eventhub/components"
@@ -38,6 +39,7 @@ module Publisher
       @files_sent = 0
 
       @filename = "data/store.json"
+      FileUtils.mkdir_p(File.dirname(@filename))
       if File.exist?(@filename)
         cleanup
       else
@@ -119,7 +121,7 @@ module Publisher
         logger: Logger.new(File::NULL))
       @connection.start
       @channel = @connection.create_channel
-      @channel.confirm_select
+      @channel.confirm_select(tracking: true)
       @exchange = @channel.direct("example.outbound", durable: true)
     end
 
@@ -135,13 +137,8 @@ module Publisher
       Publisher.logger.info("[#{id}] - Message/File created")
 
       @exchange.publish(data, persistent: true)
-      success = @channel.wait_for_confirms
-      if success
-        Celluloid::Actor[:transaction_store]&.stop(id)
-        Publisher&.logger&.info("[#{id}] - Message sent")
-      else
-        Publisher&.logger&.error("[#{id}] -  Published message not confirmed")
-      end
+      Celluloid::Actor[:transaction_store]&.stop(id)
+      Publisher&.logger&.info("[#{id}] - Message sent")
     end
   end
 

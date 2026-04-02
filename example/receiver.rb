@@ -10,6 +10,10 @@ module EventHub
       "Example Company"
     end
 
+    def http_resources
+      [:heartbeat, :version, :docs, :changelog, :configuration]
+    end
+
     # Custom README served via method instead of file
     def readme_as_html
       <<~HTML
