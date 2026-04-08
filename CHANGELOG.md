@@ -1,5 +1,10 @@
 # Changelog of EventHub::Processor2
 
+# 1.27.2 / 2026-04-08
+
+* Fix publish return value leaking Bunny::Exchange object back to callers, causing unintended re-publishing of garbage messages via `handle_payload`
+* Add type guard in `handle_payload` to only re-publish `EventHub::Message` instances
+
 # 1.27.1 / 2026-04-08
 
 * Read markdown files (README, CHANGELOG) as UTF-8 to correctly render Unicode characters (e.g. umlauts, accented characters, emojis)

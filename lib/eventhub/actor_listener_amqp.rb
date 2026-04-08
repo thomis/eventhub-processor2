@@ -124,6 +124,7 @@ module EventHub
       end
 
       Array(response_messages).each do |message|
+        next unless message.is_a?(EventHub::Message)
         publish(message: message.to_json, connection: connection)
       end
     end

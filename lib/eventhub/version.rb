@@ -1,3 +1,3 @@
 module EventHub
-  VERSION = "1.27.1".freeze
+  VERSION = "1.27.2".freeze
 end

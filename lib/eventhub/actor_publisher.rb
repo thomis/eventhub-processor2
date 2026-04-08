@@ -33,6 +33,7 @@ module EventHub
       publish_options[:correlation_id] = correlation_id if correlation_id
 
       exchange.publish(message, publish_options)
+      nil
     ensure
       channel&.close
     end

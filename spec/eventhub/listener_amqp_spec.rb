@@ -32,6 +32,11 @@ RSpec.describe EventHub::ActorListenerAmqp do
     EventHub::CorrelationId.clear
   end
 
+  it "returns nil from publish to prevent return value leaking" do
+    result = listener.publish(message: EventHub::Message.new.to_json)
+    expect(result).to be_nil
+  end
+
   it "raises exception when restart" do
     expect(listener).not_to eq(nil)
     expect { listener.restart }.to raise_error(RuntimeError, "Listener amqp is restarting...")
