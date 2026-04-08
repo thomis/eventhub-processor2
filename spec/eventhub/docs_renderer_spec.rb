@@ -39,6 +39,32 @@ RSpec.describe EventHub::DocsRenderer do
     end
   end
 
+  describe "UTF-8 support" do
+    context "with Unicode characters in markdown file" do
+      before do
+        path = File.join(Dir.pwd, "spec", "fixtures", "unicode_readme.md")
+        FileUtils.mkdir_p(File.dirname(path))
+        File.write(path, "# Über uns\nGrüße from Zürich! Ñoño 日本語 🎉", encoding: "utf-8")
+        EventHub::Configuration.config_data[:server][:http][:docs][:readme_path] = path
+      end
+
+      after do
+        path = File.join(Dir.pwd, "spec", "fixtures", "unicode_readme.md")
+        File.delete(path) if File.exist?(path)
+      end
+
+      it "renders Unicode characters correctly" do
+        html = renderer.render_readme
+        expect(html).to include("Über uns")
+        expect(html).to include("Grüße")
+        expect(html).to include("Zürich")
+        expect(html).to include("Ñoño")
+        expect(html).to include("日本語")
+        expect(html).to include("🎉")
+      end
+    end
+  end
+
   describe "#render_changelog" do
     context "when no changelog file exists" do
       it "shows fallback message" do

@@ -401,6 +401,8 @@ GET {base_path}/docs
 
 **Response:** `200 OK` with HTML page
 
+Markdown files are read as UTF-8, so Unicode characters (umlauts, accented characters, emojis, etc.) are rendered correctly.
+
 By default, looks for `README.md` in the current directory, then `doc/README.md`. You can customize the path via configuration:
 
 ```json

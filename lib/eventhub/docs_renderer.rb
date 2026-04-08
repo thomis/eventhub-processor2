@@ -35,7 +35,7 @@ module EventHub
     def asset(name)
       path = File.join(ASSETS_PATH, name)
       return nil unless File.exist?(path)
-      File.read(path)
+      File.read(path, encoding: "utf-8")
     end
 
     private
@@ -63,7 +63,7 @@ module EventHub
       end
 
       if config_path && File.exist?(config_path)
-        return File.read(config_path)
+        return File.read(config_path, encoding: "utf-8")
       end
 
       locations = case type
@@ -75,7 +75,7 @@ module EventHub
 
       locations.each do |location|
         path = File.join(Dir.pwd, location)
-        return File.read(path) if File.exist?(path)
+        return File.read(path, encoding: "utf-8") if File.exist?(path)
       end
 
       "No #{(type == :readme) ? "README" : "CHANGELOG"} available."
@@ -265,7 +265,7 @@ module EventHub
 
     def render_layout(title:, content:, content_class: "")
       template_path = File.join(TEMPLATES_PATH, "layout.erb")
-      template = File.read(template_path)
+      template = File.read(template_path, encoding: "utf-8")
 
       processor_name = EventHub::Configuration.name
       version = processor_version

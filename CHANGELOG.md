@@ -1,5 +1,9 @@
 # Changelog of EventHub::Processor2
 
+# 1.27.1 / 2026-04-08
+
+* Read markdown files (README, CHANGELOG) as UTF-8 to correctly render Unicode characters (e.g. umlauts, accented characters, emojis)
+
 # 1.27.0 / 2026-04-01
 
 * Adapt to Bunny 3.0 publisher confirms: use `confirm_select(tracking: true)` for automatic backpressure, remove manual `wait_for_confirms` calls
