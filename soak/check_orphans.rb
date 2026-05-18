@@ -17,7 +17,11 @@ require "json"
 
 data_dir = ARGV[0] || "soak/data"
 store_path = File.join(data_dir, "store.json")
-in_flight = (JSON.parse(File.read(store_path)) rescue {}).keys
+in_flight = begin
+  JSON.parse(File.read(store_path))
+rescue
+  {}
+end.keys
 
 files = Dir.glob(File.join(data_dir, "*.json"))
   .map { |f| File.basename(f, ".json") }
