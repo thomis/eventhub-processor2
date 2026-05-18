@@ -9,6 +9,8 @@ module EventHub
 
     def initialize(processor_instance)
       @processor_instance = processor_instance
+      @connection = nil
+      @channel = nil
       async.start
     end
 
@@ -28,21 +30,49 @@ module EventHub
 
     def cleanup
       EventHub.logger.info("Heartbeat is cleaning up...")
-      publish(heartbeat(action: "stopped"))
-      EventHub.logger.info("Heartbeat has sent a [stopped] beat")
+      begin
+        publish(heartbeat(action: "stopped"))
+        EventHub.logger.info("Heartbeat has sent a [stopped] beat")
+      rescue => ex
+        EventHub.logger.warn("Heartbeat cleanup publish: ignoring #{ex.class}: #{ex.message}")
+      end
+      begin
+        @channel&.close
+      rescue => ex
+        EventHub.logger.warn("Heartbeat cleanup channel: ignoring #{ex.class}: #{ex.message}")
+      end
+      begin
+        @connection&.close
+      rescue => ex
+        EventHub.logger.warn("Heartbeat cleanup connection: ignoring #{ex.class}: #{ex.message}")
+      end
     end
 
     private
 
     def publish(message)
-      connection = create_bunny_connection
-      connection.start
-      channel = connection.create_channel
-      channel.confirm_select(tracking: true)
-      exchange = channel.direct(EventHub::EH_X_INBOUND, durable: true)
+      ensure_channel
+      exchange = @channel.direct(EventHub::EH_X_INBOUND, durable: true)
       exchange.publish(message, persistent: true)
-    ensure
-      connection&.close
+    rescue Bunny::NetworkFailure, Bunny::ChannelAlreadyClosed => e
+      EventHub.logger.warn("Heartbeat channel dropped: #{e.class}: #{e.message}")
+      begin
+        @channel&.close
+      rescue
+        nil
+      end
+      @channel = nil
+      raise
+    end
+
+    def ensure_channel
+      unless @connection
+        @connection = create_bunny_connection
+        @connection.start
+      end
+      return if @channel&.open?
+      @channel = @connection.create_channel
+      @channel.confirm_select(tracking: true)
     end
 
     def heartbeat(args = {action: "running"})

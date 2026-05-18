@@ -7,9 +7,13 @@ module EventHub
 
     finalizer :cleanup
 
+    # number of consecutive failed cycles before we raise to force a restart
+    MISSING_QUEUE_THRESHOLD = 3
+
     def initialize
       cycle = Configuration.processor[:watchdog_cycle_in_s]
       EventHub.logger.info("Watchdog is starting [cycle: #{cycle}s]...")
+      @consecutive_failures = 0
       async.start
     end
 
@@ -30,14 +34,28 @@ module EventHub
       connection = create_bunny_connection
       connection.start
 
-      EventHub::Configuration.processor[:listener_queues].each do |queue_name|
-        unless connection.queue_exists?(queue_name)
-          EventHub.logger.warn("Queue [#{queue_name}] is missing")
-          raise "Queue [#{queue_name}] is missing"
+      missing = EventHub::Configuration.processor[:listener_queues].reject do |queue_name|
+        connection.queue_exists?(queue_name)
+      end
+
+      if missing.empty?
+        @consecutive_failures = 0
+      else
+        @consecutive_failures += 1
+        EventHub.logger.warn("Watchdog: queue(s) missing #{missing.inspect} (#{@consecutive_failures}/#{MISSING_QUEUE_THRESHOLD})")
+        if @consecutive_failures >= MISSING_QUEUE_THRESHOLD
+          raise "Queue(s) missing for #{@consecutive_failures} consecutive cycles: #{missing.inspect}"
         end
       end
+    rescue Bunny::NetworkFailure, Bunny::TCPConnectionFailed, Timeout::Error => ex
+      # transient broker problems are auto-recovered by Bunny; don't fight it
+      EventHub.logger.warn("Watchdog: transient broker error #{ex.class}: #{ex.message} - skipping cycle")
     ensure
-      connection&.close
+      begin
+        connection&.close
+      rescue
+        nil
+      end
     end
   end
 end

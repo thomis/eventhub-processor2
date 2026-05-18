@@ -162,7 +162,9 @@ module EventHub
     def config_to_html_table(hash, depth = 0, prefix = "")
       rows = hash.map do |key, value|
         full_key = prefix.empty? ? key.to_s : "#{prefix}.#{key}"
-        if depth == 0 && value.is_a?(Hash) && !value.empty?
+        if sensitive_key?(key) && !value.nil? && !(value.respond_to?(:empty?) && value.empty?)
+          "<tr><td class=\"config-key\">#{ERB::Util.html_escape(full_key)}</td><td>#{redacted_html}</td></tr>"
+        elsif depth == 0 && value.is_a?(Hash) && !value.empty?
           "<tr class=\"is-section is-section-top\"><td colspan=\"2\"><strong>#{ERB::Util.html_escape(full_key)}</strong></td></tr>\n" \
           "#{config_to_html_table(value, 1, full_key)}"
         elsif value.is_a?(Hash) && value.empty?
@@ -178,9 +180,7 @@ module EventHub
         elsif value.is_a?(Array)
           format_array_rows(full_key, key, value, depth)
         else
-          display_value = if sensitive_key?(key)
-            "<span class=\"redacted\">***</span>"
-          elsif value.nil? || value.to_s.strip.empty?
+          display_value = if value.nil? || value.to_s.strip.empty?
             "<span class=\"not-set\">(not set)</span>"
           else
             ERB::Util.html_escape(value.to_s)
@@ -200,7 +200,7 @@ module EventHub
       return "<tr><td class=\"config-key\">#{ERB::Util.html_escape(full_key)}</td><td><span class=\"not-set\">(empty)</span></td></tr>" if array.empty?
 
       if sensitive_key?(key)
-        return "<tr><td class=\"config-key\">#{ERB::Util.html_escape(full_key)}</td><td><span class=\"redacted\">***</span></td></tr>"
+        return "<tr><td class=\"config-key\">#{ERB::Util.html_escape(full_key)}</td><td>#{redacted_html}</td></tr>"
       end
 
       inner = array.map { |item| format_array_item(item) }.join("\n")
@@ -210,7 +210,7 @@ module EventHub
     def format_array_item(item)
       if item.is_a?(Hash)
         rows = item.map do |k, v|
-          value = format_nested_value(v)
+          value = sensitive_key?(k) ? redacted_html : format_nested_value(v)
           "<tr><td>#{ERB::Util.html_escape(k)}</td><td>#{value}</td></tr>"
         end.join
         "<li><table class=\"table is-bordered is-narrow config-subtable\">#{rows}</table></li>"
@@ -225,7 +225,8 @@ module EventHub
     def format_nested_value(value)
       if value.is_a?(Hash)
         rows = value.map do |k, v|
-          "<tr><td>#{ERB::Util.html_escape(k)}</td><td>#{format_nested_value(v)}</td></tr>"
+          inner = sensitive_key?(k) ? redacted_html : format_nested_value(v)
+          "<tr><td>#{ERB::Util.html_escape(k)}</td><td>#{inner}</td></tr>"
         end.join
         "<table class=\"table is-bordered is-narrow config-subtable\">#{rows}</table>"
       elsif value.is_a?(Array)
@@ -236,6 +237,10 @@ module EventHub
       else
         ERB::Util.html_escape(value.to_s)
       end
+    end
+
+    def redacted_html
+      "<span class=\"redacted\">***</span>"
     end
 
     def compact_hash?(hash)

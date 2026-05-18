@@ -39,6 +39,37 @@ module EventHub
     def listen(args = {})
       with_listen(args) do |connection, channel, consumer, queue, queue_name|
         EventHub.logger.info("Listening to queue [#{queue_name}]")
+
+        # log broker-initiated connection state changes
+        connection.on_blocked { |reason| EventHub.logger.warn("Broker blocked connection: #{reason}") }
+        connection.on_unblocked { EventHub.logger.info("Broker unblocked connection") }
+
+        # Only escalate to an actor restart for exceptions Bunny will NOT
+        # recover from. Transient network exceptions are handled by Bunny's
+        # automatic recovery; an actor restart in that window races recovery
+        # and incurs an avoidable 15s before_restart sleep without consumption.
+        channel.on_uncaught_exception do |ex, _consumer|
+          if recoverable_bunny_error?(ex)
+            EventHub.logger.warn("Consumer thread raised recoverable #{ex.class}: #{ex.message} - leaving recovery to Bunny")
+          else
+            EventHub.logger.error("Consumer thread raised non-recoverable #{ex.class}: #{ex.message} - restarting listener")
+            Celluloid::Actor[:actor_listener_amqp]&.async&.restart
+          end
+        end
+
+        # Broker may cancel a consumer (queue deleted, HA failover, policy change).
+        # If the connection is still open, this is a real broker-side cancel and
+        # we must restart. If the connection is closed/recovering, Bunny will
+        # re-register the consumer itself on reconnect; do not race it.
+        consumer.on_cancellation do
+          if connection.open?
+            EventHub.logger.error("Consumer for [#{queue_name}] cancelled by broker - restarting listener")
+            Celluloid::Actor[:actor_listener_amqp]&.async&.restart
+          else
+            EventHub.logger.warn("Consumer for [#{queue_name}] cancelled during disconnect - leaving recovery to Bunny")
+          end
+        end
+
         consumer.on_delivery do |delivery_info, metadata, payload|
           CorrelationId.with(metadata[:correlation_id]) do
             EventHub.logger.info("#{queue_name}: [#{delivery_info.delivery_tag}]" \
@@ -70,9 +101,10 @@ module EventHub
 
     def with_listen(args = {}, &block)
       connection = create_bunny_connection
-      connection.start
       queue_name = args[:queue_name]
+      # store FIRST so cleanup can find a partially-started session
       @connections[queue_name] = connection
+      connection.start
       channel = connection.create_channel
       channel.prefetch(1)
       queue = channel.queue(queue_name, durable: true)
@@ -88,6 +120,7 @@ module EventHub
     def handle_payload(args = {})
       response_messages = []
       connection = args[:connection]
+      correlation_id = args[:correlation_id] || CorrelationId.current
 
       # convert to EventHub message
       message = EventHub::Message.from_json(args[:payload])
@@ -123,9 +156,12 @@ module EventHub
         end
       end
 
+      # use possibly-updated execution_id fallback from above
+      correlation_id ||= CorrelationId.current
+
       Array(response_messages).each do |message|
         next unless message.is_a?(EventHub::Message)
-        publish(message: message.to_json, connection: connection)
+        publish(message: message.to_json, connection: connection, correlation_id: correlation_id)
       end
     end
 
@@ -136,15 +172,33 @@ module EventHub
 
     def cleanup
       EventHub.logger.info("Listener amqp is cleaning up...")
-      # close all open connections
+      # close all open connections; bunny-3 can raise on a torn-down session
       return unless @connections
       @connections.values.each do |connection|
         connection&.close
+      rescue => ex
+        EventHub.logger.warn("Listener cleanup: ignoring #{ex.class}: #{ex.message}")
       end
     end
 
     def publish(args)
       @actor_publisher.publish(args)
+    end
+
+    # Exceptions that Bunny's network recovery handles transparently. If one of
+    # these bubbles into `on_uncaught_exception`, the right move is to let the
+    # in-flight recovery complete rather than racing it with an actor restart.
+    RECOVERABLE_BUNNY_ERRORS = [
+      Bunny::NetworkFailure,
+      Bunny::ConnectionClosedError,
+      Bunny::TCPConnectionFailed,
+      Bunny::TCPConnectionFailedForAllHosts,
+      Timeout::Error,
+      IOError
+    ].freeze
+
+    def recoverable_bunny_error?(ex)
+      RECOVERABLE_BUNNY_ERRORS.any? { |klass| ex.is_a?(klass) }
     end
   end
 end

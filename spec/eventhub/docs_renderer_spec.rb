@@ -221,6 +221,63 @@ RSpec.describe EventHub::DocsRenderer do
       end
     end
 
+    context "with sensitive keys nested inside compact hashes" do
+      before do
+        EventHub::Configuration.config_data[:db] = {
+          credentials: {user: "admin", password: "leak-1"}
+        }
+      end
+
+      it "redacts a password key inside a nested compact hash" do
+        html = renderer.render_config
+        expect(html).to include("***")
+        expect(html).not_to include("leak-1")
+      end
+    end
+
+    context "with sensitive keys inside an array of hashes" do
+      before do
+        EventHub::Configuration.config_data[:downstream] = [
+          {name: "svc-a", token: "leak-2"}
+        ]
+      end
+
+      it "redacts the sensitive value while keeping the rest visible" do
+        html = renderer.render_config
+        expect(html).to include("svc-a")
+        expect(html).to include("***")
+        expect(html).not_to include("leak-2")
+      end
+    end
+
+    context "with sensitive keys nested deeply inside hashes within arrays" do
+      before do
+        EventHub::Configuration.config_data[:upstream] = [
+          {endpoint: "u1", auth: {password: "leak-3"}}
+        ]
+      end
+
+      it "redacts the deepest sensitive scalar" do
+        html = renderer.render_config
+        expect(html).to include("u1")
+        expect(html).to include("***")
+        expect(html).not_to include("leak-3")
+      end
+    end
+
+    context "with a sensitive key whose value is itself a hash" do
+      before do
+        EventHub::Configuration.config_data[:secret] = {api_key: "leak-4a", region: "leak-4b"}
+      end
+
+      it "redacts the whole subtree (key and value)" do
+        html = renderer.render_config
+        expect(html).to include("***")
+        expect(html).not_to include("leak-4a")
+        expect(html).not_to include("leak-4b")
+      end
+    end
+
     context "with nested arrays" do
       before do
         EventHub::Configuration.config_data[:matrix] = {

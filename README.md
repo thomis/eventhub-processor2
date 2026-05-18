@@ -463,7 +463,7 @@ end
 
 ### Configuration
 
-Displays the active configuration as an HTML table. Sensitive values (passwords, tokens, keys) are automatically redacted.
+Displays the active configuration as an HTML table. Sensitive values (passwords, tokens, keys) are automatically redacted at any depth — keys matching the sensitive list are masked whether they appear at the top level, inside nested hashes, or inside hashes nested in arrays.
 
 ```
 GET {base_path}/docs/configuration
@@ -546,6 +546,35 @@ end
 ```
 
 To install this gem onto your local machine, run `bundle exec rake install`.
+
+### Reliability soak harness
+
+A multi-process chaos harness lives in `soak/` (publisher, router, receiver, crasher). It validates end-to-end reliability under sustained broker restarts and `SIGHUP`-triggered listener restarts. A run is considered passing when zero "real orphan" files remain (files whose UUID is not in the publisher's transaction store — i.e. messages whose delivery was claimed by the publisher but never made it through the pipeline).
+
+```
+  # 10-minute chaos + adaptive drain (default), prints PASS/FAIL
+  make soak
+
+  # Longer runs
+  SOAK_MINUTES=60 make soak
+  SOAK_MINUTES=120 SOAK_DRAIN_MAX_S=1200 make soak
+
+  # See all targets and env knobs
+  make help
+```
+
+See `soak/README.md` for the full description.
+
+### Throughput baseline
+
+`rake test:performance` runs a publisher-throughput regression spec against a real local RabbitMQ. It is excluded from `rake spec` (tagged `:performance`) so it does not run on every CI build.
+
+```
+  bundle exec rake test:performance
+  PERF_FLOOR=3000 bundle exec rake test:performance   # lower the floor for slower hosts
+```
+
+Default floor is 5,000 msg/s. Typical local result is ~7,000 msg/s.
 
 ## Publishing
 

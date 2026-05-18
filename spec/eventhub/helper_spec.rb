@@ -56,5 +56,36 @@ RSpec.describe EventHub::Helper do
       connection = create_bunny_connection
       expect(connection.class).to eq(Bunny::Session)
     end
+
+    it "enables Bunny network auto-recovery in connection options" do
+      EventHub::Configuration.load!
+      _url, props = bunny_connection_options
+      expect(props[:automatically_recover]).to eq(true)
+      expect(props[:network_recovery_interval]).to eq(5)
+      expect(props[:recovery_attempts]).to be_nil
+      expect(props[:continuation_timeout]).to eq(15_000)
+      expect(props[:recovery_attempts_exhausted]).to be_a(Proc)
+    end
+
+    it "recovery_attempts_exhausted callback logs and attempts an actor restart" do
+      EventHub::Configuration.load!
+      _url, props = bunny_connection_options
+
+      fake_listener = double("listener")
+      fake_async = double("async")
+      allow(Celluloid::Actor).to receive(:[]).with(:actor_listener_amqp).and_return(fake_listener)
+      allow(fake_listener).to receive(:async).and_return(fake_async)
+      expect(fake_async).to receive(:restart)
+      expect(EventHub.logger).to receive(:error).with(/recovery attempts exhausted/)
+      props[:recovery_attempts_exhausted].call
+    end
+
+    it "recovery_attempts_exhausted callback is a no-op if listener actor is absent" do
+      EventHub::Configuration.load!
+      _url, props = bunny_connection_options
+      allow(Celluloid::Actor).to receive(:[]).with(:actor_listener_amqp).and_return(nil)
+      expect(EventHub.logger).to receive(:error).with(/recovery attempts exhausted/)
+      expect { props[:recovery_attempts_exhausted].call }.not_to raise_error
+    end
   end
 end

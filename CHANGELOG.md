@@ -1,5 +1,37 @@
 # Changelog of EventHub::Processor2
 
+# 1.28.0 / 2026-05-18
+
+**Reliability**
+
+* Survive broker restarts. `automatically_recover: true` + recovery callbacks, so transient disconnects no longer crash the Celluloid actor or exhaust the supervisor's restart budget. Fixes the dispatcher's crash-loop into permanent death after a broker bounce.
+* Survive silent consumer-thread death. New `channel#on_uncaught_exception` / `consumer#on_cancellation` hooks on `ActorListenerAmqp` escalate to an actor restart, but only for non-recoverable errors - transient `Bunny::NetworkFailure` / `ConnectionClosedError` / `TCPConnectionFailed` / `Timeout::Error` / `IOError` and mid-disconnect cancellations are left to Bunny's recovery (no spurious 15s restart sleep).
+* `ActorWatchdog` tolerates transient broker errors; only escalates on 3 consecutive cycles of persistent queue absence.
+* Tolerant `cleanup` in `ActorListenerAmqp`, `ActorPublisher`, `ActorHeartbeat` - bunny-3 raises on `close` of a torn-down session no longer crash the finalizer.
+* **Patch Celluloid 0.18 / Ruby 3.x incompatibility.** Celluloid's `Internals::Logger.crash` mutates a frozen string literal, which raises `FrozenError` before our exception handler runs - the actor thread then dies silently, the supervisor never sees the exit, and the listener becomes a zombie. Symptom: SIGHUP-triggered restart looks like it works but the listener stops consuming. Patched via `Module#prepend` in `lib/eventhub/patches/celluloid_logger.rb`.
+
+**Throughput**
+
+* `ActorPublisher` and `ActorHeartbeat` now reuse a single channel per actor instead of opening one per message. Eliminates the RabbitMQ `Channel is stopping with N pending publisher confirms` warning and lifts publisher throughput from ~hundreds to ~7k msg/s in local tests.
+* New `rake test:performance` task: regression gate at 5k msg/s on a reused channel (opt-in, tagged `:performance`).
+
+**Tracing**
+
+* `correlation_id` now survives the cross-actor hop on publish. `Processor2#publish` captures `CorrelationId.current` in the caller's thread before handing off to the publisher actor, so the AMQP header is preserved end-to-end.
+
+**Security**
+
+* Sensitive-value redaction in the rendered config page now walks nested hashes and arrays. Previously `server.credentials.password` and `connections[].token` leaked through; now redacted at any depth.
+
+**Observability**
+
+* `Celluloid.exception_handler` log line includes the dying actor's class name.
+* Log broker `connection.blocked` / `connection.unblocked` events.
+
+**Test harness**
+
+* New `soak/` reliability harness (publisher / router / receiver / crasher) with `make soak` Makefile target. Adaptive drain, real-vs-in-flight orphan classification, configurable chaos length. Validated with 2h chaos run: 0 real orphans.
+
 # 1.27.2 / 2026-04-08
 
 * Fix publish return value leaking Bunny::Exchange object back to callers, causing unintended re-publishing of garbage messages via `handle_payload`

@@ -2,7 +2,8 @@
 coverage
 .rspec_status
 logs
-example/data
+soak/data
+soak/logs
 pkg
 tmp
 checksums

@@ -9,10 +9,16 @@ require_relative "../lib/eventhub/sleeper"
 SIGNALS_FOR_TERMINATION = [:INT, :TERM, :QUIT]
 SIGNALS_FOR_RELOAD_CONFIG = [:HUP]
 ALL_SIGNALS = SIGNALS_FOR_TERMINATION + SIGNALS_FOR_RELOAD_CONFIG
-PAUSE_BETWEEN_WORK = 0.05 # default is 0.05
+
+# Tunables (override via env). Defaults are sized to bridge a typical
+# Bunny channel-recovery window (~network_recovery_interval = 5s) plus
+# reconnect, so a broker restart doesn't leak in-flight publishes.
+PAUSE_BETWEEN_WORK = Float(ENV.fetch("PAUSE_BETWEEN_WORK", "0.05"))
+PUBLISH_MAX_ATTEMPTS = Integer(ENV.fetch("PUBLISH_MAX_ATTEMPTS", "8"))
+PUBLISH_RETRY_DELAY_S = Float(ENV.fetch("PUBLISH_RETRY_DELAY_S", "1"))
 
 Celluloid.logger = nil
-Celluloid.exception_handler { |ex| Publisher.logger.error "Exception occured: #{ex}}" }
+Celluloid.exception_handler { |ex| Publisher.logger.error "Exception occured: #{ex.class}: #{ex.message}" }
 Celluloid.boot
 
 # Publisher module
@@ -110,14 +116,24 @@ module Publisher
         sleep PAUSE_BETWEEN_WORK
       end
     ensure
-      @connection&.close
+      begin
+        @connection&.close
+      rescue => ex
+        Publisher.logger.warn("Worker connection close: ignoring #{ex.class}: #{ex.message}")
+      end
     end
 
     private
 
     def connect
       @connection = Bunny.new(vhost: "event_hub",
-        automatic_recovery: false,
+        # match the gem's recovery defaults so Bunny re-opens the channel
+        # and re-declares the exchange after a broker restart, without
+        # crashing the Worker actor.
+        automatically_recover: true,
+        network_recovery_interval: 5,
+        recovery_attempts: nil,
+        continuation_timeout: 15_000,
         logger: Logger.new(File::NULL))
       @connection.start
       @channel = @connection.create_channel
@@ -131,14 +147,35 @@ module Publisher
       file_name = "data/#{id}.json"
       data = {body: {id: id}}.to_json
 
-      # start transaction...
+      # start transaction (durable on disk via store.json)
       Celluloid::Actor[:transaction_store].start(id)
       File.write(file_name, data)
       Publisher.logger.info("[#{id}] - Message/File created")
 
-      @exchange.publish(data, persistent: true)
+      # Bridge Bunny's channel-recovery window: when the broker is bouncing,
+      # the channel needs ~network_recovery_interval seconds to reopen and
+      # publishes during that window raise ChannelAlreadyClosed. Retry a few
+      # times with backoff so the message survives a broker hiccup. After
+      # PUBLISH_MAX_ATTEMPTS, leave it pending on disk for an external sweep.
+      attempts = 0
+      begin
+        attempts += 1
+        @exchange.publish(data, persistent: true)
+        unless @channel.wait_for_confirms
+          Publisher.logger.warn("[#{id}] - broker nacked; leaving pending")
+          return
+        end
+      rescue Bunny::NetworkFailure, Bunny::ChannelAlreadyClosed, Timeout::Error => ex
+        if attempts < PUBLISH_MAX_ATTEMPTS
+          sleep PUBLISH_RETRY_DELAY_S
+          retry
+        end
+        Publisher.logger.warn("[#{id}] - publish failed after #{attempts} attempts (#{ex.class}: #{ex.message}); leaving pending")
+        return
+      end
+
       Celluloid::Actor[:transaction_store]&.stop(id)
-      Publisher&.logger&.info("[#{id}] - Message sent")
+      Publisher.logger.info("[#{id}] - Message sent")
     end
   end
 

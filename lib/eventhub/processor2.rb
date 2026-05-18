@@ -61,6 +61,11 @@ module EventHub
     # pass message as string like: '{ "header": ... , "body": { .. }}'
     # and optionally exchange_name: 'your exchange name'
     def publish(args = {})
+      # capture caller-thread thread-local before the cross-actor hop;
+      # CorrelationId.current is nil inside the publisher actor's thread
+      if CorrelationId.current && !args[:correlation_id]
+        args = args.merge(correlation_id: CorrelationId.current)
+      end
       Celluloid::Actor[:actor_listener_amqp].publish(args)
     rescue => error
       EventHub.logger.error("Unexpected exeption while publish: #{error}")

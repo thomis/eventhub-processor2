@@ -10,23 +10,17 @@ module EventHub
     def initialize
       EventHub.logger.info("Publisher is starting...")
       @connection = nil
+      @channel = nil
     end
 
     def publish(args = {})
-      # keep connection once established
-      unless @connection
-        @connection = create_bunny_connection
-        @connection.start
-      end
+      ensure_channel
 
       message = args[:message]
       return if message.nil?
 
       exchange_name = args[:exchange_name] || EH_X_INBOUND
-
-      channel = @connection.create_channel
-      channel.confirm_select(tracking: true)
-      exchange = channel.direct(exchange_name, durable: true)
+      exchange = @channel.direct(exchange_name, durable: true)
 
       publish_options = {persistent: true}
       correlation_id = args[:correlation_id] || CorrelationId.current
@@ -34,13 +28,53 @@ module EventHub
 
       exchange.publish(message, publish_options)
       nil
-    ensure
-      channel&.close
+    rescue Bunny::NetworkFailure, Bunny::ChannelAlreadyClosed => e
+      # broker-side close - drop the channel so next publish reopens it
+      EventHub.logger.warn("Publisher channel dropped: #{e.class}: #{e.message}")
+      begin
+        @channel&.close
+      rescue
+        nil
+      end
+      @channel = nil
+      raise
     end
 
     def cleanup
       EventHub.logger.info("Publisher is cleaning up...")
-      @connection&.close
+      begin
+        @channel&.close
+      rescue => ex
+        EventHub.logger.warn("Publisher cleanup channel: ignoring #{ex.class}: #{ex.message}")
+      end
+      begin
+        @connection&.close
+      rescue => ex
+        EventHub.logger.warn("Publisher cleanup connection: ignoring #{ex.class}: #{ex.message}")
+      end
+    end
+
+    private
+
+    def ensure_channel
+      unless @connection
+        @connection = create_bunny_connection
+        @connection.start
+      end
+      return if @channel&.open?
+
+      attempts = 0
+      begin
+        @channel = @connection.create_channel
+        @channel.confirm_select(tracking: true)
+      rescue Bunny::NetworkFailure, Bunny::ChannelAlreadyClosed
+        attempts += 1
+        if attempts < 3
+          sleep 1
+          retry
+        end
+        raise
+      end
     end
   end
 end

@@ -18,6 +18,11 @@ module EventHub
     end
 
     def create_bunny_connection
+      connection_string, connection_properties = bunny_connection_options
+      Bunny.new(connection_string, connection_properties)
+    end
+
+    def bunny_connection_options
       server = EventHub::Configuration.server
 
       protocol = "amqp"
@@ -31,8 +36,21 @@ module EventHub
         connection_properties[:logger] = Logger.new(File::NULL)
       end
 
-      # we don't need it since reactors can deal with it
-      connection_properties[:automatically_recover] = false
+      # Bunny's network recovery: re-establish connection, re-open channels,
+      # re-declare queues, and re-register consumers transparently after a
+      # broker disconnect (heartbeat miss, broker restart, LB drop).
+      connection_properties[:automatically_recover] = true
+      connection_properties[:network_recovery_interval] = 5
+      connection_properties[:recovery_attempts] = nil
+      connection_properties[:continuation_timeout] = 15_000
+
+      # Belt-and-suspenders: if recovery_attempts is ever capped, escalate to
+      # a Celluloid actor restart instead of going silent.
+      connection_properties[:recovery_attempts_exhausted] = lambda do
+        EventHub.logger.error("Bunny recovery attempts exhausted - actor will restart")
+        actor = Celluloid::Actor[:actor_listener_amqp]
+        actor&.async&.restart
+      end
 
       # do we do tls?
       if server[:tls]
@@ -45,8 +63,7 @@ module EventHub
       end
 
       connection_string = "#{protocol}://#{server[:host]}:#{server[:port]}"
-
-      Bunny.new(connection_string, connection_properties)
+      [connection_string, connection_properties]
     end
 
     # Formats stamp into UTC format

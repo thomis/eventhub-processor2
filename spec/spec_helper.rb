@@ -1,6 +1,10 @@
 # to collect test coverage
 require "simplecov"
-SimpleCov.start
+SimpleCov.start do
+  # Performance spec is opt-in (rake test:performance) and its `it` body
+  # isn't executed in `rake spec` runs, so don't let it skew lib coverage.
+  add_filter "spec/eventhub/performance_spec.rb"
+end
 
 require "celluloid/test"
 require_relative "../lib/eventhub/base"
