@@ -11,7 +11,16 @@ module EventHub
         message = block.call if block
         correlation_id = CorrelationId.current
         execution_id = ExecutionId.current
-        if correlation_id || execution_id
+
+        if message.is_a?(Hash)
+          # Caller already passed a structured event - merge tracing
+          # fields in (caller-provided values win via ||=) instead of
+          # wrapping under :message, which would double-nest the event.
+          log_hash = message.dup
+          log_hash[:correlation_id] ||= correlation_id if correlation_id
+          log_hash[:execution_id] ||= execution_id if execution_id
+          @logger.send(level, log_hash)
+        elsif correlation_id || execution_id
           log_hash = {message: message}
           log_hash[:correlation_id] = correlation_id if correlation_id
           log_hash[:execution_id] = execution_id if execution_id

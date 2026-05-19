@@ -152,6 +152,57 @@ RSpec.describe EventHub::LoggerProxy do
           expect(mock_logger).to receive(level).with({message: "block message", correlation_id: "block-corr"})
           proxy.send(level) { "block message" }
         end
+
+        # Regression: 1.26.0 introduced LoggerProxy which double-wrapped any
+        # caller-supplied Hash (turning {message: "x", execution_id: "id"} into
+        # {message: {message: "x", execution_id: "id"}, ...}). Hash inputs must
+        # be MERGED, not nested.
+        context "with a Hash input" do
+          it "merges a Hash input rather than wrapping it" do
+            EventHub::CorrelationId.current = "corr-id"
+            EventHub::ExecutionId.current = "exec-id"
+            expect(mock_logger).to receive(level).with(
+              hash_including(
+                message: "hello",
+                correlation_id: "corr-id",
+                execution_id: "exec-id"
+              )
+            )
+            proxy.send(level, message: "hello")
+          end
+
+          it "lets an explicit caller-provided execution_id win over the thread-local" do
+            EventHub::CorrelationId.current = "corr-id"
+            EventHub::ExecutionId.current = "thread-exec"
+            expect(mock_logger).to receive(level).with(
+              hash_including(execution_id: "explicit-exec")
+            )
+            proxy.send(level, message: "hello", execution_id: "explicit-exec")
+          end
+
+          it "lets an explicit caller-provided correlation_id win over the thread-local" do
+            EventHub::CorrelationId.current = "thread-corr"
+            expect(mock_logger).to receive(level).with(
+              hash_including(correlation_id: "explicit-corr")
+            )
+            proxy.send(level, message: "hello", correlation_id: "explicit-corr")
+          end
+
+          it "passes a Hash through unchanged when no thread-locals are set" do
+            expect(mock_logger).to receive(level).with(
+              {message: "hello", extra: "field"}
+            )
+            proxy.send(level, message: "hello", extra: "field")
+          end
+
+          it "does not mutate the caller's Hash" do
+            EventHub::CorrelationId.current = "corr-id"
+            allow(mock_logger).to receive(level)
+            original = {message: "hello"}
+            proxy.send(level, original)
+            expect(original).to eq({message: "hello"})
+          end
+        end
       end
     end
   end
