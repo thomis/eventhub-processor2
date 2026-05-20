@@ -117,6 +117,31 @@ I, [2018-02-09T15:22:35.658522 #37966]  INFO -- : Listener is starting...
 I, [2018-02-09T15:22:35.699161 #37966]  INFO -- : Listening to queue [example]
 ```
 
+## Concurrency Model
+
+Processor2 runs **one consumer thread per queue** listed in `listener_queues`. Each consumer holds a Bunny worker thread with `prefetch(1)`, so it processes its messages sequentially. Multiple queues run their consumers in parallel.
+
+| `listener_queues`             | Concurrency                                    |
+|-------------------------------|------------------------------------------------|
+| `["q1"]`                      | 1 consumer thread, sequential                  |
+| `["q1", "q2"]`                | 2 consumer threads, parallel (one per queue)   |
+| `["q1", "q1", "q1"]`          | 3 consumer threads, all on the same queue      |
+
+To increase throughput for a single queue, either list it multiple times in `listener_queues` (each entry gets its own consumer thread) or run multiple processes. The single-process / single-consumer-per-queue model is what the gem is designed for.
+
+Correlation context (`correlation_id`, `execution_id`) is held in thread-local storage, so concurrent consumer threads cannot interfere with each other - each message's outbound `correlation_id` is the one it received (or its body's fallback), regardless of what other threads are doing.
+
+### A note on `prefetch`
+
+The AMQP `prefetch` value is **fixed at 1** and not currently exposed via configuration. Raising it would require:
+
+- bumping Bunny's `channel.work_pool.size` in lockstep (raising `prefetch` alone only buffers messages in Bunny - it does not add parallelism);
+- pooling or removing `ActorPublisher`'s single-mailbox bottleneck, otherwise N parallel consumers serialize through one publisher;
+- making `handle_message` a thread-safety contract for gem users (today it is implicitly single-threaded - any `@ivar` on the processor class is safe by accident);
+- making `Statistics` and any other shared state thread-safe.
+
+These trade-offs change the gem's call-surface contract, so a configurable `prefetch` would be a minor-version feature, not a patch. For now, the supported way to scale a single queue is to list it multiple times in `listener_queues` or run multiple processes.
+
 ## Logging
 
 By default, Processor2 logs to both stdout (standard format) and a logstash file. For containerized environments (Docker, Kubernetes), use the `--console-log-only` option to output structured JSON logs to stdout only:
@@ -135,10 +160,21 @@ This outputs logs in JSON format suitable for log aggregation systems:
 
 Processor2 supports automatic propagation of correlation IDs for distributed tracing. While EventHub messages already contain an `execution_id` in the message body for tracing, the AMQP `correlation_id` provides an additional benefit: it's part of the message metadata (envelope), not the payload. This means it's available even when the JSON body is invalid and cannot be parsed - useful for error tracking and debugging malformed messages.
 
-When an incoming AMQP message includes a `correlation_id` in its metadata:
+> **Important: `correlation_id` is an AMQP `property`, not a `header`.**
+>
+> In AMQP 0.9.1, `correlation_id` is one of the 14 standard message *properties* (top-level envelope fields, alongside `message_id`, `reply_to`, `content_type`, etc.). The *headers table* is a separate, optional dictionary inside the property block for application-defined fields. They are not interchangeable.
+>
+> Producers must set `correlation_id` as a property. A custom field called `correlation_id` placed inside the headers table is **invisible to this gem** and will silently fall back to the message body's `execution_id`.
+>
+> Concretely:
+> - In Bunny: `channel.default_exchange.publish(payload, correlation_id: "...")`  ✅ property
+> - In Bunny: `... publish(payload, headers: { "correlation_id" => "..." })`  ❌ custom header, not seen
+> - In the RabbitMQ Management UI's "Publish message" form: set the value in the **Properties** section, not in the **Headers** section. When inspecting a queued message, look at "Properties → correlation_id", not at "Headers".
+
+When an incoming AMQP message includes a `correlation_id` in its metadata (as a property):
 
 1. **Automatic logging**: All log messages during message processing will include `correlation_id` as a separate field in structured JSON output
-2. **Automatic publishing**: Any messages published during processing will automatically include the same correlation_id in their AMQP headers
+2. **Automatic publishing**: Any messages published during processing will automatically include the same correlation_id as an AMQP `correlation_id` property (envelope-level, not in the headers table)
 3. **Available in args**: The correlation_id is passed to `handle_message` via `args[:correlation_id]`
 4. **Consistent execution_id**: When creating new messages, `execution_id` is automatically set to match `correlation_id`, ensuring consistent tracing across both AMQP metadata and message body
 
@@ -174,7 +210,7 @@ If no `correlation_id` is present in the AMQP metadata, the message body's `exec
 3. **Stored**: The value is stored in thread-local storage (`Thread.current`) for the duration of message processing
 4. **Passed**: The `correlation_id` is passed to `handle_message` via `args[:correlation_id]`
 5. **Logging**: The logger automatically reads from thread-local storage and includes it in JSON output
-6. **Publishing**: The publisher automatically reads from thread-local storage and adds it to outgoing AMQP message headers (can be overwritten by passing `correlation_id:` explicitly)
+6. **Publishing**: The publisher automatically reads from thread-local storage and sets it as the outgoing AMQP `correlation_id` property (can be overwritten by passing `correlation_id:` explicitly)
 7. **New messages**: When creating a new `EventHub::Message`:
    - With `correlation_id` present → `execution_id` is set to match `correlation_id`
    - Without `correlation_id` → `execution_id` is set to a new UUID (default behavior)

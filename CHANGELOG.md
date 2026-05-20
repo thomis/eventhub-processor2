@@ -1,5 +1,11 @@
 # Changelog of EventHub::Processor2
 
+# 1.28.2 / 2026-05-20
+
+* Fix `CorrelationId.current` leaking across messages on the same Bunny consumer thread. `CorrelationId.with` now always saves and restores, even when called with nil/empty. Symptom in production: deadletter messages stamped with an earlier message's `execution_id`.
+* Listener now also resets `correlation_id` after each message (extra safety on top of the fix above, in case some future code writes it outside of `CorrelationId.with`).
+* README: clarify `correlation_id` is the AMQP **property** (envelope-level), not a custom field in the headers table. Producers must set the property; a header named `correlation_id` is invisible to the gem.
+
 # 1.28.1 / 2026-05-19
 
 * Fix `LoggerProxy` double-wrapping when callers pass a Hash to a logger method. Hash inputs are now merged (not nested under `:message`), so the resulting structured event has the caller's fields at the top level - restoring the behaviour that existed before `LoggerProxy` was introduced in 1.26.0, while keeping automatic thread-local injection of `correlation_id` and `execution_id`. Caller-provided values win over thread-locals via `||=`.

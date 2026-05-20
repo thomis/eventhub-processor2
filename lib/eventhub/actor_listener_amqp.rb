@@ -90,6 +90,12 @@ module EventHub
                                  " acknowledged")
           ensure
             ExecutionId.clear
+            # Belt-and-suspenders: CorrelationId.with's ensure already
+            # restores the prior value, but clearing here protects any
+            # future code path that writes CorrelationId.current outside
+            # of `.with` (e.g. handle_payload's fallback was the original
+            # leak source pre-1.28.2).
+            CorrelationId.clear
           end
         end
         queue.subscribe_with(consumer, block: false)

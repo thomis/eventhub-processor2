@@ -103,6 +103,42 @@ RSpec.describe EventHub::CorrelationId do
       }.to raise_error("test error")
       expect(described_class.current).to be_nil
     end
+
+    # Regression: pre-1.28.2 `with` had no save/restore in the nil/empty
+    # branch, so any value written to .current inside the block leaked
+    # onto the consumer thread and was picked up by the next message's
+    # processing. handle_payload's fallback to the body's execution_id
+    # was the original leak source.
+    describe "thread-local leak protection" do
+      it "still restores current when called with nil and the block writes to current" do
+        described_class.with(nil) do
+          described_class.current = "set-inside-block"
+        end
+        expect(described_class.current).to be_nil
+      end
+
+      it "still restores current when called with an empty string and the block writes to current" do
+        described_class.with("") do
+          described_class.current = "set-inside-block"
+        end
+        expect(described_class.current).to be_nil
+      end
+
+      it "does not leak between two consecutive .with(nil) blocks" do
+        described_class.with(nil) { described_class.current = "first" }
+        observed = nil
+        described_class.with(nil) { observed = described_class.current }
+        expect(observed).to be_nil
+      end
+
+      it "restores prior outer value even when block writes to current under .with(nil)" do
+        described_class.current = "outer"
+        described_class.with(nil) do
+          described_class.current = "scribble"
+        end
+        expect(described_class.current).to eq("outer")
+      end
+    end
   end
 end
 
