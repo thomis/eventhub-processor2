@@ -43,11 +43,10 @@ module EventHub
     end
 
     def mount_resources
-      # Redirect base path to docs
+      # Redirect base path to docs. WEBrick normalizes mount points by
+      # stripping the trailing slash, so this single mount serves both
+      # "#{@base_path}" and "#{@base_path}/".
       @server.mount_proc @base_path do |req, res|
-        handle_base_redirect(req, res)
-      end
-      @server.mount_proc "#{@base_path}/" do |req, res|
         handle_base_redirect(req, res)
       end
 

@@ -83,8 +83,8 @@ RSpec.describe EventHub::DocsRenderer do
     context "with array of hashes in config" do
       before do
         EventHub::Configuration.config_data[:connections] = [
-          {host: "db1.example.com", port: 5432},
-          {host: "db2.example.com", port: 5433}
+          {name: "db1.example.com", pool: 5432},
+          {name: "db2.example.com", pool: 5433}
         ]
       end
 
@@ -206,6 +206,24 @@ RSpec.describe EventHub::DocsRenderer do
       end
     end
 
+    context "with non-compact hash below the top level" do
+      before do
+        EventHub::Configuration.config_data[:services] = {
+          api: {
+            resources: {health: {path: "/health"}},
+            tags: ["a", "b"]
+          }
+        }
+      end
+
+      it "renders a nested section header for the non-compact hash" do
+        html = renderer.render_config
+        expect(html).to include("is-section")
+        expect(html).to include("services.api")
+        expect(html).to include("/health")
+      end
+    end
+
     context "with sensitive array key" do
       before do
         EventHub::Configuration.config_data[:auth] = {
@@ -253,7 +271,7 @@ RSpec.describe EventHub::DocsRenderer do
     context "with sensitive keys nested deeply inside hashes within arrays" do
       before do
         EventHub::Configuration.config_data[:upstream] = [
-          {endpoint: "u1", auth: {password: "leak-3"}}
+          {name: "u1", auth: {password: "leak-3"}}
         ]
       end
 
@@ -265,16 +283,77 @@ RSpec.describe EventHub::DocsRenderer do
       end
     end
 
+    context "with keys matching sensitive patterns as substrings" do
+      before do
+        EventHub::Configuration.config_data[:service] = {
+          base_url: "https://internal.example.com",
+          api_port: "8443",
+          userpwd: "leak-5",
+          status_endpoint: "/internal/status"
+        }
+      end
+
+      it "redacts keys containing a sensitive pattern" do
+        html = renderer.render_config
+        expect(html).to include("***")
+        expect(html).not_to include("https://internal.example.com")
+        expect(html).not_to include("8443")
+        expect(html).not_to include("leak-5")
+        expect(html).not_to include("/internal/status")
+      end
+    end
+
     context "with a sensitive key whose value is itself a hash" do
       before do
         EventHub::Configuration.config_data[:secret] = {api_key: "leak-4a", region: "leak-4b"}
       end
 
-      it "redacts the whole subtree (key and value)" do
+      it "keeps the structure visible but redacts all scalar values inside" do
         html = renderer.render_config
         expect(html).to include("***")
+        expect(html).to include("api_key")
+        expect(html).to include("region")
         expect(html).not_to include("leak-4a")
         expect(html).not_to include("leak-4b")
+      end
+    end
+
+    context "with a vhost key" do
+      before do
+        EventHub::Configuration.config_data[:server] = {
+          host: "leak-6a",
+          vhost: "event_hub"
+        }
+      end
+
+      it "redacts host but keeps vhost visible as an explicit exception" do
+        html = renderer.render_config
+        expect(html).to include("event_hub")
+        expect(html).not_to include("leak-6a")
+      end
+    end
+
+    context "with custom non_sensitive_keys method on the processor" do
+      let(:processor_with_exceptions) {
+        Class.new do
+          def non_sensitive_keys
+            %w[vhost username]
+          end
+        end.new
+      }
+      let(:renderer) { EventHub::DocsRenderer.new(processor: processor_with_exceptions, base_path: "/svc/test") }
+
+      before do
+        EventHub::Configuration.config_data[:accounts] = {
+          username: "visible-account",
+          user: "leak-7"
+        }
+      end
+
+      it "keeps configured exception keys visible while still redacting others" do
+        html = renderer.render_config
+        expect(html).to include("visible-account")
+        expect(html).not_to include("leak-7")
       end
     end
 
@@ -296,7 +375,7 @@ RSpec.describe EventHub::DocsRenderer do
     context "with array value inside array of hashes" do
       before do
         EventHub::Configuration.config_data[:connections] = [
-          {host: "db1", tags: ["primary", "backup"]}
+          {name: "db1", tags: ["primary", "backup"]}
         ]
       end
 
@@ -314,7 +393,7 @@ RSpec.describe EventHub::DocsRenderer do
       before do
         EventHub::Configuration.config_data[:services] = {
           api: {
-            endpoints: {
+            resources: {
               health: {path: "/health", method: "GET"}
             }
           }

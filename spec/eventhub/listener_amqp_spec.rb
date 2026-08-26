@@ -247,6 +247,31 @@ RSpec.describe "EventHub::ActorListenerAmqp listen hooks" do
     end
   end
 
+  context "on_delivery" do
+    let(:delivery_info) { double("delivery_info", delivery_tag: 42) }
+    let(:metadata) { {correlation_id: "cid-123", content_type: "application/json", priority: nil} }
+    let(:payload) { EventHub::Message.new.to_json }
+    let(:statistics) { EventHub::Statistics.new }
+    let(:processor_instance) { double("processor", statistics: statistics) }
+
+    before do
+      allow(fake_consumer).to receive(:on_delivery).and_yield(delivery_info, metadata, payload)
+      allow(fake_channel).to receive(:acknowledge)
+      allow(Celluloid::Actor).to receive(:[]).with(:actor_listener_amqp).and_return(nil)
+      allow(processor_instance).to receive(:handle_message).and_return([])
+      bare_listener.instance_variable_set(:@processor_instance, processor_instance)
+    end
+
+    it "measures, handles the payload, acknowledges and clears thread-locals" do
+      bare_listener.listen(queue_name: "test-q", index: 0)
+
+      expect(fake_channel).to have_received(:acknowledge).with(42, false)
+      expect(statistics.messages_total).to eq(1)
+      expect(EventHub::CorrelationId.current).to be_nil
+      expect(EventHub::ExecutionId.current).to be_nil
+    end
+  end
+
   it "re-raises and logs when with_listen itself fails" do
     allow(bare_listener).to receive(:create_bunny_connection).and_raise("connection refused")
     expect(EventHub.logger).to receive(:error).with(/Unexpected exception/).at_least(:once)

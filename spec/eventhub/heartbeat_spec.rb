@@ -34,6 +34,32 @@ RSpec.describe EventHub::ActorHeartbeat do
     hb
   end
 
+  describe "#start" do
+    it "sends a started beat and then keeps beating every cycle" do
+      hb = EventHub::ActorHeartbeat.allocate
+      hb.instance_variable_set(:@processor_instance, processor)
+      hb.instance_variable_set(:@connection, nil)
+      hb.instance_variable_set(:@channel, nil)
+      allow(hb).to receive(:every)
+      # set AFTER the processor above is instantiated - Processor2.new runs
+      # Configuration.load!, which would reset the cycle to its 300s default
+      # and turn the loop below into a real 5-minute sleep
+      EventHub::Configuration.config_data[:processor][:heartbeat_cycle_in_s] = 0
+      allow(hb).to receive(:heartbeat).and_return("beat")
+      calls = 0
+      allow(hb).to receive(:publish) do
+        calls += 1
+        raise "stop-loop" if calls >= 3
+      end
+
+      expect { hb.start }.to raise_error("stop-loop")
+      # 1st call: [started] beat, further calls: cyclic beats from the loop
+      expect(calls).to eq(3)
+    ensure
+      EventHub::Configuration.load!
+    end
+  end
+
   describe "#publish (private)" do
     it "reuses a single channel across multiple beats" do
       expect(fake_connection).to receive(:create_channel).once.and_return(fake_channel)

@@ -80,6 +80,30 @@ RSpec.describe EventHub::Helper do
       props[:recovery_attempts_exhausted].call
     end
 
+    it "uses amqps protocol and tls properties when tls is enabled" do
+      EventHub::Configuration.load!
+      name = EventHub::Configuration.name
+      server = EventHub::Configuration.server
+      server[:tls] = true
+      server[:tls_cert] = "/certs/client.pem"
+      server[:tls_key] = "/certs/client.key"
+      server[:tls_ca_certificates] = ["/certs/ca.pem"]
+      server[:verify_peer] = false
+
+      url, props = bunny_connection_options
+
+      expect(url).to start_with("amqps://")
+      expect(props[:tls]).to eq(true)
+      expect(props[:tls_cert]).to eq("/certs/client.pem")
+      expect(props[:tls_key]).to eq("/certs/client.key")
+      expect(props[:tls_ca_certificates]).to eq(["/certs/ca.pem"])
+      expect(props[:verify_peer]).to eq(false)
+    ensure
+      EventHub::Configuration.reset
+      EventHub::Configuration.name = name
+      EventHub::Configuration.load!
+    end
+
     it "recovery_attempts_exhausted callback is a no-op if listener actor is absent" do
       EventHub::Configuration.load!
       _url, props = bunny_connection_options

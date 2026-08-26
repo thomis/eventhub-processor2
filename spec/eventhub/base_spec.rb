@@ -32,4 +32,17 @@ RSpec.describe "EventHub.format_celluloid_exception" do
     formatted = EventHub.format_celluloid_exception(StandardError.new("oops"))
     expect(formatted).to eq("Exception occured: StandardError: oops")
   end
+
+  it "swallows errors from walking a broken actor's internals" do
+    broken_actor = Object.new
+    def broken_actor.instance_variable_get(*)
+      raise "internals unreadable"
+    end
+    Thread.current[:celluloid_actor] = broken_actor
+
+    formatted = EventHub.format_celluloid_exception(StandardError.new("oops"))
+    expect(formatted).to eq("Exception occured: StandardError: oops")
+  ensure
+    Thread.current[:celluloid_actor] = nil
+  end
 end

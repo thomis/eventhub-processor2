@@ -522,14 +522,75 @@ RSpec.describe EventHub::ActorListenerHttp do
 
     it "fails with method not allowed for POST" do
       EventHub::ActorListenerHttp.new(
-        port: 8098,
+        port: 8117,
         base_path: "/api"
       )
       sleep 0.2
-      uri = URI("http://localhost:8098/api/assets/app.css")
+      uri = URI("http://localhost:8117/api/assets/app.css")
       res = Net::HTTP.post(uri, nil)
 
       expect(res.is_a?(Net::HTTPMethodNotAllowed)).to eq(true)
+    end
+  end
+
+  describe "base path redirect" do
+    it "redirects the bare base path to docs" do
+      EventHub::ActorListenerHttp.new(
+        port: 8113,
+        base_path: "/api"
+      )
+      sleep 0.2
+      uri = URI("http://localhost:8113/api")
+      res = Net::HTTP.get_response(uri)
+
+      expect(res.is_a?(Net::HTTPRedirection)).to eq(true)
+      expect(res["Location"]).to end_with("/api/docs")
+    end
+
+    it "redirects the base path with trailing slash to docs" do
+      EventHub::ActorListenerHttp.new(
+        port: 8114,
+        base_path: "/api"
+      )
+      sleep 0.2
+      uri = URI("http://localhost:8114/api/")
+      res = Net::HTTP.get_response(uri)
+
+      expect(res.is_a?(Net::HTTPRedirection)).to eq(true)
+      expect(res["Location"]).to end_with("/api/docs")
+    end
+
+    it "fails with method not allowed for POST on base path" do
+      EventHub::ActorListenerHttp.new(
+        port: 8116,
+        base_path: "/api"
+      )
+      sleep 0.2
+      uri = URI("http://localhost:8116/api/")
+      res = Net::HTTP.post(uri, nil)
+
+      expect(res.is_a?(Net::HTTPMethodNotAllowed)).to eq(true)
+    end
+  end
+
+  describe "heartbeat endpoint with a real processor" do
+    it "includes started_at and message statistics from the processor" do
+      EventHub::ActorListenerHttp.new(
+        port: 8115,
+        processor: EventHub::Processor2.new,
+        base_path: "/api"
+      )
+      sleep 0.2
+      uri = URI("http://localhost:8115/api/heartbeat")
+      res = Net::HTTP.get_response(uri)
+
+      expect(res.is_a?(Net::HTTPSuccess)).to eq(true)
+      data = JSON.parse(res.body)
+      expect(data["heartbeat"]).to have_key("started")
+      messages = data["heartbeat"]["messages"]
+      expect(messages).to have_key("total")
+      expect(messages).to have_key("average_process_time_in_ms")
+      expect(messages).to have_key("total_process_time_in_ms")
     end
   end
 

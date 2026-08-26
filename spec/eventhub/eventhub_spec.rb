@@ -76,6 +76,68 @@ RSpec.describe EventHub::Processor2 do
     end
   end
 
+  describe "#main_event_loop" do
+    let(:processor) { described_class.new }
+
+    before do
+      allow(Celluloid).to receive(:boot)
+      allow(Celluloid).to receive(:shutdown)
+      allow(Celluloid).to receive(:running?).and_return(false)
+      allow(processor).to receive(:setup_signal_handler)
+      allow(processor).to receive(:start_supervisor)
+    end
+
+    it "reloads configuration on HUP and restarts a known listener actor" do
+      fake_async = double("async", restart: nil)
+      listener = double("listener", async: fake_async)
+      allow(Celluloid::Actor).to receive(:[]).with(:actor_listener_amqp).and_return(listener)
+
+      # Array#pop takes from the end: :HUP is processed first, :TERM ends the loop
+      processor.instance_variable_get(:@command_queue).push(:TERM, :HUP)
+      processor.send(:main_event_loop)
+
+      expect(EventHub::Configuration).to have_received(:load!).at_least(:once)
+      expect(fake_async).to have_received(:restart)
+    end
+
+    it "logs when no listener actor is available after a HUP reload" do
+      allow(Celluloid::Actor).to receive(:[]).with(:actor_listener_amqp).and_return(nil)
+
+      processor.instance_variable_get(:@command_queue).push(:TERM, :HUP)
+      processor.send(:main_event_loop)
+
+      expect(logger).to have_received(:info).with(/unable to get a valid listener actor/)
+    end
+
+    it "waits until Celluloid has fully stopped after shutdown" do
+      allow(Celluloid).to receive(:running?).and_return(true, false)
+
+      processor.instance_variable_get(:@command_queue).push(:TERM)
+      processor.send(:main_event_loop)
+
+      expect(Celluloid).to have_received(:running?).twice
+    end
+  end
+
+  describe "#start_supervisor" do
+    it "injects a before_restart hook that logs and starts the sleeper" do
+      captured = nil
+      fake_config = double("supervision config", deploy: nil)
+      allow(fake_config).to receive(:injection!) { |_name, blk| captured = blk }
+      allow(Celluloid::Supervision::Configuration).to receive(:define).and_return(fake_config)
+
+      processor = described_class.new
+      processor.send(:start_supervisor)
+
+      expect(fake_config).to have_received(:deploy)
+      expect(captured).to be_a(Proc)
+
+      captured.call
+      expect(sleeper).to have_received(:start)
+      expect(logger).to have_received(:info).with(/Restarting in .* seconds/)
+    end
+  end
+
   describe "#publish" do
     let(:processor) { described_class.new }
     let(:actor) { instance_double("Actor", publish: nil) }

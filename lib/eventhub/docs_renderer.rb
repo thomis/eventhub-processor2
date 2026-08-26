@@ -159,29 +159,30 @@ module EventHub
       intro + filter + config_to_html_table(config) + script
     end
 
-    def config_to_html_table(hash, depth = 0, prefix = "")
+    def config_to_html_table(hash, depth = 0, prefix = "", redact: false)
       rows = hash.map do |key, value|
         full_key = prefix.empty? ? key.to_s : "#{prefix}.#{key}"
-        if sensitive_key?(key) && !value.nil? && !(value.respond_to?(:empty?) && value.empty?)
-          "<tr><td class=\"config-key\">#{ERB::Util.html_escape(full_key)}</td><td>#{redacted_html}</td></tr>"
-        elsif depth == 0 && value.is_a?(Hash) && !value.empty?
+        hide = redact || sensitive_key?(key)
+        if depth == 0 && value.is_a?(Hash) && !value.empty?
           "<tr class=\"is-section is-section-top\"><td colspan=\"2\"><strong>#{ERB::Util.html_escape(full_key)}</strong></td></tr>\n" \
-          "#{config_to_html_table(value, 1, full_key)}"
+          "#{config_to_html_table(value, 1, full_key, redact: hide)}"
         elsif value.is_a?(Hash) && value.empty?
           "<tr><td class=\"config-key\">#{ERB::Util.html_escape(full_key)}</td><td><span class=\"not-set\">(empty)</span></td></tr>"
         elsif value.is_a?(Hash) && value.values.all? { |v| v.is_a?(Hash) && v.empty? }
           items = value.keys.map { |k| "<li>#{ERB::Util.html_escape(k)}</li>" }.join("\n")
           "<tr><td class=\"config-key\">#{ERB::Util.html_escape(full_key)}</td><td><ul class=\"config-array\">#{items}</ul></td></tr>"
         elsif value.is_a?(Hash) && compact_hash?(value)
-          "<tr><td class=\"config-key\">#{ERB::Util.html_escape(full_key)}</td><td>#{format_nested_value(value)}</td></tr>"
+          "<tr><td class=\"config-key\">#{ERB::Util.html_escape(full_key)}</td><td>#{format_nested_value(value, redact: hide)}</td></tr>"
         elsif value.is_a?(Hash)
           "<tr class=\"is-section\"><td colspan=\"2\"><strong>#{ERB::Util.html_escape(full_key)}</strong></td></tr>\n" \
-          "#{config_to_html_table(value, depth + 1, full_key)}"
+          "#{config_to_html_table(value, depth + 1, full_key, redact: hide)}"
         elsif value.is_a?(Array)
-          format_array_rows(full_key, key, value, depth)
+          format_array_rows(full_key, value, depth, redact: hide)
         else
           display_value = if value.nil? || value.to_s.strip.empty?
             "<span class=\"not-set\">(not set)</span>"
+          elsif hide
+            redacted_html
           else
             ERB::Util.html_escape(value.to_s)
           end
@@ -196,44 +197,42 @@ module EventHub
       end
     end
 
-    def format_array_rows(full_key, key, array, _depth)
+    def format_array_rows(full_key, array, _depth, redact: false)
       return "<tr><td class=\"config-key\">#{ERB::Util.html_escape(full_key)}</td><td><span class=\"not-set\">(empty)</span></td></tr>" if array.empty?
 
-      if sensitive_key?(key)
-        return "<tr><td class=\"config-key\">#{ERB::Util.html_escape(full_key)}</td><td>#{redacted_html}</td></tr>"
-      end
-
-      inner = array.map { |item| format_array_item(item) }.join("\n")
+      inner = array.map { |item| format_array_item(item, redact: redact) }.join("\n")
       "<tr><td class=\"config-key\">#{ERB::Util.html_escape(full_key)}</td><td><ul class=\"config-array\">#{inner}</ul></td></tr>"
     end
 
-    def format_array_item(item)
+    def format_array_item(item, redact: false)
       if item.is_a?(Hash)
         rows = item.map do |k, v|
-          value = sensitive_key?(k) ? redacted_html : format_nested_value(v)
-          "<tr><td>#{ERB::Util.html_escape(k)}</td><td>#{value}</td></tr>"
+          hide = redact || sensitive_key?(k)
+          "<tr><td>#{ERB::Util.html_escape(k)}</td><td>#{format_nested_value(v, redact: hide)}</td></tr>"
         end.join
         "<li><table class=\"table is-bordered is-narrow config-subtable\">#{rows}</table></li>"
       elsif item.is_a?(Array)
-        inner = item.map { |i| format_array_item(i) }.join("\n")
+        inner = item.map { |i| format_array_item(i, redact: redact) }.join("\n")
         "<li><ul class=\"config-array\">#{inner}</ul></li>"
       else
-        "<li>#{ERB::Util.html_escape(item.to_s)}</li>"
+        "<li>#{redact ? redacted_html : ERB::Util.html_escape(item.to_s)}</li>"
       end
     end
 
-    def format_nested_value(value)
+    def format_nested_value(value, redact: false)
       if value.is_a?(Hash)
         rows = value.map do |k, v|
-          inner = sensitive_key?(k) ? redacted_html : format_nested_value(v)
-          "<tr><td>#{ERB::Util.html_escape(k)}</td><td>#{inner}</td></tr>"
+          hide = redact || sensitive_key?(k)
+          "<tr><td>#{ERB::Util.html_escape(k)}</td><td>#{format_nested_value(v, redact: hide)}</td></tr>"
         end.join
         "<table class=\"table is-bordered is-narrow config-subtable\">#{rows}</table>"
       elsif value.is_a?(Array)
-        items = value.map { |i| format_array_item(i) }.join("\n")
+        items = value.map { |i| format_array_item(i, redact: redact) }.join("\n")
         "<ul class=\"config-array\">#{items}</ul>"
       elsif value.nil? || value.to_s.strip.empty?
         "<span class=\"not-set\">(not set)</span>"
+      elsif redact
+        redacted_html
       else
         ERB::Util.html_escape(value.to_s)
       end
@@ -253,15 +252,27 @@ module EventHub
       end
     end
 
-    DEFAULT_SENSITIVE_KEYS = %w[password secret token api_key credential username user login].freeze
+    DEFAULT_SENSITIVE_KEYS = %w[password secret token api_key credential user login host port database instance url endpoint scheme].freeze
+    DEFAULT_NON_SENSITIVE_KEYS = %w[vhost].freeze
 
     def sensitive_key?(key)
+      normalized = key.to_s.downcase
+      return false if non_sensitive_keys.any? { |exception| normalized == exception.downcase }
+
       keys = if @processor&.class&.method_defined?(:sensitive_keys)
         @processor.sensitive_keys
       else
         DEFAULT_SENSITIVE_KEYS
       end
-      keys.any? { |pattern| key.to_s.downcase == pattern.downcase }
+      keys.any? { |pattern| normalized.include?(pattern.downcase) }
+    end
+
+    def non_sensitive_keys
+      if @processor&.class&.method_defined?(:non_sensitive_keys)
+        @processor.non_sensitive_keys
+      else
+        DEFAULT_NON_SENSITIVE_KEYS
+      end
     end
 
     def markdown_to_html(markdown)

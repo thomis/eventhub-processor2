@@ -1,5 +1,11 @@
 # Changelog of EventHub::Processor2
 
+# 1.29.0 / 2026-08-26
+
+* Docs configuration page: sensitive keys now match by substring with an extended default list (e.g. `base_url`, `api_port` are redacted automatically). Exceptions like `vhost` stay visible and can be customized via `non_sensitive_keys`, analogous to `sensitive_keys`. See README for details.
+* Docs configuration page: redaction keeps hash/array structures visible and masks only the scalar values inside.
+* Test coverage raised to 100% lines; removed a dead duplicate route mount in the HTTP listener.
+
 # 1.28.2 / 2026-05-20
 
 * Fix `CorrelationId.current` leaking across messages on the same Bunny consumer thread. `CorrelationId.with` now always saves and restores, even when called with nil/empty. Symptom in production: deadletter messages stamped with an earlier message's `execution_id`.

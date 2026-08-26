@@ -499,7 +499,7 @@ end
 
 ### Configuration
 
-Displays the active configuration as an HTML table. Sensitive values (passwords, tokens, keys) are automatically redacted at any depth — keys matching the sensitive list are masked whether they appear at the top level, inside nested hashes, or inside hashes nested in arrays.
+Displays the active configuration as an HTML table. Sensitive values (passwords, tokens, keys) are automatically redacted at any depth — keys matching the sensitive list are masked whether they appear at the top level, inside nested hashes, or inside hashes nested in arrays. The structure is always preserved: when a sensitive key holds a hash or array, its keys stay visible and only the scalar values inside are replaced by `***`.
 
 ```
 GET {base_path}/docs/configuration
@@ -507,7 +507,7 @@ GET {base_path}/docs/configuration
 
 **Response:** `200 OK` with HTML page
 
-By default, the following keys are redacted: `password`, `secret`, `token`, `api_key`, `credential`, `username`, `user`, `login`. You can customize the list by defining a `sensitive_keys` method in your processor:
+Matching is by substring: a key is redacted if it *contains* one of the sensitive patterns (case-insensitive). By default, the patterns are: `password`, `secret`, `token`, `api_key`, `credential`, `user`, `login`, `host`, `port`, `database`, `instance`, `url`, `endpoint`, `scheme`. So `base_url`, `api_port`, `username`, or `userpwd` are redacted as well. `vhost` is an explicit exception and stays visible, even though it contains `host`. You can customize the list by defining a `sensitive_keys` method in your processor:
 
 ```ruby
 # Override the entire list
@@ -521,6 +521,17 @@ end
 class MyProcessor < EventHub::Processor2
   def sensitive_keys
     EventHub::DocsRenderer::DEFAULT_SENSITIVE_KEYS + %w[connection_string]
+  end
+end
+```
+
+Exceptions work the other way around: keys listed as exceptions are never redacted, even if they match a sensitive pattern. Unlike the patterns, exceptions match the whole key exactly (case-insensitive). The default is `vhost`; you can customize the list by defining a `non_sensitive_keys` method:
+
+```ruby
+# Keep username and user visible although they match the user pattern
+class MyProcessor < EventHub::Processor2
+  def non_sensitive_keys
+    EventHub::DocsRenderer::DEFAULT_NON_SENSITIVE_KEYS + %w[username user]
   end
 end
 ```
