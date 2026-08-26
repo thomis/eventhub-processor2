@@ -162,7 +162,7 @@ module EventHub
     def config_to_html_table(hash, depth = 0, prefix = "", redact: false)
       rows = hash.map do |key, value|
         full_key = prefix.empty? ? key.to_s : "#{prefix}.#{key}"
-        hide = redact || sensitive_key?(key)
+        hide = redact_value?(key, value, redact)
         if depth == 0 && value.is_a?(Hash) && !value.empty?
           "<tr class=\"is-section is-section-top\"><td colspan=\"2\"><strong>#{ERB::Util.html_escape(full_key)}</strong></td></tr>\n" \
           "#{config_to_html_table(value, 1, full_key, redact: hide)}"
@@ -207,7 +207,7 @@ module EventHub
     def format_array_item(item, redact: false)
       if item.is_a?(Hash)
         rows = item.map do |k, v|
-          hide = redact || sensitive_key?(k)
+          hide = redact_value?(k, v, redact)
           "<tr><td>#{ERB::Util.html_escape(k)}</td><td>#{format_nested_value(v, redact: hide)}</td></tr>"
         end.join
         "<li><table class=\"table is-bordered is-narrow config-subtable\">#{rows}</table></li>"
@@ -222,7 +222,7 @@ module EventHub
     def format_nested_value(value, redact: false)
       if value.is_a?(Hash)
         rows = value.map do |k, v|
-          hide = redact || sensitive_key?(k)
+          hide = redact_value?(k, v, redact)
           "<tr><td>#{ERB::Util.html_escape(k)}</td><td>#{format_nested_value(v, redact: hide)}</td></tr>"
         end.join
         "<table class=\"table is-bordered is-narrow config-subtable\">#{rows}</table>"
@@ -254,6 +254,13 @@ module EventHub
 
     DEFAULT_SENSITIVE_KEYS = %w[password secret token api_key credential user login host port database instance url endpoint scheme].freeze
     DEFAULT_NON_SENSITIVE_KEYS = %w[vhost].freeze
+
+    # A sensitive keyword only triggers redaction on leaf nodes (scalars and
+    # arrays). A hash named e.g. "database" stays visible; its keys are
+    # checked individually instead.
+    def redact_value?(key, value, inherited)
+      inherited || (!value.is_a?(Hash) && sensitive_key?(key))
+    end
 
     def sensitive_key?(key)
       normalized = key.to_s.downcase

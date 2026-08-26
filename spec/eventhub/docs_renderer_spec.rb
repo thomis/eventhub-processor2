@@ -305,16 +305,41 @@ RSpec.describe EventHub::DocsRenderer do
 
     context "with a sensitive key whose value is itself a hash" do
       before do
-        EventHub::Configuration.config_data[:secret] = {api_key: "leak-4a", region: "leak-4b"}
+        EventHub::Configuration.config_data[:secret] = {api_key: "leak-4a", region: "eu-west-1"}
       end
 
-      it "keeps the structure visible but redacts all scalar values inside" do
+      it "checks keys inside the hash individually instead of redacting the whole structure" do
         html = renderer.render_config
         expect(html).to include("***")
         expect(html).to include("api_key")
         expect(html).to include("region")
         expect(html).not_to include("leak-4a")
-        expect(html).not_to include("leak-4b")
+        expect(html).to include("eu-west-1")
+      end
+    end
+
+    context "with a section named after a sensitive keyword" do
+      before do
+        EventHub::Configuration.config_data[:database] = {
+          adapter: "postgresql",
+          pool: 5,
+          reaping_frequency: 10,
+          password: "leak-8"
+        }
+      end
+
+      it "keeps non-sensitive keys inside the section visible while redacting sensitive ones" do
+        html = renderer.render_config
+        expect(html).to include("postgresql")
+        expect(html).to include("database.pool")
+        expect(html).to include("database.reaping_frequency")
+        expect(html).not_to include("leak-8")
+      end
+
+      it "still redacts a scalar value under a sensitive key name" do
+        EventHub::Configuration.config_data[:database][:database] = "leak-9"
+        html = renderer.render_config
+        expect(html).not_to include("leak-9")
       end
     end
 
