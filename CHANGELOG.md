@@ -1,5 +1,9 @@
 # Changelog of EventHub::Processor2
 
+# 1.29.2 / 2026-08-31
+
+* Docs pages: version number in the footer is now bold, matching the processor name.
+
 # 1.29.1 / 2026-08-26
 
 * Docs configuration page: sensitive keywords now only redact leaf values, not hash sections named after one (e.g. `database.pool` stays visible, `database.password` stays redacted).
