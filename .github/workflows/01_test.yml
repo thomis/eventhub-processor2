@@ -18,6 +18,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     env:
       CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
     strategy:
@@ -45,3 +46,9 @@ jobs:
     - name: Run default task
       run: |
         bundle exec rake
+
+    - name: RabbitMQ container log (on failure)
+      if: failure()
+      run: |
+        docker ps -a
+        docker logs processor-rabbitmq

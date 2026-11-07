@@ -26,5 +26,15 @@ RSpec.describe Support do
       expect(Support).to receive(:sleep).with(1).twice  # Expect sleep to happen twice before success
       expect { Support.ensure_rabbitmq_is_available }.not_to raise_error
     end
+
+    it "gives up after the maximum number of attempts" do
+      allow(mock_bunny).to receive(:start).and_raise(StandardError, "connection reset")
+      allow(Support).to receive(:sleep)
+
+      expect { Support.ensure_rabbitmq_is_available(max_attempts: 3) }
+        .to raise_error(RuntimeError, "RabbitMQ not available after 3 attempts: connection reset")
+      expect(mock_bunny).to have_received(:start).exactly(3).times
+      expect(Support).to have_received(:sleep).with(1).twice
+    end
   end
 end
